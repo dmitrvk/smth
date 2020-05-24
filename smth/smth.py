@@ -1,7 +1,11 @@
 import logging
 
+from .backup_system import BackupSystem
+
 def main():
     setup_logging()
+
+    backupSystem = BackupSystem()
 
 def setup_logging(filename='smth.log', log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
