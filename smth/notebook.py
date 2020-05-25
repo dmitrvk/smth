@@ -14,14 +14,22 @@ class Notebook:
         self._total_pages = 0
 
     @property
-    def title(self):
+    def title(self) -> str:
         if self._title:
             return self._title
         else:
             return 'Untitled'
 
     @property
-    def total_pages(self):
+    def type(self) -> NotebookType:
+        return self._type
+
+    @type.setter
+    def type(self, type: NotebookType) -> None:
+        self._type = type
+
+    @property
+    def total_pages(self) -> int:
         return self._total_pages
 
     def __repr__(self):

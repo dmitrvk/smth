@@ -23,7 +23,8 @@ class BackupSystem:
         if self._notebooks != None and len(self._notebooks) > 0:
             print('All notebooks:')
             for notebook in self._notebooks:
-                print(f'  {notebook.title}  {notebook.total_pages} pages')
+                print(f'  {notebook.title}  {notebook.total_pages} pages  '
+                    f'({notebook.type.title})')
         else:
             print('No notebooks found.')
 

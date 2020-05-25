@@ -28,6 +28,8 @@ SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook ORDER BY title'''
 
 SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
+SQL_GET_NOTEBOOK_TYPE_BY_ID = '''SELECT * FROM notebook_type WHERE id=?'''
+
 
 class DB:
     def __init__(self, path='smth.db'):
@@ -62,7 +64,7 @@ class DB:
             cursor.execute(SQL_GET_NOTEBOOKS)
 
             for row in cursor:
-                notebook_type = NotebookType('A4', 210, 297)
+                notebook_type = self.get_notebook_type_by_id(row[2])
                 notebook = Notebook(row[1], notebook_type, row[3])
                 notebooks.append(notebook)
 
@@ -102,6 +104,33 @@ class DB:
                 connection.close()
 
         return notebook_types
+
+    def get_notebook_type_by_id(self, id: int) -> NotebookType:
+        notebook_type = NotebookType('', 0, 0)
+
+        connection = None
+        cursor = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_GET_NOTEBOOK_TYPE_BY_ID, (id,))
+            row = cursor.fetchone()
+            if row != None:
+                notebook_type.title = row[1]
+                notebook_type.page_width = row[2]
+                notebook_type.page_height = row[3]
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to get notebook type from database', e)
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+        return notebook_type
 
     def _handle_error(self, message: str, e: sqlite3.Error) -> None:
         """Log error message and propagate DBError."""
