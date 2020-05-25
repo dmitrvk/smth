@@ -1,6 +1,10 @@
 import logging
 import sqlite3
 
+from .notebook import Notebook
+from .notebook_type import NotebookType
+
+
 log = logging.getLogger(__name__)
 
 SQL_CREATE_TABLE_NOTEBOOK_TYPE = '''CREATE TABLE IF NOT EXISTS notebook_type(
@@ -18,6 +22,8 @@ SQL_CREATE_TABLE_NOTEBOOK = '''CREATE TABLE IF NOT EXISTS notebook(
     total_pages INTEGER,
     first_page_number INTEGER,
     FOREIGN KEY(notebook_type_id) REFERENCES notebook_type(id))'''
+
+SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook'''
 
 
 class DB:
@@ -39,4 +45,30 @@ class DB:
         finally:
             if connection != None:
                 connection.close()
+
+    def get_notebooks(self) -> list:
+        notebooks = []
+
+        connection = None
+        cursor = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_GET_NOTEBOOKS)
+
+            for row in cursor:
+                notebook_type = NotebookType('A4', 210, 297)
+                notebook = Notebook(row[1], notebook_type, row[3])
+                notebooks.append(notebook)
+        except sqlite3.Error as exception:
+            log.exception('Failed to get notebooks from database')
+            raise exception
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+        return notebooks
 
