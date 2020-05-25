@@ -1,3 +1,5 @@
+import os
+
 from .db import DB
 
 class NotebookValidator:
@@ -22,6 +24,10 @@ class NotebookValidator:
         if self._db.notebook_exists(title):
             raise ValueError(f"Notebook '{title}' exists")
 
+        pages_dir = os.path.expanduser(f'~/.local/share/smth/pages/{title}')
+        if os.path.exists(pages_dir):
+            raise FileExistsError(f"'{pages_dir}' already exists")
+
     def validate_type(self, type: str) -> None:
         if len(type.strip()) == 0:
             raise ValueError('Notebook type must not be empty')
@@ -32,6 +38,9 @@ class NotebookValidator:
     def validate_path(self, path: str) -> None:
         if len(path) == 0:
             raise ValueError('Path must not be empty')
+
+        if os.path.exists(path):
+            raise FileExistsError(f"'{path}' already exists")
 
     def validate_first_page_number(self, number: int) -> None:
         if not isinstance(number, int) or number < 0:

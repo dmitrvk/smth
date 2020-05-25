@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import sys
 from time import sleep
 
@@ -43,6 +44,9 @@ class BackupSystem:
 
             self._create_empty_pdf(path)
             self._db.create_notebook(title, type, path, first)
+
+            pages_dir = os.path.expanduser(f'~/.local/share/smth/pages/{title}/')
+            pathlib.Path(pages_dir).mkdir(parents=True)
 
             log.info(f"Create notebook '{title}' of type '{type}' at '{path}'")
             print(f"Created notebook '{title}' of type '{type}' at '{path}'")
