@@ -11,6 +11,14 @@ class NotebookType:
     def title(self):
         return self._title
 
+    @property
+    def page_width(self):
+        return self._page_width
+
+    @property
+    def page_height(self):
+        return self._page_height
+
     def __repr__(self):
         repr = f"<NotebookType '{self._title}'"
         repr += f" of size '{self._page_width}x{self._page_height}mm'"

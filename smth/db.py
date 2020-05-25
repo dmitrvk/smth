@@ -24,9 +24,9 @@ SQL_CREATE_TABLE_NOTEBOOK = '''CREATE TABLE IF NOT EXISTS notebook(
     first_page_number INTEGER,
     FOREIGN KEY(notebook_type_id) REFERENCES notebook_type(id))'''
 
-SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook'''
+SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook ORDER BY title'''
 
-SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type'''
+SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
 
 class DB:

@@ -13,6 +13,17 @@ class Notebook:
         self._first_page_number = 1
         self._total_pages = 0
 
+    @property
+    def title(self):
+        if self._title:
+            return self._title
+        else:
+            return 'Untitled'
+
+    @property
+    def total_pages(self):
+        return self._total_pages
+
     def __repr__(self):
         return f"<Notebook '{self._title}' of type '{self._type.title}'>"
 
