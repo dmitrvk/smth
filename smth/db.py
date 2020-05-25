@@ -25,6 +25,8 @@ SQL_CREATE_TABLE_NOTEBOOK = '''CREATE TABLE IF NOT EXISTS notebook(
 
 SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook'''
 
+SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type'''
+
 
 class DB:
     def __init__(self, path='smth.db'):
@@ -71,4 +73,31 @@ class DB:
                 connection.close()
 
         return notebooks
+
+    def get_notebook_types(self) -> list:
+        notebook_types = []
+
+        connection = None
+        cursor = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_GET_NOTEBOOK_TYPES)
+
+            for row in cursor:
+                notebook_type = NotebookType(row[1], row[2], row[3])
+                notebook_types.append(notebook_type)
+
+        except sqlite3.Error as exception:
+            log.exception('Failed to get notebook types from database')
+            raise exception
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+        return notebook_types
 

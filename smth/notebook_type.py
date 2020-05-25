@@ -11,3 +11,12 @@ class NotebookType:
     def title(self):
         return self._title
 
+    def __repr__(self):
+        repr = f"<NotebookType '{self._title}'"
+        repr += f" of size '{self._page_width}x{self._page_height}mm'"
+        if self._pages_paired:
+            repr += f" with paired pages>"
+        else:
+            repr += '>'
+        return repr
+
