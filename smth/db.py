@@ -1,6 +1,7 @@
 import logging
 import sqlite3
 
+from .db_error import DBError
 from .notebook import Notebook
 from .notebook_type import NotebookType
 
@@ -41,9 +42,10 @@ class DB:
             connection.execute(SQL_CREATE_TABLE_NOTEBOOK)
             connection.commit()
             log.info('Created tables if they did not exist')
-        except sqlite3.Error as exception:
-            log.exception('Failed to create tables')
-            raise exception
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to initialize the database', e)
+
         finally:
             if connection != None:
                 connection.close()
@@ -63,9 +65,10 @@ class DB:
                 notebook_type = NotebookType('A4', 210, 297)
                 notebook = Notebook(row[1], notebook_type, row[3])
                 notebooks.append(notebook)
+
         except sqlite3.Error as exception:
-            log.exception('Failed to get notebooks from database')
-            raise exception
+            self._handle_error('Failed to get notebooks from database', e)
+
         finally:
             if cursor != None:
                 cursor.close()
@@ -89,9 +92,8 @@ class DB:
                 notebook_type = NotebookType(row[1], row[2], row[3])
                 notebook_types.append(notebook_type)
 
-        except sqlite3.Error as exception:
-            log.exception('Failed to get notebook types from database')
-            raise exception
+        except sqlite3.Error as e:
+            self._handle_error('Failed to get notebook types from database', e)
 
         finally:
             if cursor != None:
@@ -101,3 +103,7 @@ class DB:
 
         return notebook_types
 
+    def _handle_error(self, message: str, e: sqlite3.Error) -> None:
+        """Log error message and propagate DBError."""
+        log.exception(message)
+        raise DBError(f'{message}: {e}.') from None
