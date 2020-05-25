@@ -18,17 +18,30 @@ SQL_CREATE_TABLE_NOTEBOOK_TYPE = '''CREATE TABLE IF NOT EXISTS notebook_type(
 SQL_CREATE_TABLE_NOTEBOOK = '''CREATE TABLE IF NOT EXISTS notebook(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT UNIQUE,
-    notebook_type_id INTEGER,
+    type_id INTEGER,
     path TEXT,
     total_pages INTEGER,
     first_page_number INTEGER,
-    FOREIGN KEY(notebook_type_id) REFERENCES notebook_type(id))'''
+    FOREIGN KEY(type_id) REFERENCES notebook_type(id))'''
 
 SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook ORDER BY title'''
+
+SQL_NOTEBOOK_EXISTS = '''SELECT COUNT(*) FROM notebook WHERE title=?'''
+
+SQL_CREATE_NOTEBOOK = '''INSERT INTO
+    notebook(title, type_id, path, total_pages, first_page_number)
+    VALUES(?,
+    (SELECT id FROM notebook_type WHERE title=?),
+    ?, ?, ?)'''
 
 SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
 SQL_GET_NOTEBOOK_TYPE_BY_ID = '''SELECT * FROM notebook_type WHERE id=?'''
+
+SQL_NOTEBOOK_TYPE_EXISTS = '''SELECT COUNT(*) FROM notebook_type
+    WHERE title=?'''
+
+SQL_GET_NOTEBOOK_TYPE_ID_BY_TITLE = '''SELECT id FROM notebook_type WHERE title=?'''
 
 
 class DB:
@@ -131,6 +144,76 @@ class DB:
                 connection.close()
 
         return notebook_type
+
+    def notebook_exists(self, title: str) -> bool:
+        exists = False
+
+        connection = None
+        cursor = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_NOTEBOOK_EXISTS, (title,))
+            exists = cursor.fetchone()[0] > 0
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to check if notebook exists', e)
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+        return exists
+
+    def notebook_type_exists(self, title: str) -> bool:
+        exists = False
+
+        connection = None
+        cursor = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_NOTEBOOK_TYPE_EXISTS, (title,))
+            exists = cursor.fetchone()[0] > 0
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to check if notebook type exists', e)
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+        return exists
+
+    def create_notebook(self, title: str, type: str, path: str,
+            first: int) -> None:
+        """Create notebook with given title, type, path and 1st page number."""
+        connection = None
+        cursor = None
+
+        try:
+            total_pages = 0
+            values = (title, type, path, total_pages, first)
+
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_CREATE_NOTEBOOK, values)
+            connection.commit()
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to get notebook id', e)
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
 
     def _handle_error(self, message: str, e: sqlite3.Error) -> None:
         """Log error message and propagate DBError."""
