@@ -5,6 +5,8 @@ import sys
 
 from .backup_system import BackupSystem
 
+LOG_FILE = os.path.expanduser('~/.local/share/smth/smth.log')
+
 PAGES_ROOT = os.path.expanduser('~/.local/share/smth/pages/')
 
 def main():
@@ -24,7 +26,7 @@ def main():
     else:
         print('Syntax: `smth <command>`. Available commands: create, list, types')
 
-def setup_logging(filename='smth.log', log_level=logging.DEBUG) -> None:
+def setup_logging(filename=LOG_FILE, log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
     log.setLevel(log_level)
     handler = logging.FileHandler(filename)
