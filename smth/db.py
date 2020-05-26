@@ -195,15 +195,15 @@ class DB:
 
         return exists
 
-    def create_notebook(self, title: str, type: str, path: str,
-            first: int) -> None:
+    def create_notebook(self, values: dict) -> None:
         """Create notebook with given title, type, path and 1st page number."""
         connection = None
         cursor = None
 
         try:
             total_pages = 0
-            values = (title, type, path, total_pages, first)
+            values = (values['title'], values['type'], values['path'],
+                total_pages, values['first_page_number'])
 
             connection = sqlite3.connect(self._path)
             cursor = connection.cursor()

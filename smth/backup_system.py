@@ -1,10 +1,12 @@
 import logging
 import os
 import pathlib
+import pprint
 import sys
 from time import sleep
 
 import fpdf
+import inquirer
 
 from .db import DB
 from .db_error import DBError
@@ -37,23 +39,52 @@ class BackupSystem:
         else:
             print('No notebooks found.')
 
-    def create(self, title: str, type: str, path: str, first: int = 1) -> None:
+    def create(self) -> None:
         """Create notebook with given title, type, path and 1st page number."""
         try:
-            title = str(title).strip()
-            type = str(type).strip()
-            path = self._expand_path(path)
+            validator = NotebookValidator(self._db)
 
-            NotebookValidator(self._db).validate(title, type, path, first)
+            questions = [
+                inquirer.Text(
+                    name='title',
+                    message='Enter title',
+                    validate=validator.validate_title),
+                inquirer.List(
+                    name='type',
+                    message='Choose type',
+                    choices=list(map(lambda t: t.title, self._notebook_types)),
+                    validate=validator.validate_type),
+                inquirer.Path(
+                    name='path',
+                    message='Enter path to PDF',
+                    path_type=inquirer.Path.FILE,
+                    exists=False,
+                    normalize_to_absolute_path=True,
+                    validate=validator.validate_path),
+                inquirer.Text(
+                    name='first_page_number',
+                    message='Enter 1st page number',
+                    default=1,
+                    validate=validator.validate_first_page_number)
+            ]
+            answers = inquirer.prompt(questions)
 
-            self._create_empty_pdf(path)
-            self._db.create_notebook(title, type, path, first)
+            answers['title'] = answers['title'].strip()
+            answers['type'] = answers['type'].strip()
+            answers['path'] = self._expand_path(answers['path'])
+            answers['first_page_number'] = answers['first_page_number'].strip()
 
-            pages_dir = os.path.expanduser(f'~/.local/share/smth/pages/{title}/')
+            self._create_empty_pdf(answers['path'])
+            self._db.create_notebook(answers)
+
+            pages_root = os.path.expanduser(f'~/.local/share/smth/pages')
+            pages_dir = os.path.join(pages_root, answers['title'])
             pathlib.Path(pages_dir).mkdir(parents=True)
 
-            log.info(f"Create notebook '{title}' of type '{type}' at '{path}'")
-            print(f"Created notebook '{title}' of type '{type}' at '{path}'")
+            log.info("Create notebook '{}' of type '{}' at '{}'".format(
+                answers['title'], answers['type'], answers['path']))
+            print("Create notebook '{}' of type '{}' at '{}'".format(
+                answers['title'], answers['type'], answers['path']))
 
         except (DBError, OSError, ValueError) as e:
             self._print_exception(e)

@@ -1,8 +1,7 @@
 import logging
-
-import fire
 import os
 import pathlib
+import sys
 
 from .backup_system import BackupSystem
 
@@ -14,7 +13,16 @@ def main():
     if not os.path.exists(PAGES_ROOT):
         pathlib.Path(PAGES_ROOT).mkdir(parents=True, exist_ok=True)
 
-    fire.Fire(BackupSystem)
+    backup_system = BackupSystem()
+
+    if len(sys.argv) == 2:
+        command = getattr(backup_system, sys.argv[1], None)
+        if callable(command):
+            command()
+        else:
+            print('Syntax: `smth <command>`. Available commands: create, list, types')
+    else:
+        print('Syntax: `smth <command>`. Available commands: create, list, types')
 
 def setup_logging(filename='smth.log', log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
