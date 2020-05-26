@@ -137,17 +137,35 @@ class BackupSystem:
                 scanner.mode = 'gray'
                 scanner.resolution = 150
 
+                pages_root = os.path.expanduser('~/.local/share/smth/pages')
+                pages_dir = os.path.join(pages_root, notebook.title)
+
                 for i in range(0, number_of_pages_to_append):
                     page = notebook.first_page_number + notebook.total_pages + i
                     print(f'Scanning page {page}...')
-                    pages_root = os.path.expanduser('~/.local/share/smth/pages')
-                    pages_dir = os.path.join(pages_root, notebook.title)
-                    scanner.scan().save(os.path.join(pages_dir, f'{page}.jpg'))
+                    page_path = os.path.join(pages_dir, f'{page}.jpg')
+                    image = scanner.scan()
+                    image.save(page_path)
+
+                scanner.close()
 
                 notebook.total_pages += number_of_pages_to_append
                 self._db.save_notebook(notebook)
 
-                scanner.close()
+                width, height = image.size
+                pdf = fpdf.FPDF(unit='pt', format=[width, height])
+
+                for i in range(0, notebook.total_pages):
+                    page = notebook.first_page_number + i
+                    page_path = os.path.join(pages_dir, f'{page}.jpg')
+                    pdf.add_page()
+                    pdf.image(page_path, 0, 0, width, height)
+
+                pdf.output(notebook.path, 'F')
+
+                print(f"PDF saved at '{notebook.path}'.")
+
+                print('Done.')
             else:
                 print('Nothing to scan.')
         else:
