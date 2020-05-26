@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 class BackupSystem:
     def __init__(self):
         try:
-            self._db = DB()
+            self._db = DB(os.path.expanduser('~/.local/share/smth/smth.db'))
             self._notebooks = self._db.get_notebooks()
 
             if not self._db.notebook_type_exists('A4'):
