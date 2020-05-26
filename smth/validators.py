@@ -10,16 +10,6 @@ class NotebookValidator:
     def __init__(self, db: DB):
         self._db = db
 
-    def validate(self, title: str, type: str, path: str, first: int):
-        """Validate notebook's parameters.
-
-        Raise ValueError if inacceptable.
-        Raise DBError on database errors."""
-        self.validate_title(None, title)
-        self.validate_type(None, type)
-        self.validate_path(None, path)
-        self.validate_first_page_number(None, first)
-
     def validate_title(self, answers: dict, title: str) -> bool:
         title = title.strip()
 
@@ -62,6 +52,26 @@ class NotebookValidator:
 
         if not number.isnumeric():
             raise ValidationError('', reason='Please, enter an integer >= 0.')
+
+        return True
+
+
+class ScanPreferencesValidator:
+    """Validator for user input when choosing scan preferences."""
+
+    def validate_number_of_pages_to_append(
+            self, answers: dict, number: str) -> bool:
+        """Allow empty value or an integer > 0."""
+        if len(number.strip()) == 0:
+            return True
+
+        if not number.isnumeric():
+            raise ValidationError(
+                '', reason='Please, enter an integer > 0 or leave empty.')
+
+        if int(number) <= 0:
+            raise ValidationError(
+                '', reason='Please, enter an integer > 0 or leave empty.')
 
         return True
 

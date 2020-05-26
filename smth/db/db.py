@@ -1,7 +1,7 @@
 import logging
 import sqlite3
 
-import smth.db
+from .db_error import DBError
 from smth.models import Notebook, NotebookType
 
 log = logging.getLogger(__name__)
