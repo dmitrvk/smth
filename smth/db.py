@@ -34,9 +34,15 @@ SQL_CREATE_NOTEBOOK = '''INSERT INTO
     (SELECT id FROM notebook_type WHERE title=?),
     ?, ?, ?)'''
 
+SQL_UPDATE_NOTEBOOK = '''UPDATE notebook
+    SET title=?, type_id=?, path=?, total_pages=?, first_page_number=?
+    WHERE id=?'''
+
 SQL_CREATE_NOTEBOOK_TYPE = '''INSERT INTO
     notebook_type(title, page_width, page_height, pages_paired)
     VALUES(?, ?, ?, ?)'''
+
+SQL_GET_NOTEBOOK_BY_TITLE = '''SELECT * FROM notebook WHERE title=?'''
 
 SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
@@ -83,6 +89,9 @@ class DB:
             for row in cursor:
                 notebook_type = self.get_notebook_type_by_id(row[2])
                 notebook = Notebook(row[1], notebook_type, row[3])
+                notebook.id = row[0]
+                notebook.total_pages = row[4]
+                notebook.first_page_number = row[5]
                 notebooks.append(notebook)
 
         except sqlite3.Error as exception:
@@ -134,6 +143,7 @@ class DB:
             cursor.execute(SQL_GET_NOTEBOOK_TYPE_BY_ID, (id,))
             row = cursor.fetchone()
             if row != None:
+                notebook_type.id = row[0]
                 notebook_type.title = row[1]
                 notebook_type.page_width = row[2]
                 notebook_type.page_height = row[3]
@@ -212,6 +222,30 @@ class DB:
 
         except sqlite3.Error as e:
             self._handle_error('Failed to get notebook id', e)
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+    def save_notebook(self, notebook: Notebook) -> None:
+        """Save notebook."""
+        connection = None
+        cursor = None
+
+        try:
+            values = (
+                notebook.title, notebook.type.id, notebook.path,
+                notebook.total_pages, notebook.first_page_number, notebook.id)
+
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_UPDATE_NOTEBOOK, values)
+            connection.commit()
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to save notebook', e)
 
         finally:
             if cursor != None:
