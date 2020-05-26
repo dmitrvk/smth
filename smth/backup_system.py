@@ -18,6 +18,10 @@ class BackupSystem:
         try:
             self._db = DB()
             self._notebooks = self._db.get_notebooks()
+
+            if not self._db.notebook_type_exists('A4'):
+                self._db.create_notebook_type('A4', 210, 297, False)
+
             self._notebook_types = self._db.get_notebook_types()
         except DBError as e:
             self._print_exception(e)

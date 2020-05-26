@@ -34,6 +34,10 @@ SQL_CREATE_NOTEBOOK = '''INSERT INTO
     (SELECT id FROM notebook_type WHERE title=?),
     ?, ?, ?)'''
 
+SQL_CREATE_NOTEBOOK_TYPE = '''INSERT INTO
+    notebook_type(title, page_width, page_height, pages_paired)
+    VALUES(?, ?, ?, ?)'''
+
 SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
 SQL_GET_NOTEBOOK_TYPE_BY_ID = '''SELECT * FROM notebook_type WHERE id=?'''
@@ -208,6 +212,35 @@ class DB:
 
         except sqlite3.Error as e:
             self._handle_error('Failed to get notebook id', e)
+
+        finally:
+            if cursor != None:
+                cursor.close()
+            if connection != None:
+                connection.close()
+
+    def create_notebook_type(
+            self, title: str, page_width: int, page_height: int,
+            pages_paired: bool) -> None:
+        """Create notebook type with given title, page size and paired flag."""
+        connection = None
+        cursor = None
+
+        try:
+            if pages_paired:
+                paired = 1
+            else:
+                paired = 0
+
+            values = (title, page_width, page_height, paired)
+
+            connection = sqlite3.connect(self._path)
+            cursor = connection.cursor()
+            cursor.execute(SQL_CREATE_NOTEBOOK_TYPE, values)
+            connection.commit()
+
+        except sqlite3.Error as e:
+            self._handle_error('Failed to create notebook type', e)
 
         finally:
             if cursor != None:
