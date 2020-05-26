@@ -2,7 +2,8 @@ import os
 
 from inquirer.errors import ValidationError
 
-from .db import DB
+from smth.db import DB
+
 
 class NotebookValidator:
     """Validate user input when manipulating notebooks."""

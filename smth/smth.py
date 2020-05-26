@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 
-from .backup_system import BackupSystem
+from smth.backup_system import BackupSystem
 
 LOG_FILE = os.path.expanduser('~/.local/share/smth/smth.log')
 

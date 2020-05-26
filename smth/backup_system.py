@@ -8,9 +8,8 @@ import fpdf
 import inquirer
 import sane
 
-from .db import DB
-from .db_error import DBError
-from .validators import NotebookValidator
+from smth.db import DB, DBError
+from smth.validators import NotebookValidator
 
 log = logging.getLogger(__name__)
 
