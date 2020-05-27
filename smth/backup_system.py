@@ -25,6 +25,7 @@ class BackupSystem:
 
             if not self._db.notebook_type_exists('A4'):
                 self._db.create_notebook_type('A4', 210, 297, False)
+                log.info('Created A4 notebook type.')
 
             self._notebook_types = self._db.get_notebook_types()
         except DBError as exception:
@@ -125,6 +126,7 @@ class BackupSystem:
                 try:
                     image = scanner.scan()
                     image.save(page_path)
+                    log.info(f"Scanned page {page} of '{notebook.title}'")
                 except KeyboardInterrupt:
                     log.info('Scan interrupted by user.')
                     self._view.show_info('Scanning canceled.')
@@ -167,10 +169,11 @@ class BackupSystem:
         pages_root = os.path.expanduser('~/.local/share/smth/pages')
         return os.path.join(pages_root, notebook_title)
 
-    def _create_empty_pdf(self, path: str) -> str:
+    def _create_empty_pdf(self, path: str) -> None:
         pdf = fpdf.FPDF()
         pdf.add_page()
         pdf.output(path)
+        log.info("Created empty PDF at '{path}'")
 
     def _handle_exception(self, exception: Exception):
         log.exception(exception)

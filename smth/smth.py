@@ -21,6 +21,7 @@ def main():
 
     if not os.path.exists(PAGES_ROOT):
         pathlib.Path(PAGES_ROOT).mkdir(parents=True, exist_ok=True)
+        log.info('Pages root directory does not exist. Created.')
 
     view = View()
     backup_system = BackupSystem(view)
