@@ -1,3 +1,4 @@
-from .smth import main
+from smth import main
 
-main()
+main.main()
+

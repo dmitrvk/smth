@@ -3,10 +3,10 @@ from typing import Dict, List
 
 import inquirer
 
-from smth.validators import NotebookValidator, ScanPreferencesValidator
+from smth import validators
 
 
-class View:
+class CLIView:
     """User interface."""
 
     Answers = Dict[str, str]
@@ -20,7 +20,7 @@ class View:
         else:
             print('No notebooks found.')
 
-    def show_notebook_types(self, types: list) -> None:
+    def show_types(self, types: list) -> None:
         """Show list of notebook types or message if no types found."""
         if types != None and len(types) > 0:
             print('All notebook types:')
@@ -30,7 +30,8 @@ class View:
             print('No types found.')
 
     def ask_for_new_notebook_info(
-            self, types: List[str], validator: NotebookValidator) -> Answers:
+            self, types: List[str],
+            validator: validators.NotebookValidator) -> Answers:
         """Ask user for notebook parameters and return answers.
 
         Validate answers with given validator.
@@ -63,7 +64,7 @@ class View:
 
     def ask_for_scan_prefs(
             self, devices: List[str], notebooks: List[str],
-            validator: ScanPreferencesValidator) -> Answers:
+            validator: validators.ScanPreferencesValidator) -> Answers:
         """Ask user for notebook parameters and return dict with answers.
 
         Validate answers with given validator."""

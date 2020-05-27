@@ -3,9 +3,9 @@ class NotebookType:
 
     def __init__(self, title: str, page_width: int, page_height: int):
         self._id = -1
-        self._title = title
-        self._page_width = page_width
-        self._page_height = page_height
+        self.title = title
+        self.page_width = page_width
+        self.page_height = page_height
         self._pages_paired = False
 
     @property
@@ -49,9 +49,24 @@ class NotebookType:
         else:
             self._page_height = 0
 
+    @property
+    def pages_paired(self):
+        return self._pages_paired
+
+    @pages_paired.setter
+    def pages_paired(self, paired):
+        if isinstance(paired, bool):
+            self._pages_paired = paired
+        else:
+            self._pages_paired = False
+
+    def __eq__(self, other):
+        return (isinstance(other, self.__class__) and
+                other.title == self.title)
+
     def __repr__(self):
         repr = f"<NotebookType '{self._title}'"
-        repr += f" of size '{self._page_width}x{self._page_height}mm'"
+        repr += f" of size {self._page_width}x{self._page_height}mm"
         if self._pages_paired:
             repr += f" with paired pages>"
         else:

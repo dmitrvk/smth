@@ -3,12 +3,16 @@ import os
 import pathlib
 import sys
 
-from smth.backup_system import BackupSystem
-from smth.view import View
+from smth import backup_system
+from smth import views
 
-LOG_FILE = os.path.expanduser('~/.local/share/smth/smth.log')
+DATA_ROOT = os.path.expanduser('~/.local/share/smth')
 
-PAGES_ROOT = os.path.expanduser('~/.local/share/smth/pages/')
+DB_PATH = os.path.join(DATA_ROOT, 'smth.db')
+
+LOG_FILE = os.path.join(DATA_ROOT, 'smth.log')
+
+PAGES_ROOT = os.path.join(DATA_ROOT, 'pages/')
 
 HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     create      create new notebook
@@ -17,17 +21,21 @@ HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     types       show all available notebook types'''
 
 def main():
-    setup_logging()
+    if not os.path.exists(DATA_ROOT):
+        pathlib.Path(DATA_ROOT).mkdir(parents=True, exist_ok=True)
 
     if not os.path.exists(PAGES_ROOT):
         pathlib.Path(PAGES_ROOT).mkdir(parents=True, exist_ok=True)
-        log.info('Pages root directory does not exist. Created.')
 
-    view = View()
-    backup_system = BackupSystem(view)
+    setup_logging()
+    log = logging.getLogger(__name__)
+
+    view = views.CLIView()
+
+    controller = backup_system.BackupSystem(view, DB_PATH)
 
     if len(sys.argv) == 2:
-        command = getattr(backup_system, sys.argv[1], None)
+        command = getattr(controller, sys.argv[1], None)
 
         if callable(command):
             command()

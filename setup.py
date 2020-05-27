@@ -12,7 +12,7 @@ setuptools.setup(
     python_requires='>=3.8',
     entry_points={
         'console_scripts': [
-            'smth=smth.smth:main',
+            'smth=smth.main:main',
         ],
     },
 )
