@@ -11,7 +11,7 @@ class View:
 
     Answers = Dict[str, str]
 
-    def show_list_of_notebooks(self, notebooks: list) -> None:
+    def show_notebooks(self, notebooks: list) -> None:
         """Show list of notebooks or message if no notebooks found."""
         if notebooks != None and len(notebooks) > 0:
             print('All notebooks:')
@@ -20,7 +20,7 @@ class View:
         else:
             print('No notebooks found.')
 
-    def show_list_of_notebook_types(self, types: list) -> None:
+    def show_notebook_types(self, types: list) -> None:
         """Show list of notebook types or message if no types found."""
         if types != None and len(types) > 0:
             print('All notebook types:')
@@ -61,7 +61,7 @@ class View:
 
         return inquirer.prompt(questions)
 
-    def ask_for_scan_preferences(
+    def ask_for_scan_prefs(
             self, devices: List[str], notebooks: List[str],
             validator: ScanPreferencesValidator) -> Answers:
         """Ask user for notebook parameters and return dict with answers.

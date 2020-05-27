@@ -27,6 +27,7 @@ def main():
 
     if len(sys.argv) == 2:
         command = getattr(backup_system, sys.argv[1], None)
+
         if callable(command):
             command()
         else:
@@ -37,8 +38,12 @@ def main():
 def setup_logging(filename=LOG_FILE, log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
     log.setLevel(log_level)
+
+    formatter = logging.Formatter(logging.BASIC_FORMAT)
+
     handler = logging.FileHandler(filename)
     handler.setLevel(log_level)
-    handler.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
+    handler.setFormatter(formatter)
+
     log.addHandler(handler)
 
