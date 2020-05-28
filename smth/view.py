@@ -79,7 +79,7 @@ class View:
                 carousel=True),
             inquirer.Text(
                 name='append',
-                message='Enter number of pages to append (or leave empty)',
+                message='How many new pages? (leave empty if none)',
                 validate=validator.validate_number_of_pages_to_append)
         ]
 
