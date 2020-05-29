@@ -1,6 +1,10 @@
 # smth
 
 ![build](https://github.com/dmitrvk/smth/workflows/build/badge.svg)
+[![codecov](https://codecov.io/gh/dmitrvk/smth/branch/master/graph/badge.svg?token=NH8F6U8988)](https://codecov.io/gh/dmitrvk/smth)
+![license](https://img.shields.io/pypi/l/smth)
+![pypi](https://img.shields.io/pypi/v/smth)
+![python](https://img.shields.io/pypi/pyversions/smth)
 
 *smth* is a command-line tool which allows you to scan in batch mode on Linux.
 
