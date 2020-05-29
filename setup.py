@@ -7,7 +7,7 @@ setuptools.setup(
     name='smth',
     version='0.1.0',
     keywords='scan sane cli',
-    description='Command-line tool for scanning in batch mode',
+    description='Scan in batch mode from console',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/dmitrvk/smth',
