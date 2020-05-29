@@ -18,6 +18,10 @@ cd smth
 pip install .
 ```
 
+If you got an error with missing `sane/sane.h`,
+make sure you have *sane* installed in your system.
+For Debian-based distributions, you may need to install `libsane-dev` package.
+
 ## Usage
 
 Assume you have some handwriting on A4 sheets, e.g. lecture notes.
