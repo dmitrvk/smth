@@ -85,6 +85,17 @@ class BackupSystem:
 
     def scan(self) -> None:
         """Choose device, notebook and scan pages."""
+        try:
+            notebooks = self._db.get_notebook_titles()
+
+            if not notebooks:
+                self._view.show_info(
+                    'No notebooks found. Create one with `smth create`.')
+                return
+        except db.Error as exception:
+            self._handle_exception(exception)
+            sys.exit(1)
+
         sane.init()
 
         self._view.show_info('Searching for available devices...')
@@ -95,12 +106,6 @@ class BackupSystem:
             log.info('No devices found due to keyboard interrupt')
             self._view.show_info('Scanning canceled.')
             return
-
-        try:
-            notebooks = self._db.get_notebook_titles()
-        except db.Error as exception:
-            self._handle_exception(exception)
-            sys.exit(1)
 
         validator = validators.ScanPreferencesValidator()
 

@@ -88,7 +88,7 @@ class TestBackupSystem(unittest.TestCase):
         self.view.ask_for_new_notebook_info.return_value = answers
 
         db_mock = mock.MagicMock()
-        db_mock.get_type_titles.return_value=[]
+        db_mock.get_notebook_titles.return_value=['Notebook']
         type_mock = mock.MagicMock()
         type_mock.title = 'Type 1'
         db_mock.get_type_by_title.return_value = type_mock
@@ -110,7 +110,7 @@ class TestBackupSystem(unittest.TestCase):
         self.view.ask_for_new_notebook_info.return_value = None
 
         db_mock = mock.MagicMock()
-        db_mock.get_type_titles.return_value = []
+        db_mock.get_notebook_titles.return_value = ['Notebook']
         type_mock = mock.MagicMock()
         type_mock.title = 'Type 1'
         db_mock.get_type_by_title.return_value = type_mock
@@ -156,7 +156,7 @@ class TestBackupSystem(unittest.TestCase):
             notebook_mock.total_pages = 0
 
             db_mock = mock.MagicMock()
-            db_mock.get_notebook_titles.return_value = []
+            db_mock.get_notebook_titles.return_value = ['Notebook']
             db_mock.get_notebook_by_title.return_value = notebook_mock
             DB.return_value = db_mock
 
@@ -204,7 +204,7 @@ class TestBackupSystem(unittest.TestCase):
 
             with mock.patch.object(db, 'DB') as DB:
                 db_mock = mock.MagicMock()
-                db_mock.get_notebook_titles.return_value = []
+                db_mock.get_notebook_titles.return_value = ['Notebook']
                 DB.return_value = db_mock
 
                 backup_system.BackupSystem(self.view, self.DB_PATH).scan()
@@ -226,7 +226,7 @@ class TestBackupSystem(unittest.TestCase):
 
             with mock.patch.object(db, 'DB') as DB:
                 db_mock = mock.MagicMock()
-                db_mock.get_notebook_titles.return_value = []
+                db_mock.get_notebook_titles.return_value = ['Notebook']
                 DB.return_value = db_mock
 
                 backup_system.BackupSystem(self.view, self.DB_PATH).scan()
@@ -275,7 +275,7 @@ class TestBackupSystem(unittest.TestCase):
                 notebook_mock.total_pages = 0
 
                 db_mock = mock.MagicMock()
-                db_mock.get_notebook_titles.return_value = []
+                db_mock.get_notebook_titles.return_value = ['Notebook']
                 db_mock.get_notebook_by_title.return_value = notebook_mock
                 DB.return_value = db_mock
 
@@ -283,6 +283,19 @@ class TestBackupSystem(unittest.TestCase):
 
                 scanner_mock.close.assert_called_once()
                 db_mock.save_notebook.assert_not_called()
+
+    def test_scan_no_notebooks(self):
+        with mock.patch.object(db, 'DB') as DB:
+            db_mock = mock.MagicMock()
+            db_mock.get_notebook_titles.return_value = []
+            DB.return_value = db_mock
+
+            with mock.patch('smth.backup_system.sane') as sane_mock:
+                sane_mock = mock.MagicMock()
+
+                backup_system.BackupSystem(self.view, self.DB_PATH).scan()
+
+                sane_mock.init.assert_not_called()
 
     def tearDown(self):
         if os.path.exists(self.DB_PATH):
