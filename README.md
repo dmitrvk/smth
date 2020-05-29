@@ -1,6 +1,6 @@
 # smth
 
-*smth* is a command-line tool which allows you to scan in batch mode.
+*smth* is a command-line tool which allows you to scan in batch mode on Linux.
 
 ## Features
 
