@@ -12,7 +12,11 @@
 
 ## Installation
 
-From source:
+```
+pip install smth
+```
+
+Or install from source:
 
 ```bash
 git clone https://github.com/dmitrvk/smth
