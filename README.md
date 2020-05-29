@@ -1,5 +1,7 @@
 # smth
 
+![build](https://github.com/dmitrvk/smth/workflows/build/badge.svg)
+
 *smth* is a command-line tool which allows you to scan in batch mode on Linux.
 
 ## Features
