@@ -13,7 +13,6 @@ class TestMain(fake_filesystem_unittest.TestCase):
 
     def setUp(self):
         self.setUpPyfakefs()
-        self.fs.create_file(main.LOG_FILE)
 
     @mock.patch('smth.main')
     def test__main__(self, mock):
