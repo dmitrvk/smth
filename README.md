@@ -1,9 +1,9 @@
 # smth
 
-![build](https://github.com/dmitrvk/smth/workflows/build/badge.svg)
+[![build](https://github.com/dmitrvk/smth/workflows/build/badge.svg)](https://github.com/dmitrvk/smth/actions)
 [![codecov](https://codecov.io/gh/dmitrvk/smth/branch/master/graph/badge.svg?token=NH8F6U8988)](https://codecov.io/gh/dmitrvk/smth)
-![license](https://img.shields.io/pypi/l/smth)
-![pypi](https://img.shields.io/pypi/v/smth)
+[![license](https://img.shields.io/pypi/l/smth)](https://github.com/dmitrvk/smth/blob/master/LICENSE)
+[![pypi](https://img.shields.io/pypi/v/smth)](https://pypi.org/project/smth)
 ![python](https://img.shields.io/pypi/pyversions/smth)
 
 *smth* is a command-line tool which allows you to scan in batch mode on Linux.
@@ -29,7 +29,7 @@ pip install .
 ```
 
 If you got an error with missing `sane/sane.h`,
-make sure you have *sane* installed in your system.
+make sure you have *sane* installed.
 For Debian-based distributions, you may need to install `libsane-dev` package.
 
 ## Usage
