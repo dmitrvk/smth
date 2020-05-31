@@ -75,7 +75,7 @@ class CLIView:
             inquirer.List(
                 name='device',
                 message='Choose device',
-                choices=devices),
+                choices=sorted(devices)),
             inquirer.List(
                 name='notebook',
                 message='Choose notebook',
