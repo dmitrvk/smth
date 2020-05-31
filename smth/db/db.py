@@ -27,7 +27,7 @@ SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook ORDER BY title'''
 
 SQL_GET_NOTEBOOK_TITLES = '''SELECT title FROM notebook ORDER BY title'''
 
-SQL_NOTEBOOK_EXISTS = '''SELECT COUNT(*) FROM notebook WHERE title=?'''
+SQL_NOTEBOOK_COUNT = '''SELECT COUNT(*) FROM notebook WHERE title=?'''
 
 SQL_CREATE_NOTEBOOK = '''INSERT INTO
     notebook(title, type_id, path, total_pages, first_page_number)
@@ -41,40 +41,35 @@ SQL_UPDATE_NOTEBOOK = '''UPDATE notebook
     path=?, total_pages=?, first_page_number=?
     WHERE id=?'''
 
-SQL_CREATE_NOTEBOOK_TYPE = '''INSERT INTO
+SQL_CREATE_TYPE = '''INSERT INTO
     notebook_type(title, page_width, page_height, pages_paired)
     VALUES(?, ?, ?, ?)'''
 
-SQL_UPDATE_NOTEBOOK_TYPE = '''UPDATE notebook_type
+SQL_UPDATE_TYPE = '''UPDATE notebook_type
     SET title=?, page_width=?, page_height=?, pages_paired=?
     WHERE id=?'''
 
 SQL_GET_NOTEBOOK_BY_TITLE = '''SELECT * FROM notebook WHERE title=?'''
 
-SQL_GET_NOTEBOOK_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
+SQL_GET_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
-SQL_GET_NOTEBOOK_TYPE_TITLES = '''SELECT title FROM notebook_type
-    ORDER BY title'''
+SQL_GET_TYPE_TITLES = '''SELECT title FROM notebook_type ORDER BY title'''
 
-SQL_GET_NOTEBOOK_TYPE_BY_ID = '''SELECT * FROM notebook_type WHERE id=?'''
+SQL_GET_TYPE_BY_ID = '''SELECT * FROM notebook_type WHERE id=?'''
 
-SQL_GET_NOTEBOOK_TYPE_BY_TITLE = '''SELECT * FROM notebook_type
-    WHERE title=?'''
+SQL_GET_TYPE_BY_TITLE = '''SELECT * FROM notebook_type WHERE title=?'''
 
-SQL_NOTEBOOK_TYPE_EXISTS = '''SELECT COUNT(*) FROM notebook_type
-    WHERE title=?'''
+SQL_TYPE_COUNT = '''SELECT COUNT(*) FROM notebook_type WHERE title=?'''
 
 
 class DB:
     def __init__(self, path='smth.db'):
         self._path = path
-
         connection = None
 
         try:
-            connection = sqlite3.connect(path)
+            connection = self._connect()
             connection.execute(SQL_CREATE_TABLE_NOTEBOOK_TYPE)
-            connection.commit()
             connection.execute(SQL_CREATE_TABLE_NOTEBOOK)
             connection.commit()
             log.info('Created tables if they did not exist')
@@ -83,67 +78,45 @@ class DB:
             self._handle_error('Failed to initialize the database', e)
 
         finally:
-            if connection != None:
+            if connection:
                 connection.close()
 
-    def get_notebooks(self) -> list:
+    def get_notebooks(self) -> List[models.Notebook]:
         notebooks = []
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOKS)
-
-            for row in cursor:
-                notebook_type = self.get_type_by_id(row[2])
-                notebook = models.Notebook(row[1], notebook_type, row[3])
-                notebook.id = row[0]
-                notebook.total_pages = row[4]
-                notebook.first_page_number = row[5]
-                notebooks.append(notebook)
+            connection = self._connect()
+            for row in connection.execute(SQL_GET_NOTEBOOKS):
+                notebooks.append(self._make_notebook_from_row(row))
 
         except (sqlite3.Error, Error) as e:
             self._handle_error('Failed to get notebooks from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return notebooks
 
     def get_notebook_by_title(self, title: int) -> models.Notebook:
+        """Return notebook with specific title from database."""
         notebook = models.Notebook('', None, '')
 
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOK_BY_TITLE, (title,))
+            connection = self._connect()
+            cursor = connection.execute(SQL_GET_NOTEBOOK_BY_TITLE, (title,))
             row = cursor.fetchone()
             if row != None:
-                title = row[1]
-                type = self.get_type_by_id(row[2])
-                path = row[3]
-
-                notebook = models.Notebook(title, type, path)
-                notebook.id = row[0]
-                notebook.total_pages = row[4]
-                notebook.first_page_number = row[5]
+                notebook = self._make_notebook_from_row(row)
 
         except (sqlite3.Error, Error) as e:
             self._handle_error('Failed to get notebook type from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return notebook
@@ -151,51 +124,37 @@ class DB:
     def get_notebook_titles(self) -> List[str]:
         """Return list of notebook titles from database."""
         titles = []
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOK_TITLES)
+            connection = self._connect()
+            for row in connection.execute(SQL_GET_NOTEBOOK_TITLES):
+                titles.append(row['title'])
 
-            titles = [row[0] for row in cursor]
-
-        except sqlite3.Error as exception:
-            self._handle_error(
-                'Failed to get notebooks from database', exception)
+        except sqlite3.Error as e:
+            self._handle_error('Failed to get notebooks from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return titles
 
-    def get_types(self) -> list:
+    def get_types(self) -> List[models.NotebookType]:
+        """Return list of types from database."""
         types = []
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOK_TYPES)
-
-            for row in cursor:
-                type_ = models.NotebookType(row[1], row[2], row[3])
-                types.append(type_)
+            connection = self._connect()
+            for row in connection.execute(SQL_GET_TYPES):
+                types.append(self._make_type_from_row(row))
 
         except sqlite3.Error as e:
             self._handle_error('Failed to get notebook types from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return types
@@ -203,104 +162,77 @@ class DB:
     def get_type_titles(self) -> List[str]:
         """Return list of notebook types' titles from database."""
         titles = []
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOK_TYPE_TITLES)
+            connection = self._connect()
+            for row in connection.execute(SQL_GET_TYPE_TITLES):
+                titles.append(row['title'])
 
-            titles = [row[0] for row in cursor]
-
-        except sqlite3.Error as exception:
-            self._handle_error(
-                'Failed to get notebooks from database', exception)
+        except sqlite3.Error as e:
+            self._handle_error('Failed to get notebooks from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return titles
 
     def get_type_by_id(self, id: int) -> models.NotebookType:
+        """Return notebook type with specified id from database."""
         type_ = models.NotebookType('', 0, 0)
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOK_TYPE_BY_ID, (id,))
+            connection = self._connect()
+            cursor = connection.execute(SQL_GET_TYPE_BY_ID, (id,))
             row = cursor.fetchone()
             if row != None:
-                type_.id = row[0]
-                type_.title = row[1]
-                type_.page_width = row[2]
-                type_.page_height = row[3]
+                type_ = self._make_type_from_row(row)
 
         except sqlite3.Error as e:
             self._handle_error('Failed to get notebook type from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return type_
 
     def get_type_by_title(self, title: str) -> models.NotebookType:
         type_ = models.NotebookType('', 0, 0)
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_GET_NOTEBOOK_TYPE_BY_TITLE, (title,))
+            connection = self._connect()
+            cursor = connection.execute(SQL_GET_TYPE_BY_TITLE, (title,))
             row = cursor.fetchone()
             if row != None:
-                type_.id = row[0]
-                type_.title = row[1]
-                type_.page_width = row[2]
-                type_.page_height = row[3]
+                type_ = self._make_type_from_row(row)
 
         except sqlite3.Error as e:
             self._handle_error('Failed to get notebook type from database', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return type_
 
     def notebook_exists(self, title: str) -> bool:
         exists = False
-
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_NOTEBOOK_EXISTS, (title,))
+            connection = self._connect()
+            cursor = connection.execute(SQL_NOTEBOOK_COUNT, (title,))
             exists = cursor.fetchone()[0] > 0
 
         except sqlite3.Error as e:
             self._handle_error('Failed to check if notebook exists', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return exists
@@ -309,21 +241,17 @@ class DB:
         exists = False
 
         connection = None
-        cursor = None
 
         try:
-            connection = sqlite3.connect(self._path)
-            cursor = connection.cursor()
-            cursor.execute(SQL_NOTEBOOK_TYPE_EXISTS, (title,))
+            connection = self._connect()
+            cursor = connection.execute(SQL_TYPE_COUNT, (title,))
             exists = cursor.fetchone()[0] > 0
 
         except sqlite3.Error as e:
             self._handle_error('Failed to check if notebook type exists', e)
 
         finally:
-            if cursor != None:
-                cursor.close()
-            if connection != None:
+            if connection:
                 connection.close()
 
         return exists
@@ -333,7 +261,7 @@ class DB:
         connection = None
 
         try:
-            connection = sqlite3.connect(self._path)
+            connection = self._connect()
 
             if notebook.id < 0:
                 values = (
@@ -367,12 +295,12 @@ class DB:
                 values = (
                     type.title, type.page_width, type.page_height,
                     type.pages_paired)
-                connection.execute(SQL_CREATE_NOTEBOOK_TYPE, values)
+                connection.execute(SQL_CREATE_TYPE, values)
             else:
                 values = (
                     type.title, type.page_width, type.page_height,
                     type.pages_paired, type.id)
-                connection.execute(SQL_UPDATE_NOTEBOOK_TYPE, values)
+                connection.execute(SQL_UPDATE_TYPE, values)
 
             connection.commit()
 
@@ -382,8 +310,31 @@ class DB:
             if connection:
                 connection.close()
 
+    def _connect(self) -> sqlite3.Connection:
+        """Connect to the database and return the connection object.
+
+        Raises sqlite3.Error if connection failed."""
+        connection = sqlite3.connect(self._path)
+        connection.row_factory = sqlite3.Row
+        return connection
+
     def _handle_error(self, message: str, e: sqlite3.Error) -> None:
         """Log error message and propagate db.Error."""
         log.exception(message)
         raise Error(f'{message}: {e}.') from None
+
+    def _make_notebook_from_row(self, row: sqlite3.Row) -> models.Notebook:
+        type_ = self.get_type_by_id(row['type_id'])
+        notebook = models.Notebook(row['title'], type_, row['path'])
+        notebook.id = row['id']
+        notebook.total_pages = row['total_pages']
+        notebook.first_page_number = row['first_page_number']
+        return notebook
+
+    def _make_type_from_row(self, row: sqlite3.Row) -> models.NotebookType:
+        type_ = models.NotebookType(
+            row['title'], row['page_width'], row['page_height'])
+        type_.id = row['id']
+        type_.pages_paired = row['pages_paired'] > 0
+        return type_
 
