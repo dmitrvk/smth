@@ -106,6 +106,35 @@ class TestBackupSystem(unittest.TestCase):
                 fpdf_mock.output.assert_called_once()
 
     @mock.patch.object(db, 'DB')
+    def test_create_path_not_pdf(self, db_constructor_mock):
+        answers = {
+            'title': 'Notebook',
+            'type': 'Type 1',
+            'path': '/test/path/',
+            'first_page_number': '1'
+        }
+
+        self.view.ask_for_new_notebook_info.return_value = answers
+
+        db_mock = mock.MagicMock()
+        db_mock.get_notebook_titles.return_value=['Notebook']
+        type_mock = mock.MagicMock()
+        type_mock.title = 'Type 1'
+        db_mock.get_type_by_title.return_value = type_mock
+
+        db_constructor_mock.return_value = db_mock
+
+        backup_system_ = backup_system.BackupSystem(self.view, self.DB_PATH)
+
+        with mock.patch.object(fpdf, 'FPDF') as fpdf_constructor_mock:
+            with fakefs_unittest.Patcher():
+                fpdf_mock = mock.MagicMock()
+                fpdf_constructor_mock.return_value = fpdf_mock
+                backup_system_.create()
+                db_mock.save_notebook.assert_called_once()
+                fpdf_mock.output.assert_called_once()
+
+    @mock.patch.object(db, 'DB')
     def test_create_no_answers(self, db_constructor_mock):
         self.view.ask_for_new_notebook_info.return_value = None
 
