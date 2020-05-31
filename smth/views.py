@@ -16,7 +16,10 @@ class CLIView:
         if notebooks != None and len(notebooks) > 0:
             print('All notebooks:')
             for n in notebooks:
-                print(f'  {n.title}  {n.total_pages} pages  ({n.type.title})')
+                if n.total_pages == 1:
+                    print(f'  {n.title}  {n.total_pages} page  ({n.type.title})')
+                else:
+                    print(f'  {n.title}  {n.total_pages} pages  ({n.type.title})')
         else:
             print('No notebooks found.')
 
