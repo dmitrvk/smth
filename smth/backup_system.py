@@ -150,6 +150,8 @@ class BackupSystem:
             notebook.total_pages += append
             self._db.save_notebook(notebook)
 
+            self._view.show_info('Creating PDF...')
+
             width, height = image.size
             pdf = fpdf.FPDF(unit='pt', format=[width, height])
 
