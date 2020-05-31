@@ -1,4 +1,5 @@
 import logging
+import operator
 import os
 import sqlite3
 import unittest
@@ -18,10 +19,12 @@ class TestDB(unittest.TestCase):
         self.db = db.DB(self.DB_PATH)
 
         # Types for tests
+        self.types = self.db.get_types()
         type1 = models.NotebookType('Type 1', 100, 200)
         type2 = models.NotebookType('Type 2', 200, 100)
         type2.pages_paired = True
-        self.types = [type1, type2]
+        self.types.append(type1)
+        self.types.append(type2)
         for type in self.types:
             self.db.save_type(type)
 
@@ -59,7 +62,7 @@ class TestDB(unittest.TestCase):
 
     def test_get_type_titles(self):
         titles = self.db.get_type_titles()
-        expected = ['Type 1', 'Type 2']
+        expected = list(map(operator.attrgetter('title'), self.types))
         self.assertListEqual(titles, expected)
 
     def test_get_type_by_id(self):

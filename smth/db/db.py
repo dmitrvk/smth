@@ -23,6 +23,9 @@ SQL_CREATE_TABLE_NOTEBOOK = '''CREATE TABLE IF NOT EXISTS notebook(
     first_page_number INTEGER,
     FOREIGN KEY(type_id) REFERENCES notebook_type(id))'''
 
+SQL_TABLE_EXISTS = '''SELECT COUNT(*) FROM sqlite_master
+    WHERE type='table' AND name=?'''
+
 SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook ORDER BY title'''
 
 SQL_GET_NOTEBOOK_TITLES = '''SELECT title FROM notebook ORDER BY title'''
@@ -64,15 +67,32 @@ SQL_TYPE_COUNT = '''SELECT COUNT(*) FROM notebook_type WHERE title=?'''
 
 class DB:
     def __init__(self, path='smth.db'):
+        """Create tables and default notebook type if necessary."""
         self._path = path
         connection = None
 
         try:
             connection = self._connect()
-            connection.execute(SQL_CREATE_TABLE_NOTEBOOK_TYPE)
-            connection.execute(SQL_CREATE_TABLE_NOTEBOOK)
+
+            cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook_type',))
+            table_exists = exists = cursor.fetchone()[0] > 0
+
+            if not table_exists:
+                connection.execute(SQL_CREATE_TABLE_NOTEBOOK_TYPE)
+                log.info("Table 'notebook_type' created")
+
+                typeA4 = models.NotebookType('A4', 210, 297)
+                self.save_type(typeA4)
+                log.info("Type 'A4' created")
+
+            cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook',))
+            table_exists = exists = cursor.fetchone()[0] > 0
+
+            if not table_exists:
+                connection.execute(SQL_CREATE_TABLE_NOTEBOOK)
+                log.info("Table 'notebook' created")
+
             connection.commit()
-            log.info('Created tables if they did not exist')
 
         except sqlite3.Error as e:
             self._handle_error('Failed to initialize the database', e)

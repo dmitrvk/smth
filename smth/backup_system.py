@@ -21,11 +21,6 @@ class BackupSystem:
 
         try:
             self._db = db.DB(db_path)
-
-            if not self._db.type_exists('A4'):
-                typeA4 = models.NotebookType('A4', 210, 297)
-                self._db.save_type(typeA4)
-                log.info('Created A4 notebook type.')
         except db.Error as exception:
             self._handle_exception(exception)
             sys.exit(1)
