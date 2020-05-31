@@ -59,15 +59,24 @@ class BackupSystem:
                 self._view.show_info('Nothing created.')
                 return
 
-            notebook = models.Notebook(
-                answers['title'].strip(),
-                self._db.get_type_by_title(answers['type'].strip()),
-                self._expand_path(answers['path']))
+            title = answers['title'].strip()
+            type = self._db.get_type_by_title(answers['type'].strip())
+            path = self._expand_path(answers['path'])
 
-            notebook.first_page_number = int(
-                answers['first_page_number'].strip())
+            if path.endswith('.pdf'):
+                dir = os.path.dirname(path)
+                if not os.path.exists(dir):
+                    pathlib.Path(dir).mkdir(parents=True)
+            else:
+                if not os.path.exists(path):
+                    pathlib.Path(path).mkdir(parents=True)
+                path = os.path.join(path, f'{title}.pdf')
+
+            notebook = models.Notebook(title, type, path)
+            notebook.first_page_number = int(answers['first_page_number'])
 
             self._create_empty_pdf(notebook.path)
+
             self._db.save_notebook(notebook)
 
             pages_root = os.path.expanduser(f'~/.local/share/smth/pages')
