@@ -1,13 +1,13 @@
-import sys
 from typing import Dict, List
 
 import inquirer
 
 from smth import validators
+from smth import views
 
 
-class CLIView:
-    """User interface."""
+class ScanView(views.BaseView):
+    """The view asks for scanning preferences and shows scanning progress."""
 
     Answers = Dict[str, str]
 
@@ -34,12 +34,4 @@ class CLIView:
         ]
 
         return inquirer.prompt(questions)
-
-    def show_info(self, message: str) -> None:
-        """Print message to stdout."""
-        print(message)
-
-    def show_error(self, message: str) -> None:
-        """Print message to stderr."""
-        print(message, file=sys.stderr)
 

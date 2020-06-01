@@ -3,7 +3,6 @@ import os
 import pathlib
 import sys
 
-from smth import backup_system
 from smth import controllers
 from smth import views
 
@@ -31,28 +30,26 @@ def main():
     setup_logging()
     log = logging.getLogger(__name__)
 
-    view = views.CLIView()
-
-    controller = backup_system.BackupSystem(view, DB_PATH)
+    view = views.BaseView()
 
     if len(sys.argv) == 2:
         command = sys.argv[1]
 
-        if command == 'list':
+        if command == 'create':
+            controllers.CreateController(DB_PATH).create_notebook()
+        elif command == 'list':
             controllers.ListController(DB_PATH).show_notebooks_list()
+        elif command == 'scan':
+            controllers.ScanController(DB_PATH).scan_notebook()
         elif command == 'types':
             controllers.TypesController(DB_PATH).show_types_list()
-        elif command == 'create':
-            controllers.CreateController(DB_PATH).create_notebook()
         else:
-            command = getattr(controller, sys.argv[1], None)
-
-            if callable(command):
-                command()
-            else:
-                view.show_info(HELP_MESSAGE)
+            view.show_info(f"Unknown command '{command}'.")
+            view.show_info(HELP_MESSAGE)
+            log.info(f"Unknown command '{command}'")
     else:
         view.show_info(HELP_MESSAGE)
+        log.info(f"Wrong args: '{sys.argv}'")
 
 def setup_logging(filename=LOG_FILE, log_level=logging.DEBUG) -> None:
     log = logging.getLogger()

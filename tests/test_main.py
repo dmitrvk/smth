@@ -27,6 +27,14 @@ class TestMain(fake_filesystem_unittest.TestCase):
                 main.main()
                 controller_mock.show_notebooks_list.assert_called_once()
 
+    def test_scan_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'scan']):
+            with mock.patch('smth.controllers.ScanController') as Controller:
+                controller = mock.MagicMock()
+                Controller.return_value = controller
+                main.main()
+                controller.scan_notebook.assert_called_once()
+
     def test_types_command(self):
         with mock.patch.object(sys, 'argv', ['', 'types']):
             with mock.patch('smth.controllers.TypesController') as Controller:
@@ -45,25 +53,13 @@ class TestMain(fake_filesystem_unittest.TestCase):
 
     @mock.patch.object(sys, 'argv', ['__main__.py'])
     def test_no_command(self):
-        with mock.patch('smth.backup_system.db.DB'):
-            output = testutils.capture_stdout(main.main)
-            for command in ['create', 'list', 'scan', 'types']:
-                self.assertIn(command, output)
+        output = testutils.capture_stdout(main.main)
+        for command in ['create', 'list', 'scan', 'types']:
+            self.assertIn(command, output)
 
     @mock.patch.object(sys, 'argv', ['__main__.py', 'test'])
     def test_unknown_command(self):
-        with mock.patch('smth.backup_system.db.DB'):
-            output = testutils.capture_stdout(main.main)
-            for command in ['create', 'list', 'scan', 'types']:
-                self.assertIn(command, output)
-
-    @mock.patch('smth.backup_system.BackupSystem')
-    @mock.patch.object(sys, 'argv', ['__main__.py', 'test'])
-    def test_available_command(self, backup_system_mock):
-        def test_command():
-            print('Test Output')
-        backup_system = backup_system_mock.return_value
-        backup_system.test.side_effect = test_command
         output = testutils.capture_stdout(main.main)
-        self.assertEqual(output, 'Test Output\n')
+        for command in ['create', 'list', 'scan', 'types']:
+            self.assertIn(command, output)
 
