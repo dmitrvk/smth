@@ -1,9 +1,9 @@
 from typing import List
 
 from smth import models
-from smth.views import base_view
+from smth import views
 
-class TypesView(base_view.BaseView):
+class TypesView(views.BaseView):
     """A view that shows a list of notebook types."""
 
     def show_types(self, types: List[models.NotebookType]) -> None:

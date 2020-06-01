@@ -42,6 +42,8 @@ def main():
             controllers.ListController(DB_PATH).show_notebooks_list()
         elif command == 'types':
             controllers.TypesController(DB_PATH).show_types_list()
+        elif command == 'create':
+            controllers.CreateController(DB_PATH).create_notebook()
         else:
             command = getattr(controller, sys.argv[1], None)
 

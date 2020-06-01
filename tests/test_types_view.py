@@ -6,8 +6,6 @@ from tests import testutils
 
 
 class TestTypesView(unittest.TestCase):
-    """Test user interface."""
-
     def test_show_types(self):
         view = views.TypesView()
 

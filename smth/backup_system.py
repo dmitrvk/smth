@@ -1,7 +1,6 @@
 import logging
 import operator
 import os
-import pathlib
 import sys
 
 import fpdf
@@ -23,52 +22,6 @@ class BackupSystem:
             self._db = db.DB(db_path)
         except db.Error as exception:
             self._handle_exception(exception)
-            sys.exit(1)
-
-    def create(self) -> None:
-        """Create notebook with given title, type, path and 1st page number."""
-        try:
-            types = self._db.get_type_titles()
-            validator = validators.NotebookValidator(self._db)
-
-            answers = self._view.ask_for_new_notebook_info(types, validator)
-
-            if not answers:
-                log.info('Creation stopped due to keyboard interrupt')
-                self._view.show_info('Nothing created.')
-                return
-
-            title = answers['title'].strip()
-            type = self._db.get_type_by_title(answers['type'].strip())
-            path = self._expand_path(answers['path'])
-
-            if path.endswith('.pdf'):
-                dir = os.path.dirname(path)
-                if not os.path.exists(dir):
-                    pathlib.Path(dir).mkdir(parents=True)
-            else:
-                if not os.path.exists(path):
-                    pathlib.Path(path).mkdir(parents=True)
-                path = os.path.join(path, f'{title}.pdf')
-
-            notebook = models.Notebook(title, type, path)
-            notebook.first_page_number = int(answers['first_page_number'])
-
-            self._create_empty_pdf(notebook.path)
-
-            self._db.save_notebook(notebook)
-
-            pages_root = os.path.expanduser(f'~/.local/share/smth/pages')
-            pages_dir = os.path.join(pages_root, notebook.title)
-            pathlib.Path(pages_dir).mkdir(parents=True)
-
-            message = (f"Create notebook '{notebook.title}' "
-                f"of type '{notebook.type.title}' at '{notebook.path}'")
-            log.info(message)
-            self._view.show_info(message)
-
-        except (db.Error, OSError) as e:
-            self._handle_exception(e)
             sys.exit(1)
 
     def scan(self) -> None:
@@ -154,12 +107,6 @@ class BackupSystem:
             self._view.show_info(f"PDF saved at '{notebook.path}'.")
             self._view.show_info('Done.')
 
-    def _expand_path(self, path: str) -> str:
-        """Return full absolute path."""
-        path = str(path).strip()
-        path = os.path.expandvars(os.path.expanduser(path))
-        return os.path.abspath(path)
-
     def _get_scanner(self, device: str) -> sane.SaneDev:
         scanner = sane.open(device)
         scanner.format = 'jpeg'
@@ -170,12 +117,6 @@ class BackupSystem:
     def _get_pages_dir_path(self, notebook_title: str) -> str:
         pages_root = os.path.expanduser('~/.local/share/smth/pages')
         return os.path.join(pages_root, notebook_title)
-
-    def _create_empty_pdf(self, path: str) -> None:
-        pdf = fpdf.FPDF()
-        pdf.add_page()
-        pdf.output(path)
-        log.info("Created empty PDF at '{path}'")
 
     def _handle_exception(self, exception: Exception):
         log.exception(exception)

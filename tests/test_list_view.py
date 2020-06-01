@@ -6,8 +6,6 @@ from tests import testutils
 
 
 class TestListView(unittest.TestCase):
-    """Test user interface."""
-
     def test_show_notebooks(self):
         view = views.ListView()
 

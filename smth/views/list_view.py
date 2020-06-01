@@ -1,9 +1,9 @@
 from typing import List
 
 from smth import models
-from smth.views import base_view
+from smth import views
 
-class ListView(base_view.BaseView):
+class ListView(views.BaseView):
     """A view that shows a list of notebooks."""
 
     def show_notebooks(self, notebooks: List[models.Notebook]) -> None:

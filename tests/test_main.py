@@ -35,6 +35,14 @@ class TestMain(fake_filesystem_unittest.TestCase):
                 main.main()
                 controller_mock.show_types_list.assert_called_once()
 
+    def test_create_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'create']):
+            with mock.patch('smth.controllers.CreateController') as Controller:
+                controller_mock = mock.MagicMock()
+                Controller.return_value = controller_mock
+                main.main()
+                controller_mock.create_notebook.assert_called_once()
+
     @mock.patch.object(sys, 'argv', ['__main__.py'])
     def test_no_command(self):
         with mock.patch('smth.backup_system.db.DB'):
