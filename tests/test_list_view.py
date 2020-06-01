@@ -5,7 +5,7 @@ from smth import views
 from tests import testutils
 
 
-class TestView(unittest.TestCase):
+class TestListView(unittest.TestCase):
     """Test user interface."""
 
     def test_show_notebooks(self):

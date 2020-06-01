@@ -25,14 +25,6 @@ class BackupSystem:
             self._handle_exception(exception)
             sys.exit(1)
 
-    def types(self) -> None:
-        """Print list of all notebook types."""
-        try:
-            self._view.show_types(self._db.get_types())
-        except db.Error as exception:
-            self._handle_exception(exception)
-            sys.exit(1)
-
     def create(self) -> None:
         """Create notebook with given title, type, path and 1st page number."""
         try:

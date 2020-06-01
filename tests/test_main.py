@@ -19,13 +19,21 @@ class TestMain(fake_filesystem_unittest.TestCase):
     def test__main__(self, mock):
         from smth import __main__
 
-    def test_commands(self):
+    def test_list_command(self):
         with mock.patch.object(sys, 'argv', ['', 'list']):
             with mock.patch('smth.controllers.ListController') as Controller:
                 controller_mock = mock.MagicMock()
                 Controller.return_value = controller_mock
                 main.main()
                 controller_mock.show_notebooks_list.assert_called_once()
+
+    def test_types_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'types']):
+            with mock.patch('smth.controllers.TypesController') as Controller:
+                controller_mock = mock.MagicMock()
+                Controller.return_value = controller_mock
+                main.main()
+                controller_mock.show_types_list.assert_called_once()
 
     @mock.patch.object(sys, 'argv', ['__main__.py'])
     def test_no_command(self):

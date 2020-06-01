@@ -32,30 +32,6 @@ class TestBackupSystem(unittest.TestCase):
             sys_exit.assert_called_once()
 
     @mock.patch.object(db, 'DB')
-    def test_types(self, db_constructor_mock):
-        db_mock = mock.MagicMock()
-
-        # Mock database method
-        db_mock.get_types.return_value = 'Types'
-        db_mock.type_exists.return_value = False
-        db_constructor_mock.return_value = db_mock
-
-        backup_system_ = backup_system.BackupSystem(self.view, self.DB_PATH)
-
-        output = testutils.capture_stdout(backup_system_.types)
-        self.assertEqual(output, 'Types\n')
-
-        # Mock database method so it raises an error
-        db_mock.get_types.side_effect = db.Error
-        db_constructor_mock.return_value = db_mock
-
-        backup_system_ = backup_system.BackupSystem(self.view, self.DB_PATH)
-
-        with mock.patch.object(sys, 'exit') as sys_exit:
-            backup_system_.types()
-            sys_exit.assert_called_once()
-
-    @mock.patch.object(db, 'DB')
     def test_create(self, db_constructor_mock):
         answers = {
             'title': 'Notebook',

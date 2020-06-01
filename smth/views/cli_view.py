@@ -11,15 +11,6 @@ class CLIView:
 
     Answers = Dict[str, str]
 
-    def show_types(self, types: list) -> None:
-        """Show list of notebook types or message if no types found."""
-        if types != None and len(types) > 0:
-            print('All notebook types:')
-            for t in types:
-                print(f'  {t.title}  {t.page_width}x{t.page_height}mm')
-        else:
-            print('No types found.')
-
     def ask_for_new_notebook_info(
             self, types: List[str],
             validator: validators.NotebookValidator) -> Answers:

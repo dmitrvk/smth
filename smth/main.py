@@ -40,6 +40,8 @@ def main():
 
         if command == 'list':
             controllers.ListController(DB_PATH).show_notebooks_list()
+        elif command == 'types':
+            controllers.TypesController(DB_PATH).show_types_list()
         else:
             command = getattr(controller, sys.argv[1], None)
 

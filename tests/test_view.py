@@ -11,27 +11,6 @@ class TestView(unittest.TestCase):
     def setUp(self):
         self.view = views.CLIView()
 
-    def test_show_types(self):
-        types = []
-
-        for i in range(3):
-            type = mock.MagicMock()
-            type.title = f'Test{i}'
-            type.page_width = i ** 2 * 100
-            type.page_height = i ** 3 * 100
-            types.append(type)
-
-        output = testutils.capture_stdout(self.view.show_types, types)
-
-        for i in range(3):
-            self.assertIn(f'Test{i}', output)
-            size = '{}x{}mm'.format(str(i ** 2 * 100), str(i ** 3 * 100))
-            self.assertIn(size, output)
-
-        # No types
-        output = testutils.capture_stdout(self.view.show_types, [])
-        self.assertIn('No types found', output)
-
     @mock.patch('inquirer.prompt', return_value={'answer': 'test'})
     def test_ask_for_new_notebook_info(self, prompt):
         validator = mock.MagicMock()
