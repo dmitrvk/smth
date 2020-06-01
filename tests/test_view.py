@@ -11,28 +11,6 @@ class TestView(unittest.TestCase):
     def setUp(self):
         self.view = views.CLIView()
 
-    def test_show_notebooks(self):
-        notebooks = []
-
-        for i in range(3):
-            notebook = mock.MagicMock()
-            notebook.title = f'Test{i}'
-            notebook.total_pages = i ** 2
-            notebook.type = mock.MagicMock()
-            notebook.type.title = 'Test Type'
-            notebooks.append(notebook)
-
-        output = testutils.capture_stdout(self.view.show_notebooks, notebooks)
-
-        for i in range(3):
-            self.assertIn(f'Test{i}', output)
-            self.assertIn(str(i ** 2), output)
-            self.assertIn('Test Type', output)
-
-        # No notebooks
-        output = testutils.capture_stdout(self.view.show_notebooks, [])
-        self.assertIn('No notebooks found', output)
-
     def test_show_types(self):
         types = []
 

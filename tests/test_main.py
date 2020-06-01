@@ -4,6 +4,7 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
+from smth import controllers
 from smth import main
 from tests import testutils
 
@@ -17,6 +18,14 @@ class TestMain(fake_filesystem_unittest.TestCase):
     @mock.patch('smth.main')
     def test__main__(self, mock):
         from smth import __main__
+
+    def test_commands(self):
+        with mock.patch.object(sys, 'argv', ['', 'list']):
+            with mock.patch('smth.controllers.ListController') as Controller:
+                controller_mock = mock.MagicMock()
+                Controller.return_value = controller_mock
+                main.main()
+                controller_mock.show_notebooks_list.assert_called_once()
 
     @mock.patch.object(sys, 'argv', ['__main__.py'])
     def test_no_command(self):

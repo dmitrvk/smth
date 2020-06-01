@@ -9,6 +9,8 @@ from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
 from smth import backup_system
 from smth import db
+from smth import controllers
+from smth import models
 from smth import views
 from tests import testutils
 
@@ -27,29 +29,6 @@ class TestBackupSystem(unittest.TestCase):
     def test_init_error(self, db_mock):
         with mock.patch.object(sys, 'exit') as sys_exit:
             backup_system.BackupSystem(self.view, self.DB_PATH)
-            sys_exit.assert_called_once()
-
-    @mock.patch.object(db, 'DB')
-    def test_list(self, db_constructor_mock):
-        db_mock = mock.MagicMock()
-
-        # Mock database method
-        db_mock.get_notebooks.return_value = 'Notebooks'
-        db_constructor_mock.return_value = db_mock
-
-        backup_system_ = backup_system.BackupSystem(self.view, self.DB_PATH)
-
-        output = testutils.capture_stdout(backup_system_.list)
-        self.assertEqual(output, 'Notebooks\n')
-
-        # Mock database method so it raises an error
-        db_mock.get_notebooks.side_effect = db.Error
-        db_constructor_mock.return_value = db_mock
-
-        backup_system_ = backup_system.BackupSystem(self.view, self.DB_PATH)
-
-        with mock.patch.object(sys, 'exit') as sys_exit:
-            backup_system_.list()
             sys_exit.assert_called_once()
 
     @mock.patch.object(db, 'DB')

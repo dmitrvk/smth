@@ -4,6 +4,7 @@ import pathlib
 import sys
 
 from smth import backup_system
+from smth import controllers
 from smth import views
 
 DATA_ROOT = os.path.expanduser('~/.local/share/smth')
@@ -35,12 +36,17 @@ def main():
     controller = backup_system.BackupSystem(view, DB_PATH)
 
     if len(sys.argv) == 2:
-        command = getattr(controller, sys.argv[1], None)
+        command = sys.argv[1]
 
-        if callable(command):
-            command()
+        if command == 'list':
+            controllers.ListController(DB_PATH).show_notebooks_list()
         else:
-            view.show_info(HELP_MESSAGE)
+            command = getattr(controller, sys.argv[1], None)
+
+            if callable(command):
+                command()
+            else:
+                view.show_info(HELP_MESSAGE)
     else:
         view.show_info(HELP_MESSAGE)
 

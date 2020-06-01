@@ -25,14 +25,6 @@ class BackupSystem:
             self._handle_exception(exception)
             sys.exit(1)
 
-    def list(self) -> None:
-        """Print list of all notebooks."""
-        try:
-            self._view.show_notebooks(self._db.get_notebooks())
-        except db.Error as exception:
-            self._handle_exception(exception)
-            sys.exit(1)
-
     def types(self) -> None:
         """Print list of all notebook types."""
         try:

@@ -11,18 +11,6 @@ class CLIView:
 
     Answers = Dict[str, str]
 
-    def show_notebooks(self, notebooks: list) -> None:
-        """Show list of notebooks or message if no notebooks found."""
-        if notebooks != None and len(notebooks) > 0:
-            print('All notebooks:')
-            for n in notebooks:
-                if n.total_pages == 1:
-                    print(f'  {n.title}  {n.total_pages} page  ({n.type.title})')
-                else:
-                    print(f'  {n.title}  {n.total_pages} pages  ({n.type.title})')
-        else:
-            print('No notebooks found.')
-
     def show_types(self, types: list) -> None:
         """Show list of notebook types or message if no types found."""
         if types != None and len(types) > 0:
