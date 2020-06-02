@@ -1,18 +1,20 @@
+import configparser
 import logging
-import os
 import pathlib
 import sys
 
 from smth import controllers
 from smth import views
 
-DATA_ROOT = os.path.expanduser('~/.local/share/smth')
+DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 
-DB_PATH = os.path.join(DATA_ROOT, 'smth.db')
+CONFIG_PATH = DATA_ROOT / 'smth.conf'
 
-LOG_FILE = os.path.join(DATA_ROOT, 'smth.log')
+DB_PATH = DATA_ROOT / 'smth.db'
 
-PAGES_ROOT = os.path.join(DATA_ROOT, 'pages/')
+LOG_PATH = DATA_ROOT / 'smth.log'
+
+PAGES_ROOT = DATA_ROOT / 'pages/'
 
 HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     create      create new notebook
@@ -21,11 +23,11 @@ HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     types       show all available notebook types'''
 
 def main():
-    if not os.path.exists(DATA_ROOT):
-        pathlib.Path(DATA_ROOT).mkdir(parents=True, exist_ok=True)
+    if not DATA_ROOT.exists():
+        DATA_ROOT.mkdir(parents=True, exist_ok=True)
 
-    if not os.path.exists(PAGES_ROOT):
-        pathlib.Path(PAGES_ROOT).mkdir(parents=True, exist_ok=True)
+    if not PAGES_ROOT.exists():
+        PAGES_ROOT.mkdir(parents=True, exist_ok=True)
 
     setup_logging()
     log = logging.getLogger(__name__)
@@ -36,13 +38,13 @@ def main():
         command = sys.argv[1]
 
         if command == 'create':
-            controllers.CreateController(DB_PATH).create_notebook()
+            controllers.CreateController(str(DB_PATH)).create_notebook()
         elif command == 'list':
-            controllers.ListController(DB_PATH).show_notebooks_list()
+            controllers.ListController(str(DB_PATH)).show_notebooks_list()
         elif command == 'scan':
-            controllers.ScanController(DB_PATH).scan_notebook()
+            controllers.ScanController(str(DB_PATH)).scan_notebook()
         elif command == 'types':
-            controllers.TypesController(DB_PATH).show_types_list()
+            controllers.TypesController(str(DB_PATH)).show_types_list()
         else:
             view.show_info(f"Unknown command '{command}'.")
             view.show_info(HELP_MESSAGE)
@@ -51,15 +53,18 @@ def main():
         view.show_info(HELP_MESSAGE)
         log.info(f"Wrong args: '{sys.argv}'")
 
-def setup_logging(filename=LOG_FILE, log_level=logging.DEBUG) -> None:
+def setup_logging(log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
     log.setLevel(log_level)
 
     formatter = logging.Formatter(logging.BASIC_FORMAT)
 
-    handler = logging.FileHandler(filename)
+    handler = logging.FileHandler(str(LOG_PATH))
     handler.setLevel(log_level)
     handler.setFormatter(formatter)
 
     log.addHandler(handler)
+
+def _load_config() -> configparser.ConfigParser:
+    pass
 
