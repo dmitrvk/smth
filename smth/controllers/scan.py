@@ -1,3 +1,4 @@
+import configparser
 import logging
 import operator
 import pathlib
@@ -7,6 +8,7 @@ import fpdf
 import sane
 
 from smth import db
+from smth import main
 from smth import models
 from smth import validators
 from smth import views
@@ -17,8 +19,9 @@ log = logging.getLogger(__name__)
 class ScanController:
     """Allows to scan a notebook."""
 
-    def __init__(self, db_path: str):
+    def __init__(self, db_path: str, config: configparser.ConfigParser):
         self.db_path = db_path
+        self.config = config
 
     def scan_notebook(self) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""
@@ -38,24 +41,36 @@ class ScanController:
             sys.exit(1)
 
         sane.init()
+        scanner = None
+        devices = None
 
-        view.show_info('Searching for available devices...')
+        if self.config.has_option('scanner', 'device'):
+            device = self.config['scanner']['device']
+            scanner = self._get_scanner(device)
+            view.show_info(f"Using device '{device}'.")
+        else:
+            view.show_info('Searching for available devices...')
 
-        try:
-            devices = list(map(operator.itemgetter(0), sane.get_devices()))
-        except KeyboardInterrupt:
-            log.info('No devices found due to keyboard interrupt')
-            view.show_info('Scanning canceled.')
-            return
+            try:
+                devices = list(map(operator.itemgetter(0), sane.get_devices()))
+            except KeyboardInterrupt:
+                log.info('No devices found due to keyboard interrupt')
+                view.show_info('Scanning canceled.')
+                return
 
         validator = validators.ScanPreferencesValidator()
-
         answers = view.ask_for_scan_prefs(devices, notebooks, validator)
 
         if not answers:
             log.info('Scan did not start due to keyboard interrupt')
             view.show_info('Scanning canceled.')
             return
+        elif 'device' in answers:
+            self.config['scanner'] = {}
+            self.config['scanner']['device'] = answers['device']
+
+            with open(str(main.CONFIG_PATH), 'w') as config_file:
+                self.config.write(config_file)
 
         answers['append'] = answers['append'].strip()
 
@@ -67,7 +82,8 @@ class ScanController:
             notebook = db_.get_notebook_by_title(answers['notebook'])
             pages_dir_path = self._get_pages_dir_path(notebook.title)
 
-            scanner = self._get_scanner(answers['device'])
+            if not scanner:
+                scanner = self._get_scanner(answers['device'])
 
             for i in range(0, append):
                 page = notebook.first_page_number + notebook.total_pages + i

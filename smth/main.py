@@ -8,7 +8,7 @@ from smth import views
 
 DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 
-CONFIG_PATH = DATA_ROOT / 'smth.conf'
+CONFIG_PATH = pathlib.Path('~/.config/smth/smth.conf').expanduser()
 
 DB_PATH = DATA_ROOT / 'smth.db'
 
@@ -32,6 +32,8 @@ def main():
     setup_logging()
     log = logging.getLogger(__name__)
 
+    config = _load_config()
+
     view = views.BaseView()
 
     if len(sys.argv) == 2:
@@ -42,7 +44,7 @@ def main():
         elif command == 'list':
             controllers.ListController(str(DB_PATH)).show_notebooks_list()
         elif command == 'scan':
-            controllers.ScanController(str(DB_PATH)).scan_notebook()
+            controllers.ScanController(str(DB_PATH), config).scan_notebook()
         elif command == 'types':
             controllers.TypesController(str(DB_PATH)).show_types_list()
         else:
@@ -66,5 +68,13 @@ def setup_logging(log_level=logging.DEBUG) -> None:
     log.addHandler(handler)
 
 def _load_config() -> configparser.ConfigParser:
-    pass
+    config = configparser.ConfigParser()
+
+    if CONFIG_PATH.exists():
+        config.read(CONFIG_PATH)
+    else:
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        CONFIG_PATH.touch()
+
+    return config
 

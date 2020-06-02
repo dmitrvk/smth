@@ -19,10 +19,6 @@ class ScanView(views.BaseView):
         Validate answers with given validator."""
         questions = [
             inquirer.List(
-                name='device',
-                message='Choose device',
-                choices=sorted(devices)),
-            inquirer.List(
                 name='notebook',
                 message='Choose notebook',
                 choices=notebooks,
@@ -32,6 +28,12 @@ class ScanView(views.BaseView):
                 message='How many new pages? (leave empty if none)',
                 validate=validator.validate_number_of_pages_to_append)
         ]
+
+        if devices:
+            questions.insert(0, inquirer.List(
+                name='device',
+                message='Choose device',
+                choices=sorted(devices)))
 
         return inquirer.prompt(questions)
 
