@@ -8,6 +8,10 @@
 
 *smth* is a command-line tool which allows you to scan in batch mode on Linux.
 
+[![demo][demo-url]][demo-url]
+
+[demo-url]: https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif
+
 ## Features
 
 * Scan sheets in batch mode
@@ -39,58 +43,50 @@ To scan them, first, create a new *notebook*:
 
 ```
 $ smth create
-[?] Enter title: lectures
-[?] Choose type: A4
- > A4
-
-[?] Enter path to PDF: ~/lectures.pdf
-[?] Enter 1st page number: 1
-Create notebook 'lectures' of type 'A4' at '/home/dmitryk/lectures.pdf'
 ```
 
 Now you can start scanning process (don't forget to connect the scanner):
 
 ```
 $ smth scan
-Searching for available devices...
-[?] Choose device: pixma:04A9176D_3EBCC9
-   v4l:/dev/video0
- > pixma:04A9176D_3EBCC9
-
-[?] Choose notebook: lectures
- > lectures
-
-[?] How many new pages? (leave empty if none): 3
-Scanning page 1...
-Scanning page 2...
-Scanning page 3...
-PDF saved at '/home/user/lectures.pdf'.
-Done.
 ```
+
+First time you will be asked for scanner device you want to use.
+It takes some time for *sane* to load the list of devices,
+but next time the device you choose will be used by default.
+See instructions below on how you can change the default device.
+
 Generated PDF will contain all scanned pages.
 Separate *jpg* images are stored in `~/.local/share/smth/pages/`.
 
 > Though the type of the notebook is set to 'A4', smth does not crop or rotate scanned images to make them fit the 'A4' format.  It just merges pages into a PDF file as they are.  Custom page sizes will be implemented in future versions.
 
 When you scan new pages of the same notebook,
-*smth* automatically inserts them at the end of PDF file:
+*smth* automatically inserts them at the end of PDF file.
+
+## Configuration
+
+Configuration is stored in `~/.config/smth/smth.conf`:
 
 ```
-smth scan
-Searching for available devices...
-[?] Choose device: pixma:04A9176D_3EBCC9
-   v4l:/dev/video0
- > pixma:04A9176D_3EBCC9
-
-[?] Choose notebook: lectures
- > lectures
-
-[?] How many new pages? (leave empty if none): 2
-Scanning page 4...
-Scanning page 5...
-PDF saved at '/home/dmitryk/lectures.pdf'.
-Done.
+[scanner]
+device = <device>
+delay = 0
 ```
+
+`<device>` is a device name which *sane* uses for scanning.
+When running `scan` command, the value of this parameter is used by default.
+You can change it manually or run `scan` command with `--set-device` option:
+
+```
+$ smth scan --set-device
+```
+
+To identify your scanner's name, run `scanimage -L`.
+
+`delay` option specifies time in seconds which should pass before scanning
+of the next page starts.  Set this option to higher value if you need extra
+time to put next sheet on scanner's glass.
 
 ## Licensing
 
