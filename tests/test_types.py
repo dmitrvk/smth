@@ -2,8 +2,7 @@ import logging
 import unittest
 from unittest import mock
 
-from smth import controllers
-from smth import db
+from smth import controllers, db
 
 
 class TestTypesController(unittest.TestCase):
@@ -45,4 +44,3 @@ class TestTypesController(unittest.TestCase):
                     types_view_mock.show_types.assert_not_called()
                     types_view_mock.show_error.assert_called_once_with('Failed')
                     sys_exit.assert_called_once_with(1)
-

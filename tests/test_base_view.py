@@ -17,4 +17,3 @@ class TestBaseView(unittest.TestCase):
         message = 'Test message'
         output = testutils.capture_stderr(self.view.show_error, message)
         self.assertEqual(output, f'{message}\n')
-

@@ -1,7 +1,7 @@
 from typing import List
 
-from smth import models
-from smth import views
+from smth import models, views
+
 
 class TypesView(views.BaseView):
     """A view that shows a list of notebook types."""
@@ -14,4 +14,3 @@ class TypesView(views.BaseView):
                 print(f'  {t.title}  {t.page_width}x{t.page_height}mm')
         else:
             print('No types found.')
-

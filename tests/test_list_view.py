@@ -29,4 +29,3 @@ class TestListView(unittest.TestCase):
         # No notebooks
         output = testutils.capture_stdout(view.show_notebooks, [])
         self.assertIn('No notebooks found', output)
-

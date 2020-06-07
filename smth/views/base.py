@@ -11,4 +11,3 @@ class BaseView:
     def show_error(self, message: str) -> None:
         """Print message to stderr."""
         print(message, file=sys.stderr)
-

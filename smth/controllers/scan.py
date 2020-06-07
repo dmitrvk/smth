@@ -6,15 +6,11 @@ import sys
 import time
 from typing import List
 
+import _sane
 import fpdf
 import sane
-import _sane
 
-from smth import config
-from smth import db
-from smth import models
-from smth import validators
-from smth import views
+from smth import config, db, models, validators, views
 
 log = logging.getLogger(__name__)
 
@@ -151,4 +147,3 @@ class ScanController:
     def _get_pages_dir_path(self, notebook_title: str) -> pathlib.Path:
         pages_root = pathlib.Path('~/.local/share/smth/pages').expanduser()
         return pages_root.joinpath(notebook_title)
-

@@ -2,8 +2,9 @@ import logging
 import sqlite3
 from typing import List
 
-from .error import Error
 from smth import models
+
+from .error import Error
 
 log = logging.getLogger(__name__)
 
@@ -357,4 +358,3 @@ class DB:
         type_.id = row['id']
         type_.pages_paired = row['pages_paired'] > 0
         return type_
-

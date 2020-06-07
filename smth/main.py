@@ -3,9 +3,7 @@ import logging
 import pathlib
 import sys
 
-from smth import config
-from smth import controllers
-from smth import views
+from smth import config, controllers, views
 
 DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 

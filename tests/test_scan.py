@@ -8,10 +8,7 @@ import fpdf
 import sane
 from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import db
-from smth import controllers
-from smth import models
-from smth import views
+from smth import controllers, db, models, views
 from tests import testutils
 
 
@@ -195,4 +192,3 @@ class ScanControllerTestCase(unittest.TestCase):
 
                 view.ask_for_scan_prefs.assert_not_called
                 sane.init.assert_not_called()
-

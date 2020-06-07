@@ -5,10 +5,7 @@ import sys
 
 import fpdf
 
-from smth import db
-from smth import models
-from smth import validators
-from smth import views
+from smth import db, models, validators, views
 
 log = logging.getLogger(__name__)
 
@@ -79,4 +76,3 @@ class CreateController:
         pdf.add_page()
         pdf.output(path)
         log.info("Created empty PDF at '{path}'")
-

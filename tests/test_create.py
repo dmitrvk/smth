@@ -5,8 +5,7 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import controllers
-from smth import db
+from smth import controllers, db
 
 
 class TestCreateController(unittest.TestCase):
@@ -130,4 +129,3 @@ class TestCreateController(unittest.TestCase):
                     db_mock.save_notebook.assert_not_called()
                     create_view_mock.show_error.assert_called_once_with('Failed')
                     sys_exit.assert_called_once_with(1)
-

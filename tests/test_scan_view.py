@@ -20,4 +20,3 @@ class TestScanView(unittest.TestCase):
             answers = view.ask_for_scan_prefs([], [], validator)
 
             self.assertDictEqual(answers, {'answer': 'test'})
-

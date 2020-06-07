@@ -70,4 +70,3 @@ class Notebook:
 
     def __repr__(self):
         return f"<Notebook '{self._title}' of type '{self._type.title}'>"
-

@@ -2,9 +2,7 @@ from typing import Dict, List
 
 import inquirer
 
-from smth import models
-from smth import validators
-from smth import views
+from smth import models, validators, views
 
 
 class CreateView(views.BaseView):
@@ -44,4 +42,3 @@ class CreateView(views.BaseView):
         ]
 
         return inquirer.prompt(questions)
-

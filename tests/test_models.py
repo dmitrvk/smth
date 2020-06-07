@@ -110,4 +110,3 @@ class TestNotebookType(unittest.TestCase):
 
         expected = "<NotebookType 'Test' of size 100x200mm with paired pages>"
         self.assertEqual(self.type_.__repr__(), expected)
-

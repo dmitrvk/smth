@@ -1,8 +1,7 @@
 import logging
 import sys
 
-from smth import db
-from smth import views
+from smth import db, views
 
 log = logging.getLogger(__name__)
 
@@ -26,4 +25,3 @@ class TypesController:
             log.exception(exception)
             view.show_error(str(exception))
             sys.exit(1)
-

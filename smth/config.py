@@ -2,7 +2,6 @@ import configparser
 import logging
 import pathlib
 
-
 log = logging.getLogger(__name__)
 
 class Config:

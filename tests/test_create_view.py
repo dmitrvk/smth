@@ -21,4 +21,3 @@ class TestCreateView(unittest.TestCase):
             answers = view.ask_for_new_notebook_info([], validator)
 
             self.assertDictEqual(answers, answers_mock)
-

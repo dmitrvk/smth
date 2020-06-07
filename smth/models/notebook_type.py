@@ -72,4 +72,3 @@ class NotebookType:
         else:
             repr += '>'
         return repr
-

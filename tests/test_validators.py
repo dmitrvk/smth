@@ -113,4 +113,3 @@ class TestScanPreferencesValidator(unittest.TestCase):
         self.assertRaises(
             errors.ValidationError,
             self.validator.validate_number_of_pages_to_append, None, 'test')
-

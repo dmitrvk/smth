@@ -2,8 +2,7 @@ from typing import Dict, List
 
 import inquirer
 
-from smth import validators
-from smth import views
+from smth import validators, views
 
 
 class ScanView(views.BaseView):
@@ -36,4 +35,3 @@ class ScanView(views.BaseView):
                 choices=sorted(devices)))
 
         return inquirer.prompt(questions)
-

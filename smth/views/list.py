@@ -1,7 +1,7 @@
 from typing import List
 
-from smth import models
-from smth import views
+from smth import models, views
+
 
 class ListView(views.BaseView):
     """A view that shows a list of notebooks."""
@@ -17,4 +17,3 @@ class ListView(views.BaseView):
                     print(f'  {n.title}  {n.total_pages} pages  ({n.type.title})')
         else:
             print('No notebooks found.')
-

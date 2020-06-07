@@ -4,9 +4,7 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import config
-from smth import controllers
-from smth import main
+from smth import config, controllers, main
 from tests import testutils
 
 
@@ -63,4 +61,3 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
         output = testutils.capture_stdout(main.main)
         for command in ['create', 'list', 'scan', 'types']:
             self.assertIn(command, output)
-

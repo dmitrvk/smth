@@ -28,4 +28,3 @@ class TestTypesView(unittest.TestCase):
         # No types
         output = testutils.capture_stdout(view.show_types, [])
         self.assertIn('No types found', output)
-

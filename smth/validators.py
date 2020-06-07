@@ -79,4 +79,3 @@ class ScanPreferencesValidator:
                 '', reason='Please, enter an integer > 0 or leave empty.')
 
         return True
-
