@@ -20,7 +20,7 @@ class CreateView(views.BaseView):
             {
                 'type': 'input',
                 'name': 'title',
-                'message': 'Enter title',
+                'message': 'Enter title:',
                 'validate': validator.validate_title,
             },
             {
@@ -33,13 +33,13 @@ class CreateView(views.BaseView):
             {
                 'type': 'input',
                 'name': 'path',
-                'message': 'Enter path to PDF',
+                'message': 'Enter path to PDF:',
                 'validate': validator.validate_path,
             },
             {
                 'type': 'input',
                 'name': 'first_page_number',
-                'message': 'Enter 1st page number',
+                'message': 'Enter 1st page number:',
                 'default': '1',
                 'validate': validator.validate_first_page_number,
             },

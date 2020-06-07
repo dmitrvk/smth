@@ -1,7 +1,5 @@
 from typing import Dict, List
 
-import PyInquirer as inquirer
-
 from smth import views
 from smth.controllers import validators
 
