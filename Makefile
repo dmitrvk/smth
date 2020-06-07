@@ -1,7 +1,8 @@
 help:
 	@echo 'Possible targets:'
 	@echo '  help    display this help message'
-	@echo '  test    run unit tests'
+	@echo '  isort   sort imports'
+	@echo '  test    run unit tests and linter'
 
 isort:
 	isort --recursive --atomic smth tests
