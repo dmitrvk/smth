@@ -60,7 +60,8 @@ def setup_logging(log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
     log.setLevel(log_level)
 
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
+    format = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
+    formatter = logging.Formatter(format)
 
     handler = logging.FileHandler(str(LOG_PATH))
     handler.setLevel(log_level)
