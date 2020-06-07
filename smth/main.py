@@ -37,7 +37,7 @@ def main():
 
     view = views.BaseView()
 
-    if len(sys.argv) == 2:
+    if len(sys.argv) > 1:
         command = sys.argv[1]
 
         if command == 'create':
@@ -45,7 +45,7 @@ def main():
         elif command == 'list':
             controllers.ListController(str(DB_PATH)).show_notebooks_list()
         elif command == 'scan':
-            controllers.ScanController(str(DB_PATH), conf).scan_notebook()
+            controllers.ScanController(sys.argv[2:], str(DB_PATH), conf).scan_notebook()
         elif command == 'types':
             controllers.TypesController(str(DB_PATH)).show_types_list()
         else:

@@ -4,6 +4,7 @@ import operator
 import pathlib
 import sys
 import time
+from typing import List
 
 import fpdf
 import sane
@@ -21,7 +22,8 @@ log = logging.getLogger(__name__)
 class ScanController:
     """Allows to scan a notebook."""
 
-    def __init__(self, db_path: str, conf: config.Config):
+    def __init__(self, args: List[str], db_path: str, conf: config.Config):
+        self.args = args
         self.db_path = db_path
         self.conf = conf
 
@@ -46,7 +48,7 @@ class ScanController:
         scanner = None
         devices = None
 
-        if self.conf.scanner_device:
+        if self.conf.scanner_device and not '--set-device' in self.args:
             device = self.conf.scanner_device
 
             try:
