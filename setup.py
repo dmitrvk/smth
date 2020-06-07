@@ -20,7 +20,7 @@ setuptools.setup(
     python_requires='>=3.8',
     install_requires=[
         'fpdf>=1.7',
-        'inquirer>=2.6',
+        'PyInquirer>=1.0',
         'Pillow>=4.0',
         'python-sane>=2.8',
     ],

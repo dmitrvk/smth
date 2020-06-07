@@ -2,7 +2,7 @@ import os
 import unittest
 from unittest import mock
 
-from inquirer import errors
+from PyInquirer import ValidationError
 from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
 from smth.controllers import validators
@@ -19,76 +19,76 @@ class TestNotebookValidator(unittest.TestCase):
     def test_validate_title(self, fs):
         self.db.notebook_exists.return_value = False
 
-        self.assertTrue(self.validator.validate_title(None, 'Test'))
+        self.assertTrue(self.validator.validate_title('Test'))
 
         # Empty title
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_title, None, '')
+            ValidationError, self.validator.validate_title, '')
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_title, None, '   ')
+            ValidationError, self.validator.validate_title, '   ')
 
-        self.assertTrue(self.validator.validate_title(None, 'Test'))
+        self.assertTrue(self.validator.validate_title('Test'))
 
         # Notebook already exists
         with mock.patch.object(self.db, 'notebook_exists', return_value=True):
             self.assertRaises(
-                errors.ValidationError,
-                self.validator.validate_title, None, 'Test')
+                ValidationError,
+                self.validator.validate_title, 'Test')
 
         # Directory already exists
         fs.create_dir(os.path.expanduser('~/.local/share/smth/pages/Test'))
-        with self.assertRaises(errors.ValidationError):
-            self.validator.validate_title(None, 'Test')
+        with self.assertRaises(ValidationError):
+            self.validator.validate_title('Test')
 
     def test_validate_type(self):
         self.db.notebook_type_exists.return_value = True
 
-        self.assertTrue(self.validator.validate_type(None, 'Test'))
+        self.assertTrue(self.validator.validate_type('Test'))
 
         # Empty type
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_type, None, '')
+            ValidationError, self.validator.validate_type, '')
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_type, None, '   ')
+            ValidationError, self.validator.validate_type, '   ')
 
         # Type does not exist
         self.db.type_exists.return_value = False
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_type, None, 'Test')
+            ValidationError, self.validator.validate_type, 'Test')
 
     @fakefs_unittest.patchfs
     def test_validate_path(self, fs):
         self.assertTrue(
-            self.validator.validate_path(None, '/home/test/file.pdf'))
+            self.validator.validate_path('/home/test/file.pdf'))
         self.assertTrue(
-            self.validator.validate_path(None, '~/file.pdf'))
+            self.validator.validate_path('~/file.pdf'))
         self.assertTrue(
-            self.validator.validate_path(None, '$HOME/file.pdf'))
+            self.validator.validate_path('$HOME/file.pdf'))
 
         # Empty path
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_path, None, '')
+            ValidationError, self.validator.validate_path, '')
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_path, None, '   ')
+            ValidationError, self.validator.validate_path, '   ')
 
         # File already exists
         fs.create_file('test')
         self.assertRaises(
-            errors.ValidationError, self.validator.validate_path, None, 'test')
+            ValidationError, self.validator.validate_path, 'test')
 
     def test_validate_first_page_number(self):
-        self.assertTrue(self.validator.validate_first_page_number(None, '0'))
-        self.assertTrue(self.validator.validate_first_page_number(None, '1'))
+        self.assertTrue(self.validator.validate_first_page_number('0'))
+        self.assertTrue(self.validator.validate_first_page_number('1'))
 
         # Number < 0
         self.assertRaises(
-            errors.ValidationError,
-            self.validator.validate_first_page_number, None, '-5')
+            ValidationError,
+            self.validator.validate_first_page_number, '-5')
 
         # Not a number
         self.assertRaises(
-            errors.ValidationError,
-            self.validator.validate_first_page_number, None, 'test')
+            ValidationError,
+            self.validator.validate_first_page_number, 'test')
 
 
 class TestScanPreferencesValidator(unittest.TestCase):
@@ -98,18 +98,18 @@ class TestScanPreferencesValidator(unittest.TestCase):
 
     def test_validate_number_of_pages_to_append(self):
         self.assertTrue(
-            self.validator.validate_number_of_pages_to_append(None, '1'))
+            self.validator.validate_number_of_pages_to_append('1'))
         self.assertTrue(
-            self.validator.validate_number_of_pages_to_append(None, ''))
+            self.validator.validate_number_of_pages_to_append(''))
         self.assertTrue(
-            self.validator.validate_number_of_pages_to_append(None, '   '))
+            self.validator.validate_number_of_pages_to_append('   '))
 
         # Number < 0
         self.assertRaises(
-            errors.ValidationError,
-            self.validator.validate_number_of_pages_to_append, None, '-1')
+            ValidationError,
+            self.validator.validate_number_of_pages_to_append, '-1')
 
         # Not a number
         self.assertRaises(
-            errors.ValidationError,
-            self.validator.validate_number_of_pages_to_append, None, 'test')
+            ValidationError,
+            self.validator.validate_number_of_pages_to_append, 'test')

@@ -10,7 +10,7 @@ class TestCreateView(unittest.TestCase):
 
         answers_mock = {'answer': 'test'}
 
-        with mock.patch('inquirer.prompt', return_value=answers_mock):
+        with mock.patch('PyInquirer.prompt', return_value=answers_mock):
             validator = mock.MagicMock()
             validator.validate_title.return_value = True
             validator.validate_type.return_value = True

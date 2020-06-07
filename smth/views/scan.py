@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-import inquirer
+import PyInquirer as inquirer
 
 from smth import views
 from smth.controllers import validators
@@ -18,21 +18,26 @@ class ScanView(views.BaseView):
 
         Validate answers with given validator."""
         questions = [
-            inquirer.List(
-                name='notebook',
-                message='Choose notebook',
-                choices=notebooks,
-                carousel=True),
-            inquirer.Text(
-                name='append',
-                message='How many new pages? (leave empty if none)',
-                validate=validator.validate_number_of_pages_to_append)
+            {
+                'type': 'list',
+                'name': 'notebook',
+                'message': 'Choose notebook',
+                'choices': notebooks,
+            },
+            {
+                'type': 'input',
+                'name': 'append',
+                'message': 'How many new pages? (leave empty if none)',
+                'validate': validator.validate_number_of_pages_to_append,
+            },
         ]
 
         if devices:
-            questions.insert(0, inquirer.List(
-                name='device',
-                message='Choose device',
-                choices=sorted(devices)))
+            questions.insert(0, {
+                'type': 'list',
+                'name': 'device',
+                'message': 'Choose device',
+                'choices': sorted(devices),
+            })
 
         return inquirer.prompt(questions)

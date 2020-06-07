@@ -12,7 +12,7 @@ class TestScanView(unittest.TestCase):
 
         answers = {'answer': 'test'}
 
-        with mock.patch('inquirer.prompt', return_value=answers):
+        with mock.patch('PyInquirer.prompt', return_value=answers):
             validator = mock.MagicMock()
             validator.validate_number_of_pages_to_append.return_value = True
 

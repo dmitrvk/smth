@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-import inquirer
+import PyInquirer as inquirer
 
 from smth import views
 from smth.controllers import validators
@@ -19,27 +19,32 @@ class CreateView(views.BaseView):
         Validate answers with given validator.
         `types` should be only titles, not actual NotebookType objects."""
         questions = [
-            inquirer.Text(
-                name='title',
-                message='Enter title',
-                validate=validator.validate_title),
-            inquirer.List(
-                name='type',
-                message='Choose type',
-                choices=types,
-                validate=validator.validate_type),
-            inquirer.Path(
-                name='path',
-                message='Enter path to PDF',
-                path_type=inquirer.Path.FILE,
-                exists=False,
-                normalize_to_absolute_path=True,
-                validate=validator.validate_path),
-            inquirer.Text(
-                name='first_page_number',
-                message='Enter 1st page number',
-                default=1,
-                validate=validator.validate_first_page_number)
+            {
+                'type': 'input',
+                'name': 'title',
+                'message': 'Enter title',
+                'validate': validator.validate_title,
+            },
+            {
+                'type': 'list',
+                'name': 'type',
+                'message': 'Choose type',
+                'choices': types,
+                'validate': validator.validate_type,
+            },
+            {
+                'type': 'input',
+                'name': 'path',
+                'message': 'Enter path to PDF',
+                'validate': validator.validate_path,
+            },
+            {
+                'type': 'input',
+                'name': 'first_page_number',
+                'message': 'Enter 1st page number',
+                'default': '1',
+                'validate': validator.validate_first_page_number,
+            },
         ]
 
         return inquirer.prompt(questions)
