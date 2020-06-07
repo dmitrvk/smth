@@ -3,6 +3,7 @@ import logging
 import pathlib
 import sys
 
+from smth import config
 from smth import controllers
 from smth import views
 
@@ -32,7 +33,7 @@ def main():
     setup_logging()
     log = logging.getLogger(__name__)
 
-    config = _load_config()
+    conf = config.Config()
 
     view = views.BaseView()
 
@@ -44,7 +45,7 @@ def main():
         elif command == 'list':
             controllers.ListController(str(DB_PATH)).show_notebooks_list()
         elif command == 'scan':
-            controllers.ScanController(str(DB_PATH), config).scan_notebook()
+            controllers.ScanController(str(DB_PATH), conf).scan_notebook()
         elif command == 'types':
             controllers.TypesController(str(DB_PATH)).show_types_list()
         else:
@@ -66,15 +67,3 @@ def setup_logging(log_level=logging.DEBUG) -> None:
     handler.setFormatter(formatter)
 
     log.addHandler(handler)
-
-def _load_config() -> configparser.ConfigParser:
-    config = configparser.ConfigParser()
-
-    if CONFIG_PATH.exists():
-        config.read(CONFIG_PATH)
-    else:
-        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
-        CONFIG_PATH.touch()
-
-    return config
-

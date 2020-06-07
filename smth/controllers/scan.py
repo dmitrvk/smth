@@ -7,8 +7,8 @@ import sys
 import fpdf
 import sane
 
+from smth import config
 from smth import db
-from smth import main
 from smth import models
 from smth import validators
 from smth import views
@@ -19,9 +19,9 @@ log = logging.getLogger(__name__)
 class ScanController:
     """Allows to scan a notebook."""
 
-    def __init__(self, db_path: str, config: configparser.ConfigParser):
+    def __init__(self, db_path: str, conf: config.Config):
         self.db_path = db_path
-        self.config = config
+        self.conf = conf
 
     def scan_notebook(self) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""
@@ -44,8 +44,8 @@ class ScanController:
         scanner = None
         devices = None
 
-        if self.config.has_option('scanner', 'device'):
-            device = self.config['scanner']['device']
+        if self.conf.scanner_device:
+            device = self.conf.scanner_device
             scanner = self._get_scanner(device)
             view.show_info(f"Using device '{device}'.")
         else:
@@ -66,11 +66,7 @@ class ScanController:
             view.show_info('Scanning canceled.')
             return
         elif 'device' in answers:
-            self.config['scanner'] = {}
-            self.config['scanner']['device'] = answers['device']
-
-            with open(str(main.CONFIG_PATH), 'w') as config_file:
-                self.config.write(config_file)
+            self.conf.scanner_device = answers['device']
 
         answers['append'] = answers['append'].strip()
 
