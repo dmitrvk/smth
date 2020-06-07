@@ -4,16 +4,17 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
+from smth import config
 from smth import controllers
 from smth import main
 from tests import testutils
 
 
-class TestMain(fake_filesystem_unittest.TestCase):
+class MainTestCase(fake_filesystem_unittest.TestCase):
     """Test program's entry point."""
 
     def setUp(self):
-        self.setUpPyfakefs()
+        self.setUpPyfakefs(modules_to_reload=[main, config])
 
     @mock.patch('smth.main')
     def test__main__(self, mock):

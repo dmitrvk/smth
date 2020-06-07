@@ -15,9 +15,13 @@ from smth import views
 from tests import testutils
 
 
-class TestScanController(unittest.TestCase):
+class ScanControllerTestCase(unittest.TestCase):
     def setUp(self):
         logging.disable()
+
+        self.config = mock.MagicMock()
+        self.config.scanner_device = None
+        self.config.scanner_delay = 0
 
         sane.init = mock.MagicMock()
         sane.get_devices = mock.MagicMock(return_value=[])
@@ -56,7 +60,8 @@ class TestScanController(unittest.TestCase):
                     scanner_mock.scan.return_value = image_mock
                     sane.open.return_value = scanner_mock
 
-                    controllers.ScanController('').scan_notebook()
+                    controllers.ScanController(
+                        [], '', self.config).scan_notebook()
 
                     db_mock.save_notebook.assert_called_once()
                     scanner_mock.close.assert_called_once()
@@ -75,7 +80,7 @@ class TestScanController(unittest.TestCase):
                 view = mock.MagicMock()
                 ScanView.return_value = view
 
-                controllers.ScanController('').scan_notebook()
+                controllers.ScanController([], '', self.config).scan_notebook()
 
                 view.ask_for_scan_prefs.assert_not_called()
                 sane.open.assert_not_called()
@@ -92,7 +97,7 @@ class TestScanController(unittest.TestCase):
                 db_.get_notebook_titles.return_value = ['Notebook']
                 DB.return_value = db_
 
-                controllers.ScanController('').scan_notebook()
+                controllers.ScanController([], '', self.config).scan_notebook()
 
                 sane.open.assert_not_called()
                 db_.save_notebook.assert_not_called()
@@ -114,7 +119,7 @@ class TestScanController(unittest.TestCase):
                 db_.get_notebook_titles.return_value = ['Notebook']
                 DB.return_value = db_
 
-                controllers.ScanController('').scan_notebook()
+                controllers.ScanController([], '', self.config).scan_notebook()
 
                 sane.open.assert_not_called()
                 db_.save_notebook.assert_not_called()
@@ -136,7 +141,7 @@ class TestScanController(unittest.TestCase):
                 view.ask_for_scan_prefs.return_value = scan_prefs
                 ScanView.return_value = view
 
-                controller = controllers.ScanController('')
+                controller = controllers.ScanController([], '', self.config)
 
                 self.assertRaises(SystemExit, controller.scan_notebook)
 
@@ -171,7 +176,7 @@ class TestScanController(unittest.TestCase):
                 db_.get_notebook_by_title.return_value = notebook
                 DB.return_value = db_
 
-                controllers.ScanController('').scan_notebook()
+                controllers.ScanController([], '', self.config).scan_notebook()
 
                 scanner.close.assert_called_once()
                 db_.save_notebook.assert_not_called()
@@ -186,7 +191,7 @@ class TestScanController(unittest.TestCase):
                 view = mock.MagicMock()
                 ScanView.return_value = view
 
-                controllers.ScanController('').scan_notebook()
+                controllers.ScanController([], '', self.config).scan_notebook()
 
                 view.ask_for_scan_prefs.assert_not_called
                 sane.init.assert_not_called()
