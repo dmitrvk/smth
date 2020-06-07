@@ -6,6 +6,7 @@ import sys
 
 import fpdf
 import sane
+import _sane
 
 from smth import config
 from smth import db
@@ -46,7 +47,13 @@ class ScanController:
 
         if self.conf.scanner_device:
             device = self.conf.scanner_device
-            scanner = self._get_scanner(device)
+
+            try:
+                scanner = self._get_scanner(device)
+            except _sane.error:
+                view.show_error(f"Cannot open device '{device}'.")
+                sys.exit(1)
+
             view.show_info(f"Using device '{device}'.")
         else:
             view.show_info('Searching for available devices...')
@@ -79,7 +86,12 @@ class ScanController:
             pages_dir_path = self._get_pages_dir_path(notebook.title)
 
             if not scanner:
-                scanner = self._get_scanner(answers['device'])
+                try:
+                    scanner = self._get_scanner(self.conf.scanner_device)
+                except _sane.error:
+                    view.show_error(
+                        f"Cannot open device '{self.conf.scanner_device}'.")
+                    sys.exit(1)
 
             for i in range(0, append):
                 page = notebook.first_page_number + notebook.total_pages + i
@@ -92,6 +104,10 @@ class ScanController:
                     image = scanner.scan()
                     image.save(str(page_path))
                     log.info(f"Scanned page {page} of '{notebook.title}'")
+                except _sane.error as exception:
+                    view.show_error(f'Scanning failed: {exception}.')
+                    log.exception(exception)
+                    sys.exit(1)
                 except KeyboardInterrupt:
                     log.info('Scan interrupted by user.')
                     view.show_info('Scanning canceled.')
