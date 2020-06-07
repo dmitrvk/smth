@@ -3,6 +3,7 @@ import logging
 import operator
 import pathlib
 import sys
+import time
 
 import fpdf
 import sane
@@ -104,6 +105,9 @@ class ScanController:
                     image = scanner.scan()
                     image.save(str(page_path))
                     log.info(f"Scanned page {page} of '{notebook.title}'")
+
+                    if i < append - 1:
+                        time.sleep(self.conf.scanner_delay)
                 except _sane.error as exception:
                     view.show_error(f'Scanning failed: {exception}.')
                     log.exception(exception)
