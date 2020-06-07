@@ -25,7 +25,8 @@ class TestNotebook(unittest.TestCase):
             notebook.type = type
 
     def test_path(self):
-        self.assertEqual(models.Notebook('', None, '/path.pdf').path, '/path.pdf')
+        path = models.Notebook('', None, '/path.pdf').path
+        self.assertEqual(path, '/path.pdf')
         self.notebook.path = '/test/path/to/file.pdf'
         self.assertEqual(self.notebook.path, '/test/path/to/file.pdf')
 
@@ -59,7 +60,7 @@ class TestNotebook(unittest.TestCase):
         type = mock.MagicMock()
         type.title = 'Test Type'
         notebook = models.Notebook('Test', type, 'path')
-        expected =  "<Notebook 'Test' of type 'Test Type'>"
+        expected = "<Notebook 'Test' of type 'Test Type'>"
         self.assertEqual(notebook.__repr__(), expected)
 
 

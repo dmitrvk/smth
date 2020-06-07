@@ -1,15 +1,11 @@
 import logging
-import os
-import sys
 import unittest
 from unittest import mock
 
 import fpdf
 import sane
-from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import controllers, db, models, views
-from tests import testutils
+from smth import controllers, db
 
 
 class ScanControllerTestCase(unittest.TestCase):

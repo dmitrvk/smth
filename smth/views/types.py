@@ -8,7 +8,7 @@ class TypesView(views.BaseView):
 
     def show_types(self, types: List[models.NotebookType]) -> None:
         """Show list of notebook types or message if no types found."""
-        if types != None and len(types) > 0:
+        if types and len(types) > 0:
             print('All notebook types:')
             for t in types:
                 print(f'  {t.title}  {t.page_width}x{t.page_height}mm')

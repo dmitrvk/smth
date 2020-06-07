@@ -4,7 +4,11 @@ from typing import List
 
 from smth import models
 
-from .error import Error
+
+class Error(Exception):
+    """An error which occurs when working with a database."""
+    pass
+
 
 log = logging.getLogger(__name__)
 
@@ -76,7 +80,7 @@ class DB:
             connection = self._connect()
 
             cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook_type',))
-            table_exists = exists = cursor.fetchone()[0] > 0
+            table_exists = cursor.fetchone()[0] > 0
 
             if not table_exists:
                 connection.execute(SQL_CREATE_TABLE_NOTEBOOK_TYPE)
@@ -87,7 +91,7 @@ class DB:
                 log.info("Type 'A4' created")
 
             cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook',))
-            table_exists = exists = cursor.fetchone()[0] > 0
+            table_exists = cursor.fetchone()[0] > 0
 
             if not table_exists:
                 connection.execute(SQL_CREATE_TABLE_NOTEBOOK)
@@ -130,7 +134,7 @@ class DB:
             connection = self._connect()
             cursor = connection.execute(SQL_GET_NOTEBOOK_BY_TITLE, (title,))
             row = cursor.fetchone()
-            if row != None:
+            if row:
                 notebook = self._make_notebook_from_row(row)
 
         except (sqlite3.Error, Error) as e:
@@ -208,7 +212,7 @@ class DB:
             connection = self._connect()
             cursor = connection.execute(SQL_GET_TYPE_BY_ID, (id,))
             row = cursor.fetchone()
-            if row != None:
+            if row:
                 type_ = self._make_type_from_row(row)
 
         except sqlite3.Error as e:
@@ -228,7 +232,7 @@ class DB:
             connection = self._connect()
             cursor = connection.execute(SQL_GET_TYPE_BY_TITLE, (title,))
             row = cursor.fetchone()
-            if row != None:
+            if row:
                 type_ = self._make_type_from_row(row)
 
         except sqlite3.Error as e:

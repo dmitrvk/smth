@@ -1,10 +1,14 @@
 blessings==1.7
 coverage==5.1
+flake8==3.8.2
 fpdf==1.7.2
 inquirer==2.6.3
 isort==4.3.21
+mccabe==0.6.1
 Pillow==7.1.2
+pycodestyle==2.6.0
 pyfakefs==4.0.2
+pyflakes==2.2.0
 python-editor==1.0.4
 python-sane==2.8.2
 readchar==2.0.1

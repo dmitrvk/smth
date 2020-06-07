@@ -1,10 +1,9 @@
 import sys
-import unittest
 from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import config, controllers, main
+from smth import config, main
 from tests import testutils
 
 
@@ -16,7 +15,7 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
 
     @mock.patch('smth.main')
     def test__main__(self, mock):
-        from smth import __main__
+        from smth import __main__  # noqa: F401  # Cover __main__.py with tests
 
     def test_list_command(self):
         with mock.patch.object(sys, 'argv', ['', 'list']):

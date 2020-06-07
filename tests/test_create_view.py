@@ -2,7 +2,6 @@ import unittest
 from unittest import mock
 
 from smth import views
-from tests import testutils
 
 
 class TestCreateView(unittest.TestCase):

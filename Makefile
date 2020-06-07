@@ -10,4 +10,5 @@ test:
 	@coverage run --source smth -m unittest
 	@coverage html
 	@coverage xml
+	@flake8 smth tests
 

@@ -1,7 +1,5 @@
 import contextlib
 import io
-import unittest
-from unittest import mock
 
 
 def capture_stderr(function, *args, **kwargs):
@@ -11,6 +9,7 @@ def capture_stderr(function, *args, **kwargs):
     output = stream.getvalue()
     stream.close()
     return output
+
 
 def capture_stdout(function, *args, **kwargs):
     stream = io.StringIO()

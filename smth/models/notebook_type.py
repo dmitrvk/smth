@@ -22,7 +22,7 @@ class NotebookType:
 
     @title.setter
     def title(self, title):
-        if title == None or len(title.strip()) == 0:
+        if title is None or len(title.strip()) == 0:
             self._title = 'Untitled'
         else:
             self._title = title.strip()
@@ -68,7 +68,7 @@ class NotebookType:
         repr = f"<NotebookType '{self._title}'"
         repr += f" of size {self._page_width}x{self._page_height}mm"
         if self._pages_paired:
-            repr += f" with paired pages>"
+            repr += " with paired pages>"
         else:
             repr += '>'
         return repr

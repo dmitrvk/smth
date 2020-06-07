@@ -1,4 +1,3 @@
-import configparser
 import logging
 import pathlib
 import sys
@@ -20,6 +19,7 @@ HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     list        show all available notebooks
     scan        scan notebook
     types       show all available notebook types'''
+
 
 def main():
     if not DATA_ROOT.exists():
@@ -43,7 +43,8 @@ def main():
         elif command == 'list':
             controllers.ListController(str(DB_PATH)).show_notebooks_list()
         elif command == 'scan':
-            controllers.ScanController(sys.argv[2:], str(DB_PATH), conf).scan_notebook()
+            controllers.ScanController(
+                sys.argv[2:], str(DB_PATH), conf).scan_notebook()
         elif command == 'types':
             controllers.TypesController(str(DB_PATH)).show_types_list()
         else:
@@ -53,6 +54,7 @@ def main():
     else:
         view.show_info(HELP_MESSAGE)
         log.info(f"Wrong args: '{sys.argv}'")
+
 
 def setup_logging(log_level=logging.DEBUG) -> None:
     log = logging.getLogger()

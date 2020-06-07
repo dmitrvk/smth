@@ -4,6 +4,7 @@ import pathlib
 
 log = logging.getLogger(__name__)
 
+
 class Config:
     """App configuration."""
 

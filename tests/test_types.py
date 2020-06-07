@@ -28,7 +28,7 @@ class TestTypesController(unittest.TestCase):
     def test_show_types_list_error(self):
         with mock.patch('smth.db.DB') as DB:
             db_mock = mock.MagicMock()
-            db_mock.get_types.side_effect = db.Error('Failed')
+            db_mock.get_types.side_effect = db.Error('Fail')
             DB.return_value = db_mock
 
             with mock.patch('smth.views.TypesView') as TypesView:
@@ -42,5 +42,5 @@ class TestTypesController(unittest.TestCase):
 
                     db_mock.get_types.assert_called_once()
                     types_view_mock.show_types.assert_not_called()
-                    types_view_mock.show_error.assert_called_once_with('Failed')
+                    types_view_mock.show_error.assert_called_once_with('Fail')
                     sys_exit.assert_called_once_with(1)

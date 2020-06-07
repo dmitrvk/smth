@@ -11,7 +11,7 @@ class NotebookValidator:
         self._db = db
 
     def validate_title(self, answers, title: str) -> bool:
-        del answers # Unused but required for inquirer
+        del answers  # Unused but required for inquirer
 
         title = title.strip()
 
@@ -28,7 +28,7 @@ class NotebookValidator:
         return True
 
     def validate_type(self, answers, type: str) -> bool:
-        del answers # Unused but required for inquirer
+        del answers  # Unused but required for inquirer
 
         type = type.strip()
 
@@ -41,7 +41,7 @@ class NotebookValidator:
         return True
 
     def validate_path(self, answers, path: str) -> bool:
-        del answers # Unused but required for inquirer
+        del answers  # Unused but required for inquirer
 
         path = path.strip()
 
@@ -54,7 +54,7 @@ class NotebookValidator:
         return True
 
     def validate_first_page_number(self, answers, number: str) -> bool:
-        del answers # Unused but required for inquirer
+        del answers  # Unused but required for inquirer
 
         number = number.strip()
 
@@ -68,7 +68,7 @@ class ScanPreferencesValidator:
     """Validator for user input when choosing scan preferences."""
 
     def validate_number_of_pages_to_append(self, answers, number: str) -> bool:
-        del answers # Unused but required for inquirer
+        del answers  # Unused but required for inquirer
 
         """Allow empty value or an integer > 0."""
         if len(number.strip()) == 0:

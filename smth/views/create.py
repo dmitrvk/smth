@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import inquirer
 
-from smth import models, validators, views
+from smth import validators, views
 
 
 class CreateView(views.BaseView):

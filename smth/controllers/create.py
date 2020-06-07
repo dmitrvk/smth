@@ -52,12 +52,12 @@ class CreateController:
 
             db_.save_notebook(notebook)
 
-            pages_root = os.path.expanduser(f'~/.local/share/smth/pages')
+            pages_root = os.path.expanduser('~/.local/share/smth/pages')
             pages_dir = os.path.join(pages_root, notebook.title)
             pathlib.Path(pages_dir).mkdir(parents=True)
 
             message = (f"Create notebook '{notebook.title}' "
-                f"of type '{notebook.type.title}' at '{notebook.path}'")
+                       f"of type '{notebook.type.title}' at '{notebook.path}'")
             log.info(message)
             view.show_info(message)
         except db.Error as exception:

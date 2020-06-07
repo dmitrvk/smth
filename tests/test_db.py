@@ -6,7 +6,6 @@ import unittest
 from unittest import mock
 
 from smth import db, models
-from tests import testutils
 
 
 class TestDB(unittest.TestCase):

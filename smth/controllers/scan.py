@@ -1,4 +1,3 @@
-import configparser
 import logging
 import operator
 import pathlib
@@ -10,7 +9,7 @@ import _sane
 import fpdf
 import sane
 
-from smth import config, db, models, validators, views
+from smth import config, db, validators, views
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ class ScanController:
         scanner = None
         devices = None
 
-        if self.conf.scanner_device and not '--set-device' in self.args:
+        if self.conf.scanner_device and '--set-device' not in self.args:
             device = self.conf.scanner_device
 
             try:

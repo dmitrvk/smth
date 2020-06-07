@@ -39,7 +39,7 @@ class TestCreateController(unittest.TestCase):
                     fpdf_mock = mock.MagicMock()
                     FPDF.return_value = fpdf_mock
 
-                    with fakefs_unittest.Patcher() as fspatcher:
+                    with fakefs_unittest.Patcher():
                         controller = controllers.CreateController('db_path')
                         controller.create_notebook()
 
@@ -74,7 +74,7 @@ class TestCreateController(unittest.TestCase):
                     fpdf_mock = mock.MagicMock()
                     FPDF.return_value = fpdf_mock
 
-                    with fakefs_unittest.Patcher() as fspatcher:
+                    with fakefs_unittest.Patcher():
                         controller = controllers.CreateController('db_path')
                         controller.create_notebook()
 
@@ -104,7 +104,7 @@ class TestCreateController(unittest.TestCase):
                     fpdf_mock = mock.MagicMock()
                     FPDF.return_value = fpdf_mock
 
-                    with fakefs_unittest.Patcher() as fspatcher:
+                    with fakefs_unittest.Patcher():
                         controller = controllers.CreateController('db_path')
                         controller.create_notebook()
 
@@ -114,7 +114,7 @@ class TestCreateController(unittest.TestCase):
     def test_create_notebook_error(self):
         with mock.patch('smth.db.DB') as DB:
             db_mock = mock.MagicMock()
-            db_mock.get_type_titles.side_effect = db.Error('Failed')
+            db_mock.get_type_titles.side_effect = db.Error('Fail')
             DB.return_value = db_mock
 
             with mock.patch('smth.views.CreateView') as CreateView:
@@ -127,5 +127,5 @@ class TestCreateController(unittest.TestCase):
                     controller.create_notebook()
 
                     db_mock.save_notebook.assert_not_called()
-                    create_view_mock.show_error.assert_called_once_with('Failed')
+                    create_view_mock.show_error.assert_called_once_with('Fail')
                     sys_exit.assert_called_once_with(1)

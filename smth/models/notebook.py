@@ -1,5 +1,3 @@
-import os
-
 from .notebook_type import NotebookType
 
 
