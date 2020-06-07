@@ -40,4 +40,4 @@ class ScanView(views.BaseView):
                 'choices': sorted(devices),
             })
 
-        return inquirer.prompt(questions)
+        return self._prompt(questions)

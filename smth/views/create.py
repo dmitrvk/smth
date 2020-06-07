@@ -1,7 +1,5 @@
 from typing import Dict, List
 
-import PyInquirer as inquirer
-
 from smth import views
 from smth.controllers import validators
 
@@ -47,4 +45,4 @@ class CreateView(views.BaseView):
             },
         ]
 
-        return inquirer.prompt(questions)
+        return self._prompt(questions)
