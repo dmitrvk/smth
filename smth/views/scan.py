@@ -2,7 +2,8 @@ from typing import Dict, List
 
 import inquirer
 
-from smth import validators, views
+from smth import views
+from smth.controllers import validators
 
 
 class ScanView(views.BaseView):

@@ -9,7 +9,8 @@ import _sane
 import fpdf
 import sane
 
-from smth import config, db, validators, views
+from smth import config, db, views
+from smth.controllers import validators
 
 log = logging.getLogger(__name__)
 

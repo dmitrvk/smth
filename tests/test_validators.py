@@ -5,7 +5,7 @@ from unittest import mock
 from inquirer import errors
 from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import validators
+from smth.controllers import validators
 
 
 class TestNotebookValidator(unittest.TestCase):

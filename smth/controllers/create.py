@@ -5,7 +5,8 @@ import sys
 
 import fpdf
 
-from smth import db, models, validators, views
+from smth import db, models, views
+from smth.controllers import validators
 
 log = logging.getLogger(__name__)
 
