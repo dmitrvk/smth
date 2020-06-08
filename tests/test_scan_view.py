@@ -16,6 +16,6 @@ class TestScanView(unittest.TestCase):
             validator = mock.MagicMock()
             validator.validate_number_of_pages_to_append.return_value = True
 
-            answers = view.ask_for_scan_prefs([], [], validator)
+            answers = view.ask_for_scan_prefs(['device'], [], validator)
 
             self.assertDictEqual(answers, {'answer': 'test'})

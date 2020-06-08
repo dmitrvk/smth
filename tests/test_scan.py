@@ -2,6 +2,7 @@ import logging
 import unittest
 from unittest import mock
 
+import _sane
 import fpdf
 import sane
 
@@ -62,6 +63,40 @@ class ScanControllerTestCase(unittest.TestCase):
                     self.assertEqual(pdf_mock.add_page.call_count, 3)
                     self.assertEqual(pdf_mock.image.call_count, 3)
 
+    def test_scan_device_set(self):
+        conf = mock.MagicMock()
+        conf.scanner_device = 'device'
+
+        with mock.patch.object(db, 'DB') as DB:
+            DB.return_value = mock.MagicMock()
+
+            with mock.patch('smth.views.ScanView') as ScanView:
+                ScanView.return_value = mock.MagicMock()
+
+                controllers.ScanController([], '', conf).scan_notebook()
+
+                sane.get_devices.assert_not_called()
+
+    def test_scan_wrong_device_set(self):
+        conf = mock.MagicMock()
+        conf.scanner_device = 'device'
+
+        sane.open = mock.MagicMock(side_effect=_sane.error)
+
+        with mock.patch.object(db, 'DB') as DB:
+            db_ = mock.MagicMock()
+            DB.return_value = db_
+
+            with mock.patch('smth.views.ScanView') as ScanView:
+                view = mock.MagicMock()
+                ScanView.return_value = view
+
+                controller = controllers.ScanController([], '', conf)
+
+                self.assertRaises(SystemExit, controller.scan_notebook)
+                db_.save_notebook.assert_not_called()
+                view.show_error.assert_called_once()
+
     def test_scan_keyboard_interrupt_when_searching_for_devices(self):
         sane.get_devices.side_effect = KeyboardInterrupt
 
@@ -116,6 +151,30 @@ class ScanControllerTestCase(unittest.TestCase):
 
                 sane.open.assert_not_called()
                 db_.save_notebook.assert_not_called()
+
+    def test_scan_cannot_open_device(self):
+        sane.open = mock.MagicMock(side_effect=_sane.error)
+
+        with mock.patch.object(db, 'DB') as DB:
+            db_ = mock.MagicMock()
+            DB.return_value = db_
+
+            with mock.patch('smth.views.ScanView') as ScanView:
+                scan_prefs = {
+                    'device': 'device',
+                    'notebook': 'Notebook',
+                    'append': '1'
+                }
+
+                view = mock.MagicMock()
+                view.ask_for_scan_prefs.return_value = scan_prefs
+                ScanView.return_value = view
+
+                controller = controllers.ScanController([], '', self.config)
+
+                self.assertRaises(SystemExit, controller.scan_notebook)
+                db_.save_notebook.assert_not_called()
+                view.show_error.assert_called_once()
 
     def test_scan_db_error(self):
         with mock.patch.object(db, 'DB') as DB:
@@ -173,6 +232,32 @@ class ScanControllerTestCase(unittest.TestCase):
 
                 scanner.close.assert_called_once()
                 db_.save_notebook.assert_not_called()
+
+    def test_scan_sane_error_during_scanning(self):
+        scanner_mock = mock.MagicMock()
+        scanner_mock.scan.side_effect = _sane.error
+        sane.open.return_value = scanner_mock
+
+        with mock.patch.object(db, 'DB') as DB:
+            db_ = mock.MagicMock()
+            DB.return_value = db_
+
+            with mock.patch('smth.views.ScanView') as ScanView:
+                scan_prefs = {
+                    'device': 'device',
+                    'notebook': 'Notebook',
+                    'append': '1'
+                }
+
+                view = mock.MagicMock()
+                view.ask_for_scan_prefs.return_value = scan_prefs
+                ScanView.return_value = view
+
+                controller = controllers.ScanController([], '', self.config)
+
+                self.assertRaises(SystemExit, controller.scan_notebook)
+                db_.save_notebook.assert_not_called()
+                view.show_error.assert_called_once()
 
     def test_scan_no_notebooks(self):
         with mock.patch.object(db, 'DB') as DB:
