@@ -91,8 +91,12 @@ class ScanCommand(commands.Command):
                 log.exception(exception)
                 sys.exit(1)
 
-        def on_start(self, device_name):
+        def on_start(self, device_name: str, pages_queue: List[int]) -> None:
             self.view.show_info(f"Using device '{device_name}'.")
+
+            pages_to_scan = ', '.join(list(map(str, pages_queue)))
+            self.view.show_info(
+                f"The following pages will be scanned: {pages_to_scan}.")
 
         def on_start_scan_page(self, page: int) -> None:
             self.view.show_info(f'Scanning page {page}...')

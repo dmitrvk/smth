@@ -19,7 +19,7 @@ class Callback(abc.ABC):
     def on_set_device(self) -> None: pass
 
     @abc.abstractmethod
-    def on_start(self, device_name: str) -> None: pass
+    def on_start(self, device_name: str, pages_queue: List[int]) -> None: pass
 
     @abc.abstractmethod
     def on_start_scan_page(self, page: int) -> None: pass
@@ -99,10 +99,6 @@ class Scanner:
         try:
             sane.init()
             device = self._get_device(self.conf.scanner_device)
-
-            if self.callback:
-                self.callback.on_start(device.devname)
-
             self._scan_with_prefs(device, prefs, self.callback)
 
         except _sane.error as exception:
@@ -127,9 +123,6 @@ class Scanner:
 
             sane.exit()
 
-        if self.callback:
-            self.callback.on_finish(prefs.notebook)
-
     def _get_device(self, device_name: str) -> sane.SaneDev:
         device = sane.open(device_name)
         device.format = 'jpeg'
@@ -144,6 +137,9 @@ class Scanner:
         if len(prefs.pages_queue) == 0:
             callback.on_error('Nothing to scan')
             return
+
+        if self.callback:
+            self.callback.on_start(device.devname, list(prefs.pages_queue))
 
         while len(prefs.pages_queue) > 0:
             page = prefs.pages_queue.popleft()
@@ -162,3 +158,6 @@ class Scanner:
             if callback:
                 callback.on_finish_scan_page(
                     prefs.notebook, page, image)
+
+        if self.callback:
+            self.callback.on_finish(prefs.notebook)
