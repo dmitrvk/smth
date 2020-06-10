@@ -2,7 +2,7 @@ import logging
 import pathlib
 import sys
 
-from smth import config, controllers, views
+from smth import config, controllers, view
 
 DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 
@@ -33,7 +33,7 @@ def main():
 
     conf = config.Config()
 
-    view = views.BaseView()
+    view_ = view.View()
 
     if len(sys.argv) > 1:
         command = sys.argv[1]
@@ -48,11 +48,11 @@ def main():
         elif command == 'types':
             controllers.TypesController(str(DB_PATH)).show_types_list()
         else:
-            view.show_info(f"Unknown command '{command}'.")
-            view.show_info(HELP_MESSAGE)
+            view_.show_info(f"Unknown command '{command}'.")
+            view_.show_info(HELP_MESSAGE)
             log.info(f"Unknown command '{command}'")
     else:
-        view.show_info(HELP_MESSAGE)
+        view_.show_info(HELP_MESSAGE)
         log.info(f"Wrong args: '{sys.argv}'")
 
 

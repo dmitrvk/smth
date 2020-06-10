@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/dmitrvk/smth',
-    packages=('smth', 'smth.controllers', 'smth.models', 'smth.views'),
+    packages=('smth', 'smth.controllers', 'smth.models'),
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',

@@ -2,8 +2,8 @@ import os
 import unittest
 from unittest import mock
 
-from PyInquirer import ValidationError
 from pyfakefs import fake_filesystem_unittest as fakefs_unittest
+from PyInquirer import ValidationError
 
 from smth.controllers import validators
 

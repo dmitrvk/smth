@@ -5,7 +5,7 @@ import sys
 
 import fpdf
 
-from smth import db, models, views
+from smth import db, models, view
 from smth.controllers import validators
 
 log = logging.getLogger(__name__)
@@ -16,21 +16,21 @@ class CreateController:
 
     def __init__(self, db_path: str):
         self.db_path = db_path
+        self.view = view.View()
 
     def create_notebook(self) -> None:
         """Ask user for new notebook info, save notebook in the database."""
-        view = views.CreateView()
 
         try:
             db_ = db.DB(self.db_path)
             types = db_.get_type_titles()
             validator = validators.NotebookValidator(db_)
 
-            answers = view.ask_for_new_notebook_info(types, validator)
+            answers = self.view.ask_for_new_notebook_info(types, validator)
 
             if not answers:
                 log.info('Creation stopped due to keyboard interrupt')
-                view.show_info('Nothing created.')
+                self.view.show_info('Nothing created.')
                 return
 
             title = answers['title'].strip()
@@ -60,10 +60,10 @@ class CreateController:
             message = (f"Create notebook '{notebook.title}' "
                        f"of type '{notebook.type.title}' at '{notebook.path}'")
             log.info(message)
-            view.show_info(message)
+            self.view.show_info(message)
         except db.Error as exception:
             log.exception(exception)
-            view.show_error(str(exception))
+            self.view.show_error(str(exception))
             sys.exit(1)
 
     def _expand_path(self, path: str) -> str:
