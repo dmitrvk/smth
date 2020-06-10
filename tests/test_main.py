@@ -1,9 +1,10 @@
+import logging
 import sys
 from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import config, main
+from smth import config, db, main
 from tests import testutils
 
 
@@ -12,6 +13,7 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
 
     def setUp(self):
         self.setUpPyfakefs(modules_to_reload=[main, config])
+        logging.disable()
 
     @mock.patch('smth.main')
     def test__main__(self, mock):
@@ -19,35 +21,35 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
 
     def test_list_command(self):
         with mock.patch.object(sys, 'argv', ['', 'list']):
-            with mock.patch('smth.controllers.ListController') as Controller:
-                controller_mock = mock.MagicMock()
-                Controller.return_value = controller_mock
+            with mock.patch('smth.commands.ListCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
                 main.main()
-                controller_mock.show_notebooks_list.assert_called_once()
+                command.execute.assert_called_once()
 
     def test_scan_command(self):
         with mock.patch.object(sys, 'argv', ['', 'scan']):
-            with mock.patch('smth.controllers.ScanController') as Controller:
-                controller = mock.MagicMock()
-                Controller.return_value = controller
+            with mock.patch('smth.commands.ScanCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
                 main.main()
-                controller.scan_notebook.assert_called_once()
+                command.execute.assert_called_once()
 
     def test_types_command(self):
         with mock.patch.object(sys, 'argv', ['', 'types']):
-            with mock.patch('smth.controllers.TypesController') as Controller:
-                controller_mock = mock.MagicMock()
-                Controller.return_value = controller_mock
+            with mock.patch('smth.commands.TypesCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
                 main.main()
-                controller_mock.show_types_list.assert_called_once()
+                command.execute.assert_called_once()
 
     def test_create_command(self):
         with mock.patch.object(sys, 'argv', ['', 'create']):
-            with mock.patch('smth.controllers.CreateController') as Controller:
-                controller_mock = mock.MagicMock()
-                Controller.return_value = controller_mock
+            with mock.patch('smth.commands.CreateCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
                 main.main()
-                controller_mock.create_notebook.assert_called_once()
+                command.execute.assert_called_once()
 
     @mock.patch.object(sys, 'argv', ['__main__.py'])
     def test_no_command(self):
@@ -60,3 +62,14 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
         output = testutils.capture_stdout(main.main)
         for command in ['create', 'list', 'scan', 'types']:
             self.assertIn(command, output)
+
+    def test_db_error(self):
+        with mock.patch('smth.db.DB') as DB:
+            DB.side_effect = db.Error('Fail')
+
+            with mock.patch('smth.view.View') as View:
+                view = mock.MagicMock()
+                View.return_value = view
+
+                self.assertRaises(SystemExit, main.main)
+                view.show_error.assert_called_once_with('Fail')

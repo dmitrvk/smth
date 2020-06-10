@@ -9,27 +9,23 @@ import _sane
 import fpdf
 import sane
 
-from smth import config, db, view
-from smth.controllers import validators
+from smth import commands, config, db, validators, view
 
 log = logging.getLogger(__name__)
 
 
-class ScanController:
+class ScanCommand(commands.Command):
     """Allows to scan a notebook."""
 
-    def __init__(self, args: List[str], db_path: str, conf: config.Config):
-        self.args = args
-        self.db_path = db_path
+    def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
+        self.db = db_
+        self.view = view_
         self.conf = conf
-        self.view = view.View()
 
-    def scan_notebook(self) -> None:
+    def execute(self, args: List[str] = []) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""
-
         try:
-            db_ = db.DB(self.db_path)
-            notebooks = db_.get_notebook_titles()
+            notebooks = self.db.get_notebook_titles()
 
             if not notebooks:
                 message = 'No notebooks found. Create one with `smth create`.'
@@ -44,7 +40,7 @@ class ScanController:
         scanner = None
         devices = None
 
-        if self.conf.scanner_device and '--set-device' not in self.args:
+        if self.conf.scanner_device and '--set-device' not in args:
             device = self.conf.scanner_device
 
             try:
@@ -81,7 +77,7 @@ class ScanController:
         if append <= 0:
             self.view.show_info('Nothing to scan.')
         else:
-            notebook = db_.get_notebook_by_title(answers['notebook'])
+            notebook = self.db.get_notebook_by_title(answers['notebook'])
             pages_dir_path = self._get_pages_dir_path(notebook.title)
 
             if not scanner:
@@ -119,7 +115,7 @@ class ScanController:
             scanner.close()
 
             notebook.total_pages += append
-            db_.save_notebook(notebook)
+            self.db.save_notebook(notebook)
 
             self.view.show_info('Creating PDF...')
 

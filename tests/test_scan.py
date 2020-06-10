@@ -5,270 +5,147 @@ from unittest import mock
 import _sane
 import sane
 
-from smth import controllers, db
+from smth import commands, db
 
 
-class ScanControllerTestCase(unittest.TestCase):
+class ScanCommandTestCase(unittest.TestCase):
     def setUp(self):
         logging.disable()
 
-        self.config = mock.MagicMock()
-        self.config.scanner_device = None
-        self.config.scanner_delay = 0
+        self.notebook = mock.MagicMock(**{
+            'title': 'Notebook',
+            'path': '/test/path.pdf',
+            'total_pages': 0,
+        })
+
+        self.db = mock.MagicMock(**{
+            'get_notebook_titles.return_value': [self.notebook.title],
+            'get_notebook_by_title.return_value': self.notebook,
+        })
+
+        self.scan_prefs = {
+            'device': 'device',
+            'notebook': self.notebook.title,
+            'append': '3'
+        }
+
+        self.view = mock.MagicMock(**{
+            'ask_for_scan_prefs.return_value': self.scan_prefs,
+        })
+
+        self.conf = mock.MagicMock(**{
+            'scanner_device': None,
+            'scanner_delay': 0,
+        })
+
+        self.pdf = mock.MagicMock()
+        fpdf_patcher = mock.patch('fpdf.FPDF')
+        fpdf_patcher.start().return_value = self.pdf
+        self.addCleanup(fpdf_patcher.stop)
+
+        self.image = mock.MagicMock(size=(100, 200))
+        self.scanner = mock.MagicMock(**{'scan.return_value': self.image})
 
         sane.init = mock.MagicMock()
         sane.get_devices = mock.MagicMock(return_value=[])
-        sane.open = mock.MagicMock()
+        sane.open = mock.MagicMock(return_value=self.scanner)
 
-    def test_scan(self):
-        with mock.patch.object(db, 'DB') as DB:
-            notebook = mock.MagicMock()
-            notebook.title = 'Notebook'
-            notebook.path = '/test/path.pdf'
-            notebook.total_pages = 0
+    def test_execute(self):
+        commands.ScanCommand(self.db, self.view, self.conf).execute([])
 
-            db_ = mock.MagicMock()
-            db_.get_notebook_titles.return_value = ['Notebook']
-            db_.get_notebook_by_title.return_value = notebook
-            DB.return_value = db_
+        self.assertEqual(self.image.save.call_count, 3)
 
-            with mock.patch('fpdf.FPDF') as FPDF:
-                pdf = mock.MagicMock()
-                FPDF.return_value = pdf
+        self.assertEqual(self.notebook.total_pages, 3)
 
-                with mock.patch('smth.view.View') as View:
-                    scan_prefs = {
-                        'device': 'dev',
-                        'notebook': 'Notebook',
-                        'append': '3'
-                    }
+        self.db.save_notebook.assert_called_once()
 
-                    view = mock.MagicMock()
-                    view.ask_for_scan_prefs.return_value = scan_prefs
-                    View.return_value = view
+        self.assertEqual(self.pdf.add_page.call_count, 3)
+        self.assertEqual(self.pdf.image.call_count, 3)
+        self.pdf.output.assert_called_once()
 
-                    image = mock.MagicMock()
-                    image.size = (100, 200)
-                    scanner = mock.MagicMock()
-                    scanner.scan.return_value = image
-                    sane.open.return_value = scanner
+        self.scanner.close.assert_called_once()
 
-                    controllers.ScanController(
-                        [], '', self.config).scan_notebook()
+    def test_execute_device_set(self):
+        self.conf.scanner_device = 'device'
+        commands.ScanCommand(self.db, self.view, self.conf).execute()
+        sane.get_devices.assert_not_called()
 
-                    db_.save_notebook.assert_called_once()
-                    scanner.close.assert_called_once()
-                    self.assertEqual(image.save.call_count, 3)
-                    self.assertEqual(pdf.add_page.call_count, 3)
-                    self.assertEqual(pdf.image.call_count, 3)
+    def test_execute_wrong_device_set(self):
+        self.conf.scanner_device = 'dev'
 
-    def test_scan_device_set(self):
-        conf = mock.MagicMock()
-        conf.scanner_device = 'device'
+        sane.open.side_effect = _sane.error
 
-        with mock.patch.object(db, 'DB') as DB:
-            DB.return_value = mock.MagicMock()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
-            with mock.patch('smth.view.View') as View:
-                View.return_value = mock.MagicMock()
+        self.assertRaises(SystemExit, command.execute)
+        self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called_once()
 
-                controllers.ScanController([], '', conf).scan_notebook()
-
-                sane.get_devices.assert_not_called()
-
-    def test_scan_wrong_device_set(self):
-        conf = mock.MagicMock()
-        conf.scanner_device = 'device'
-
-        sane.open = mock.MagicMock(side_effect=_sane.error)
-
-        with mock.patch.object(db, 'DB') as DB:
-            db_ = mock.MagicMock()
-            DB.return_value = db_
-
-            with mock.patch('smth.view.View') as View:
-                view = mock.MagicMock()
-                View.return_value = view
-
-                controller = controllers.ScanController([], '', conf)
-
-                self.assertRaises(SystemExit, controller.scan_notebook)
-                db_.save_notebook.assert_not_called()
-                view.show_error.assert_called_once()
-
-    def test_scan_keyboard_interrupt_when_searching_for_devices(self):
+    def test_execute_keyboard_interrupt_when_searching_for_devices(self):
         sane.get_devices.side_effect = KeyboardInterrupt
 
-        with mock.patch.object(db, 'DB') as DB:
-            db_ = mock.MagicMock()
-            DB.return_value = db_
+        commands.ScanCommand(self.db, self.view, self.conf).execute()
 
-            with mock.patch('smth.view.View') as View:
-                view = mock.MagicMock()
-                View.return_value = view
+        self.view.ask_for_scan_prefs.assert_not_called()
+        sane.open.assert_not_called()
+        self.db.save_notebook.assert_not_called()
 
-                controllers.ScanController([], '', self.config).scan_notebook()
+    def test_execute_no_scan_prefs(self):
+        self.view.ask_for_scan_prefs.return_value = None
 
-                view.ask_for_scan_prefs.assert_not_called()
-                sane.open.assert_not_called()
-                db_.save_notebook.assert_not_called()
+        commands.ScanCommand(self.db, self.view, self.conf).execute()
 
-    def test_scan_no_scan_prefs(self):
-        with mock.patch('smth.view.View') as View:
-            view = mock.MagicMock()
-            view.ask_for_scan_prefs.return_value = None
-            View.return_value = view
+        sane.open.assert_not_called()
+        self.db.save_notebook.assert_not_called()
 
-            with mock.patch.object(db, 'DB') as DB:
-                db_ = mock.MagicMock()
-                db_.get_notebook_titles.return_value = ['Notebook']
-                DB.return_value = db_
+    def test_execute_no_new_pages(self):
+        self.scan_prefs['append'] = ''
 
-                controllers.ScanController([], '', self.config).scan_notebook()
+        commands.ScanCommand(self.db, self.view, self.conf).execute()
 
-                sane.open.assert_not_called()
-                db_.save_notebook.assert_not_called()
+        sane.open.assert_not_called()
+        self.db.save_notebook.assert_not_called()
 
-    def test_scan_no_new_pages(self):
-        with mock.patch('smth.view.View') as View:
-            scan_prefs = {
-                'device': 'dev',
-                'notebook': 'Notebook',
-                'append': ''
-            }
+    def test_execute_cannot_open_device(self):
+        sane.open.side_effect = _sane.error
 
-            view = mock.MagicMock()
-            view.ask_for_scan_prefs.return_value = scan_prefs
-            View.return_value = view
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
-            with mock.patch.object(db, 'DB') as DB:
-                db_ = mock.MagicMock()
-                db_.get_notebook_titles.return_value = ['Notebook']
-                DB.return_value = db_
+        self.assertRaises(SystemExit, command.execute)
+        self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called_once()
 
-                controllers.ScanController([], '', self.config).scan_notebook()
+    def test_execute_db_error(self):
+        self.db.get_notebook_titles.side_effect = db.Error
 
-                sane.open.assert_not_called()
-                db_.save_notebook.assert_not_called()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
-    def test_scan_cannot_open_device(self):
-        sane.open = mock.MagicMock(side_effect=_sane.error)
+        self.assertRaises(SystemExit, command.execute)
+        self.view.ask_for_scan_prefs.assert_not_called()
+        sane.open.assert_not_called()
+        self.db.save_notebook.assert_not_called()
 
-        with mock.patch.object(db, 'DB') as DB:
-            db_ = mock.MagicMock()
-            DB.return_value = db_
+    def test_execute_keyboard_interrupt_during_scanning(self):
+        self.scanner.scan.side_effect = KeyboardInterrupt
 
-            with mock.patch('smth.view.View') as View:
-                scan_prefs = {
-                    'device': 'device',
-                    'notebook': 'Notebook',
-                    'append': '1'
-                }
+        commands.ScanCommand(self.db, self.view, self.conf).execute()
 
-                view = mock.MagicMock()
-                view.ask_for_scan_prefs.return_value = scan_prefs
-                View.return_value = view
+        self.scanner.close.assert_called_once()
+        self.db.save_notebook.assert_not_called()
 
-                controller = controllers.ScanController([], '', self.config)
+    def test_execute_scan_error(self):
+        self.scanner.scan.side_effect = _sane.error
 
-                self.assertRaises(SystemExit, controller.scan_notebook)
-                db_.save_notebook.assert_not_called()
-                view.show_error.assert_called_once()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
-    def test_scan_db_error(self):
-        with mock.patch.object(db, 'DB') as DB:
-            db_ = mock.MagicMock()
-            db_.get_notebook_titles.side_effect = db.Error
-            DB.return_value = db_
+        self.assertRaises(SystemExit, command.execute)
+        self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called_once()
 
-            with mock.patch('smth.view.View') as View:
-                scan_prefs = {
-                    'device': 'dev',
-                    'notebook': 'Notebook',
-                    'append': ''
-                }
+    def test_execute_no_notebooks(self):
+        self.db.get_notebook_titles.return_value = []
 
-                view = mock.MagicMock()
-                view.ask_for_scan_prefs.return_value = scan_prefs
-                View.return_value = view
+        commands.ScanCommand(self.db, self.view, self.conf).execute()
 
-                controller = controllers.ScanController([], '', self.config)
-
-                self.assertRaises(SystemExit, controller.scan_notebook)
-
-                view.ask_for_scan_prefs.assert_not_called()
-                sane.open.assert_not_called()
-                db_.save_notebook.assert_not_called()
-
-    def test_scan_keyboard_interrupt_during_scanning(self):
-        with mock.patch('smth.view.View') as View:
-            scan_prefs = {
-                'device': 'dev',
-                'notebook': 'Notebook',
-                'append': '3'
-            }
-
-            view = mock.MagicMock()
-            view.ask_for_scan_prefs.return_value = scan_prefs
-            View.return_value = view
-
-            scanner = mock.MagicMock()
-            scanner.scan.side_effect = KeyboardInterrupt
-            sane.open.return_value = scanner
-
-            with mock.patch.object(db, 'DB') as DB:
-                notebook = mock.MagicMock()
-                notebook.title = 'Notebook'
-                notebook.path = '/test/path.pdf'
-                notebook.total_pages = 0
-
-                db_ = mock.MagicMock()
-                db_.get_notebook_titles.return_value = ['Notebook']
-                db_.get_notebook_by_title.return_value = notebook
-                DB.return_value = db_
-
-                controllers.ScanController([], '', self.config).scan_notebook()
-
-                scanner.close.assert_called_once()
-                db_.save_notebook.assert_not_called()
-
-    def test_scan_sane_error_during_scanning(self):
-        scanner_mock = mock.MagicMock()
-        scanner_mock.scan.side_effect = _sane.error
-        sane.open.return_value = scanner_mock
-
-        with mock.patch.object(db, 'DB') as DB:
-            db_ = mock.MagicMock()
-            DB.return_value = db_
-
-            with mock.patch('smth.view.View') as View:
-                scan_prefs = {
-                    'device': 'device',
-                    'notebook': 'Notebook',
-                    'append': '1'
-                }
-
-                view = mock.MagicMock()
-                view.ask_for_scan_prefs.return_value = scan_prefs
-                View.return_value = view
-
-                controller = controllers.ScanController([], '', self.config)
-
-                self.assertRaises(SystemExit, controller.scan_notebook)
-                db_.save_notebook.assert_not_called()
-                view.show_error.assert_called_once()
-
-    def test_scan_no_notebooks(self):
-        with mock.patch.object(db, 'DB') as DB:
-            db_ = mock.MagicMock()
-            db_.get_notebook_titles.return_value = []
-            DB.return_value = db_
-
-            with mock.patch('smth.view.View') as View:
-                view = mock.MagicMock()
-                View.return_value = view
-
-                controllers.ScanController([], '', self.config).scan_notebook()
-
-                view.ask_for_scan_prefs.assert_not_called
-                sane.init.assert_not_called()
+        self.view.ask_for_scan_prefs.assert_not_called()
+        self.scanner.scan.assert_not_called()

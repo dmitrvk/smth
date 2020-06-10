@@ -4,7 +4,7 @@ from typing import Dict, List
 import PyInquirer as inquirer
 
 from smth import models
-from smth.controllers import validators
+from smth import validators
 
 
 class View:

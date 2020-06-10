@@ -2,7 +2,7 @@ import logging
 import pathlib
 import sys
 
-from smth import config, controllers, view
+from smth import db, config, commands, view
 
 DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 
@@ -35,18 +35,24 @@ def main():
 
     view_ = view.View()
 
+    try:
+        db_ = db.DB(DB_PATH)
+    except db.Error as exception:
+        view_.show_error(str(exception))
+        log.exception(exception)
+        sys.exit(1)
+
     if len(sys.argv) > 1:
         command = sys.argv[1]
 
         if command == 'create':
-            controllers.CreateController(str(DB_PATH)).create_notebook()
+            commands.CreateCommand(db_, view_).execute()
         elif command == 'list':
-            controllers.ListController(str(DB_PATH)).show_notebooks_list()
+            commands.ListCommand(db_, view_).execute()
         elif command == 'scan':
-            controllers.ScanController(
-                sys.argv[2:], str(DB_PATH), conf).scan_notebook()
+            commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
         elif command == 'types':
-            controllers.TypesController(str(DB_PATH)).show_types_list()
+            commands.TypesCommand(db_, view_).execute()
         else:
             view_.show_info(f"Unknown command '{command}'.")
             view_.show_info(HELP_MESSAGE)

@@ -5,26 +5,24 @@ import sys
 
 import fpdf
 
-from smth import db, models, view
-from smth.controllers import validators
+from smth import commands, db, models, view
+from smth import validators
 
 log = logging.getLogger(__name__)
 
 
-class CreateController:
+class CreateCommand(commands.Command):
     """Creates a new notebook."""
 
-    def __init__(self, db_path: str):
-        self.db_path = db_path
-        self.view = view.View()
+    def __init__(self, db_: db.DB, view_: view.View):
+        self.db = db_
+        self.view = view_
 
-    def create_notebook(self) -> None:
+    def execute(self) -> None:
         """Ask user for new notebook info, save notebook in the database."""
-
         try:
-            db_ = db.DB(self.db_path)
-            types = db_.get_type_titles()
-            validator = validators.NotebookValidator(db_)
+            types = self.db.get_type_titles()
+            validator = validators.NotebookValidator(self.db)
 
             answers = self.view.ask_for_new_notebook_info(types, validator)
 
@@ -34,7 +32,7 @@ class CreateController:
                 return
 
             title = answers['title'].strip()
-            type = db_.get_type_by_title(answers['type'].strip())
+            type = self.db.get_type_by_title(answers['type'].strip())
             path = self._expand_path(answers['path'])
 
             if path.endswith('.pdf'):
@@ -51,7 +49,7 @@ class CreateController:
 
             self._create_empty_pdf(notebook.path)
 
-            db_.save_notebook(notebook)
+            self.db.save_notebook(notebook)
 
             pages_root = os.path.expanduser('~/.local/share/smth/pages')
             pages_dir = os.path.join(pages_root, notebook.title)

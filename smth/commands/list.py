@@ -1,26 +1,23 @@
 import logging
 import sys
 
-from smth import db, view
+from smth import commands, db, view
 
 log = logging.getLogger(__name__)
 
 
-class ListController:
+class ListCommand(commands.Command):
     """Displays list of existing notebooks."""
 
-    def __init__(self, db_path: str):
-        self.db_path = db_path
-        self.view = view.View()
+    def __init__(self, db_: db.DB, view_: view.View):
+        self.db = db_
+        self.view = view_
 
-    def show_notebooks_list(self) -> None:
+    def execute(self) -> None:
         """Get notebooks from database and show them to user."""
-
         try:
-            db_ = db.DB(self.db_path)
-            notebooks = db_.get_notebooks()
+            notebooks = self.db.get_notebooks()
             self.view.show_notebooks(notebooks)
-
         except db.Error as exception:
             log.exception(exception)
             self.view.show_error(str(exception))
