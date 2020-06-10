@@ -56,8 +56,26 @@ class View:
 
         return self._prompt(questions)
 
+    def ask_for_device(self, devices: List[str]) -> str:
+        """Show list of devices and let user choose one."""
+        questions = [
+            {
+                'type': 'list',
+                'name': 'device',
+                'message': 'Choose device',
+                'choices': sorted(devices),
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            return answers.get('device', '')
+        else:
+            return ''
+
     def ask_for_scan_prefs(
-            self, devices: List[str], notebooks: List[str],
+            self, notebooks: List[str],
             validator: validators.ScanPreferencesValidator) -> Answers:
         """Ask user for notebook parameters and return dict with answers.
 
@@ -77,15 +95,22 @@ class View:
             },
         ]
 
-        if devices:
-            questions.insert(0, {
-                'type': 'list',
-                'name': 'device',
-                'message': 'Choose device',
-                'choices': sorted(devices),
-            })
+        answers = self._prompt(questions)
 
-        return self._prompt(questions)
+        if answers:
+            answers['notebook'] = answers['notebook'].strip()
+
+            if answers['append']:
+                answers['append'] = answers['append'].strip()
+            else:
+                answers['append'] = '0'
+
+            return answers
+        else:
+            return {
+                'notebook': '',
+                'append': '0',
+            }
 
     def show_notebooks(self, notebooks: List[models.Notebook]) -> None:
         """Show list of notebooks or message if no notebooks found."""

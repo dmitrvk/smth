@@ -1,15 +1,12 @@
 import logging
-import operator
 import pathlib
 import sys
-import time
 from typing import List
 
-import _sane
 import fpdf
-import sane
+import PIL.Image as pillow
 
-from smth import commands, config, db, validators, view
+from smth import commands, config, db, models, scanner, validators, view
 
 log = logging.getLogger(__name__)
 
@@ -24,122 +21,121 @@ class ScanCommand(commands.Command):
 
     def execute(self, args: List[str] = []) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""
+        notebooks = []
+
         try:
             notebooks = self.db.get_notebook_titles()
-
-            if not notebooks:
-                message = 'No notebooks found. Create one with `smth create`.'
-                self.view.show_info(message)
-                return
         except db.Error as exception:
             log.exception(exception)
             self.view.show_error(str(exception))
             sys.exit(1)
 
-        sane.init()
-        scanner = None
-        devices = None
+        if not notebooks:
+            message = 'No notebooks found. Create one with `smth create`.'
+            self.view.show_info(message)
+            return
 
-        if self.conf.scanner_device and '--set-device' not in args:
-            device = self.conf.scanner_device
+        if '--set-device' in args:
+            self.conf.scanner_device = ''
 
-            try:
-                scanner = self._get_scanner(device)
-            except _sane.error:
-                self.view.show_error(f"Cannot open device '{device}'.")
-                sys.exit(1)
+        scanner_ = scanner.Scanner(self.conf)
+        scanner_.register(self.ScannerCallback(self.db, self.view, self.conf))
 
-            self.view.show_info(f"Using device '{device}'.")
-        else:
+        validator = validators.ScanPreferencesValidator()
+        answers = self.view.ask_for_scan_prefs(notebooks, validator)
+
+        prefs = scanner.ScanPreferences()
+
+        if not answers['notebook']:
+            self.view.show_error('No notebook chosen.')
+            sys.exit(1)
+
+        try:
+            prefs.notebook = self.db.get_notebook_by_title(answers['notebook'])
+
+        except db.Error as exception:
+            self.view.show_error(str(exception))
+            log.exception(exception)
+            sys.exit(1)
+
+        for i in range(0, int(answers['append'])):
+            page = (prefs.notebook.first_page_number +
+                    prefs.notebook.total_pages + i)
+
+            prefs.pages_queue.append(page)
+
+        try:
+            scanner_.scan(prefs)
+
+        except scanner.Error as exception:
+            self.view.show_error(f'{exception}.')
+            log.exception(exception)
+            sys.exit(1)
+
+    class ScannerCallback(scanner.Callback):
+        def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
+            self.db = db_
+            self.view = view_
+            self.conf = conf
+
+        def on_set_device(self):
             self.view.show_info('Searching for available devices...')
 
             try:
-                devices = list(map(operator.itemgetter(0), sane.get_devices()))
-            except KeyboardInterrupt:
-                log.info('No devices found due to keyboard interrupt')
-                self.view.show_info('Scanning canceled.')
-                return
+                devices = scanner.Scanner.get_devices()
+                device = self.view.ask_for_device(devices)
+                self.conf.scanner_device = device
 
-        validator = validators.ScanPreferencesValidator()
-        answers = self.view.ask_for_scan_prefs(devices, notebooks, validator)
+            except scanner.Error as exception:
+                self.view.show_error(f'Scanner error: {exception}.')
+                log.exception(exception)
+                sys.exit(1)
 
-        if not answers:
-            log.info('Scan did not start due to keyboard interrupt')
-            self.view.show_info('Scanning canceled.')
-            return
-        elif 'device' in answers:
-            self.conf.scanner_device = answers['device']
+        def on_start(self, device_name):
+            self.view.show_info(f"Using device '{device_name}'.")
 
-        answers['append'] = answers['append'].strip()
+        def on_start_scan_page(self, page: int) -> None:
+            self.view.show_info(f'Scanning page {page}...')
 
-        append = int(answers['append']) if len(answers['append']) > 0 else 0
+        def on_finish_scan_page(
+                self, notebook: models.Notebook, page: int,
+                image: pillow.Image) -> None:
+            page_path = self._get_page_path(notebook, page)
 
-        if append <= 0:
-            self.view.show_info('Nothing to scan.')
-        else:
-            notebook = self.db.get_notebook_by_title(answers['notebook'])
-            pages_dir_path = self._get_pages_dir_path(notebook.title)
+            image.save(str(page_path))
 
-            if not scanner:
-                try:
-                    scanner = self._get_scanner(self.conf.scanner_device)
-                except _sane.error:
-                    self.view.show_error(
-                        f"Cannot open device '{self.conf.scanner_device}'.")
-                    sys.exit(1)
+            self.view.show_info(f'Page {page} saved at {page_path}')
+            log.info(f"Scanned page {page} of '{notebook.title}'")
 
-            for i in range(0, append):
-                page = notebook.first_page_number + notebook.total_pages + i
-
-                self.view.show_info(f'Scanning page {page}...')
-
-                page_path = pages_dir_path.joinpath(f'{page}.jpg')
-
-                try:
-                    image = scanner.scan()
-                    image.save(str(page_path))
-                    log.info(f"Scanned page {page} of '{notebook.title}'")
-
-                    if i < append - 1:
-                        time.sleep(self.conf.scanner_delay)
-                except _sane.error as exception:
-                    self.view.show_error(f'Scanning failed: {exception}.')
-                    log.exception(exception)
-                    sys.exit(1)
-                except KeyboardInterrupt:
-                    log.info('Scan interrupted by user.')
-                    self.view.show_info('Scanning canceled.')
-                    scanner.close()
-                    return
-
-            scanner.close()
-
-            notebook.total_pages += append
+        def on_finish(self, notebook: models.Notebook):
             self.db.save_notebook(notebook)
 
             self.view.show_info('Creating PDF...')
 
-            width, height = image.size
-            pdf = fpdf.FPDF(unit='pt', format=[width, height])
+            pdf = fpdf.FPDF(
+                unit='pt',
+                format=[notebook.type.page_width, notebook.type.page_height])
 
             for i in range(0, notebook.total_pages):
                 page = notebook.first_page_number + i
-                page_path = pages_dir_path.joinpath(f'{page}.jpg')
+                page_path = self._get_page_path(notebook, page)
                 pdf.add_page()
-                pdf.image(str(page_path), 0, 0, width, height)
+                pdf.image(
+                    str(page_path), 0, 0,
+                    notebook.type.page_width, notebook.type.page_height)
 
             pdf.output(notebook.path, 'F')
 
             self.view.show_info(f"PDF saved at '{notebook.path}'.")
+
             self.view.show_info('Done.')
 
-    def _get_scanner(self, device: str) -> sane.SaneDev:
-        scanner = sane.open(device)
-        scanner.format = 'jpeg'
-        scanner.mode = 'gray'
-        scanner.resolution = 150
-        return scanner
+        def on_error(self, message):
+            self.view.show_error(f'Scanner error: {message}.')
+            log.error(f'Scanner error: {message}.')
+            sys.exit(1)
 
-    def _get_pages_dir_path(self, notebook_title: str) -> pathlib.Path:
-        pages_root = pathlib.Path('~/.local/share/smth/pages').expanduser()
-        return pages_root.joinpath(notebook_title)
+        def _get_page_path(
+                self, notebook: models.Notebook, page: int) -> pathlib.Path:
+            pages_root = pathlib.Path('~/.local/share/smth/pages').expanduser()
+            return pages_root / notebook.title / f'{page}.jpg'
