@@ -56,18 +56,18 @@ def main():
         else:
             view_.show_info(f"Unknown command '{command}'.")
             view_.show_info(HELP_MESSAGE)
-            log.info(f"Unknown command '{command}'")
+            log.info("Unknown command '%s'", command)
     else:
         view_.show_info(HELP_MESSAGE)
-        log.info(f"Wrong args: '{sys.argv}'")
+        log.info("Wrong args: '%s'", sys.argv)
 
 
 def setup_logging(log_level=logging.DEBUG) -> None:
     log = logging.getLogger()
     log.setLevel(log_level)
 
-    format = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
-    formatter = logging.Formatter(format)
+    format_ = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
+    formatter = logging.Formatter(format_)
 
     handler = logging.FileHandler(str(LOG_PATH))
     handler.setLevel(log_level)

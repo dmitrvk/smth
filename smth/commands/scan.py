@@ -11,7 +11,7 @@ from smth import commands, config, db, models, scanner, validators, view
 log = logging.getLogger(__name__)
 
 
-class ScanCommand(commands.Command):
+class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
     """Allows to scan a notebook."""
 
     def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
@@ -19,7 +19,7 @@ class ScanCommand(commands.Command):
         self.view = view_
         self.conf = conf
 
-    def execute(self, args: List[str] = []) -> None:
+    def execute(self, args: List[str] = None) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""
         notebooks = []
 
@@ -35,7 +35,7 @@ class ScanCommand(commands.Command):
             self.view.show_info(message)
             return
 
-        if '--set-device' in args:
+        if args and '--set-device' in args:
             self.conf.scanner_device = ''
 
         scanner_ = scanner.Scanner(self.conf)
@@ -109,7 +109,7 @@ class ScanCommand(commands.Command):
             image.save(str(page_path))
 
             self.view.show_info(f'Page {page} saved at {page_path}')
-            log.info(f"Scanned page {page} of '{notebook.title}'")
+            log.info("Scanned page %s of '%s'", page, notebook.title)
 
         def on_finish(self, notebook: models.Notebook):
             self.db.save_notebook(notebook)
@@ -136,7 +136,7 @@ class ScanCommand(commands.Command):
 
         def on_error(self, message):
             self.view.show_error(f'Scanner error: {message}.')
-            log.error(f'Scanner error: {message}.')
+            log.error('Scanner error: %s.', message)
             sys.exit(1)
 
         def _get_page_path(

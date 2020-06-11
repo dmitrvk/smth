@@ -32,19 +32,19 @@ class CreateCommand(commands.Command):
                 return
 
             title = answers['title'].strip()
-            type = self.db.get_type_by_title(answers['type'].strip())
+            type_ = self.db.get_type_by_title(answers['type'].strip())
             path = self._expand_path(answers['path'])
 
             if path.endswith('.pdf'):
-                dir = os.path.dirname(path)
-                if not os.path.exists(dir):
-                    pathlib.Path(dir).mkdir(parents=True)
+                dir_ = os.path.dirname(path)
+                if not os.path.exists(dir_):
+                    pathlib.Path(dir_).mkdir(parents=True)
             else:
                 if not os.path.exists(path):
                     pathlib.Path(path).mkdir(parents=True)
                 path = os.path.join(path, f'{title}.pdf')
 
-            notebook = models.Notebook(title, type, path)
+            notebook = models.Notebook(title, type_, path)
             notebook.first_page_number = int(answers['first_page_number'])
 
             self._create_empty_pdf(notebook.path)

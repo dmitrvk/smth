@@ -9,15 +9,17 @@ class NotebookType:
         self._pages_paired = False
 
     @property
-    def id(self):
+    def id(self):  # pylint: disable=invalid-name
+        """Object's id in the database."""
         return self._id
 
     @id.setter
-    def id(self, id):
-        self._id = id
+    def id(self, id_):  # pylint: disable=invalid-name
+        self._id = id_
 
     @property
     def title(self):
+        """Type's title, e.g. 'A4'."""
         return self._title
 
     @title.setter
@@ -29,6 +31,7 @@ class NotebookType:
 
     @property
     def page_width(self):
+        """Width of a page of a notebook with this type."""
         return self._page_width
 
     @page_width.setter
@@ -40,6 +43,7 @@ class NotebookType:
 
     @property
     def page_height(self):
+        """Height of a page of a notebook with this type."""
         return self._page_height
 
     @page_height.setter
@@ -50,7 +54,8 @@ class NotebookType:
             self._page_height = 0
 
     @property
-    def pages_paired(self):
+    def pages_paired(self) -> bool:
+        """Indicates whether pages in a notebook should be paired in PDF."""
         return self._pages_paired
 
     @pages_paired.setter
@@ -65,10 +70,10 @@ class NotebookType:
                 other.title == self.title)
 
     def __repr__(self):
-        repr = f"<NotebookType '{self._title}'"
-        repr += f" of size {self._page_width}x{self._page_height}mm"
+        repr_ = f"<NotebookType '{self._title}'"
+        repr_ += f" of size {self._page_width}x{self._page_height}mm"
         if self._pages_paired:
-            repr += " with paired pages>"
+            repr_ += " with paired pages>"
         else:
-            repr += '>'
-        return repr
+            repr_ += '>'
+        return repr_

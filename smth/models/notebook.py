@@ -13,15 +13,17 @@ class Notebook:
         self._total_pages = 0
 
     @property
-    def id(self) -> int:
+    def id(self) -> int:  # pylint: disable=invalid-name
+        """Notebook's id in the database."""
         return self._id
 
     @id.setter
-    def id(self, id) -> None:
-        self._id = id
+    def id(self, id_) -> None:  # pylint: disable=invalid-name
+        self._id = id_
 
     @property
     def title(self) -> str:
+        """Title of the notebook. Must be unique."""
         return self._title
 
     @title.setter
@@ -30,10 +32,12 @@ class Notebook:
 
     @property
     def type(self) -> NotebookType:
+        """Type of the notebook (page size, etc.)."""
         return self._type
 
     @property
     def path(self) -> int:
+        """Path to PDF file in the filesystem."""
         return self._path
 
     @path.setter
@@ -42,6 +46,7 @@ class Notebook:
 
     @property
     def total_pages(self) -> int:
+        """Number of pages in the notebook."""
         return self._total_pages
 
     @total_pages.setter
@@ -53,6 +58,7 @@ class Notebook:
 
     @property
     def first_page_number(self) -> int:
+        """A number from which page numbering should start."""
         return self._first_page_number
 
     @first_page_number.setter

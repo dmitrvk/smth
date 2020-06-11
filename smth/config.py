@@ -22,7 +22,7 @@ class Config:
         if self.CONFIG_PATH.exists():
             try:
                 self.config.read(str(self.CONFIG_PATH))
-                log.debug(f'Loaded config from {str(self.CONFIG_PATH)}')
+                log.debug('Loaded config from %s', {str(self.CONFIG_PATH)})
             except configparser.Error as exception:
                 log.exception(exception)
                 self._write_config()
@@ -30,10 +30,11 @@ class Config:
             self.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
             self._write_config()
 
-            log.debug(f'Created default config at {str(self.CONFIG_PATH)}')
+            log.debug('Created default config at %s', {str(self.CONFIG_PATH)})
 
     @property
     def scanner_device(self) -> str:
+        """Name of the device which is used to perform scanning."""
         return self.config.get('scanner', 'device', fallback='')
 
     @scanner_device.setter
@@ -43,6 +44,7 @@ class Config:
 
     @property
     def scanner_delay(self) -> int:
+        """Time in seconds between consecutive scans."""
         return self.config.getint('scanner', 'delay', fallback=0)
 
     @scanner_delay.setter
