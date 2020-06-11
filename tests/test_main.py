@@ -15,6 +15,10 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
         self.setUpPyfakefs(modules_to_reload=[main, config])
         logging.disable()
 
+        db_patcher = mock.patch('smth.db.DB')
+        db_patcher.start().return_value = mock.MagicMock()
+        self.addCleanup(db_patcher.stop)
+
     @mock.patch('smth.main')
     def test__main__(self, mock):
         from smth import __main__  # noqa: F401  # Cover __main__.py with tests

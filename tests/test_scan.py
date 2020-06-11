@@ -50,26 +50,6 @@ class ScanCommandTestCase(unittest.TestCase):
         sane.get_devices = mock.MagicMock(return_value=[])
         sane.open = mock.MagicMock(return_value=self.scanner)
 
-    def test_execute(self):
-        commands.ScanCommand(self.db, self.view, self.conf).execute([])
-
-        self.assertEqual(self.image.save.call_count, 3)
-
-        self.assertEqual(self.notebook.total_pages, 3)
-
-        self.db.save_notebook.assert_called_once()
-
-        self.assertEqual(self.pdf.add_page.call_count, 3)
-        self.assertEqual(self.pdf.image.call_count, 3)
-        self.pdf.output.assert_called_once()
-
-        self.scanner.close.assert_called_once()
-
-    def test_execute_device_set(self):
-        self.conf.scanner_device = 'device'
-        commands.ScanCommand(self.db, self.view, self.conf).execute()
-        sane.get_devices.assert_not_called()
-
     def test_execute_wrong_device_set(self):
         self.conf.scanner_device = 'dev'
 
@@ -84,27 +64,33 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_keyboard_interrupt_when_searching_for_devices(self):
         sane.get_devices.side_effect = KeyboardInterrupt
 
-        commands.ScanCommand(self.db, self.view, self.conf).execute()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
-        self.view.ask_for_scan_prefs.assert_not_called()
+        self.assertRaises(SystemExit, command.execute)
         sane.open.assert_not_called()
         self.db.save_notebook.assert_not_called()
 
     def test_execute_no_scan_prefs(self):
-        self.view.ask_for_scan_prefs.return_value = None
+        self.view.ask_for_scan_prefs.return_value = {
+            'notebook': '',
+            'append': '0',
+        }
 
-        commands.ScanCommand(self.db, self.view, self.conf).execute()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
+        self.assertRaises(SystemExit, command.execute)
         sane.open.assert_not_called()
         self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called_once()
 
     def test_execute_no_new_pages(self):
-        self.scan_prefs['append'] = ''
+        self.scan_prefs['append'] = '0'
 
-        commands.ScanCommand(self.db, self.view, self.conf).execute()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
-        sane.open.assert_not_called()
+        self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called_once()
 
     def test_execute_cannot_open_device(self):
         sane.open.side_effect = _sane.error
@@ -128,8 +114,9 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_keyboard_interrupt_during_scanning(self):
         self.scanner.scan.side_effect = KeyboardInterrupt
 
-        commands.ScanCommand(self.db, self.view, self.conf).execute()
+        command = commands.ScanCommand(self.db, self.view, self.conf)
 
+        self.assertRaises(SystemExit, command.execute)
         self.scanner.close.assert_called_once()
         self.db.save_notebook.assert_not_called()
 
