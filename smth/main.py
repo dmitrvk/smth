@@ -1,3 +1,5 @@
+"""smth main module."""
+
 import logging
 import pathlib
 import sys
@@ -22,6 +24,10 @@ HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
 
 
 def main():
+    """Create needed files, initialize logs, database, view.
+
+    Parse arguments and run command that user specified.
+    Show help if no command provided or specified command is invalid."""
     if not DATA_ROOT.exists():
         DATA_ROOT.mkdir(parents=True, exist_ok=True)
 
@@ -63,6 +69,7 @@ def main():
 
 
 def setup_logging(log_level=logging.DEBUG) -> None:
+    """Set logging file, level, format."""
     log = logging.getLogger()
     log.setLevel(log_level)
 
