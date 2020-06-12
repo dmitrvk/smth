@@ -84,6 +84,7 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
             try:
                 devices = scanner.Scanner.get_devices()
                 device = self.view.ask_for_device(devices)
+                self.view.show_separator()
                 self.conf.scanner_device = device
 
             except scanner.Error as exception:
@@ -92,7 +93,10 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
                 sys.exit(1)
 
         def on_start(self, device_name: str, pages_queue: List[int]) -> None:
+            self.view.show_separator()
             self.view.show_info(f"Using device '{device_name}'.")
+
+            self.view.show_separator()
 
             pages_to_scan = ', '.join(list(map(str, pages_queue)))
             self.view.show_info(
@@ -114,6 +118,7 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
         def on_finish(self, notebook: models.Notebook):
             self.db.save_notebook(notebook)
 
+            self.view.show_separator()
             self.view.show_info('Creating PDF...')
 
             pdf = fpdf.FPDF(
@@ -131,6 +136,7 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
             pdf.output(notebook.path, 'F')
 
             self.view.show_info(f"PDF saved at '{notebook.path}'.")
+            self.view.show_separator()
 
             self.view.show_info('Done.')
 

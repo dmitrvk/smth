@@ -143,5 +143,9 @@ class View:
         """Print message to stderr."""
         print(message, file=sys.stderr)
 
+    def show_separator(self) -> None:  # pylint: disable=no-self-use
+        """Print long line that divides sections of output."""
+        print('----------------------------------------')
+
     def _prompt(self, questions: List[dict]) -> dict:
         return inquirer.prompt(questions, style=self.PROMPT_STYLE)

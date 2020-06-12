@@ -89,3 +89,7 @@ class ViewTestCase(unittest.TestCase):
         message = 'Test message'
         output = testutils.capture_stderr(self.view.show_error, message)
         self.assertEqual(output, f'{message}\n')
+
+    def test_show_separator(self):
+        output = testutils.capture_stdout(self.view.show_separator)
+        self.assertEqual(output, '----------------------------------------\n')
