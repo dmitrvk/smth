@@ -64,8 +64,7 @@ def main():
             view_.show_info(HELP_MESSAGE)
             log.info("Unknown command '%s'", command)
     else:
-        view_.show_info(HELP_MESSAGE)
-        log.info("Wrong args: '%s'", sys.argv)
+        commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
 
 
 def setup_logging(log_level=logging.DEBUG) -> None:
