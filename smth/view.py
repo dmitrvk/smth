@@ -96,12 +96,7 @@ class View:
         else:
             return ''
 
-    def ask_for_scan_prefs(
-            self, notebooks: List[str],
-            validator: validators.ScanPreferencesValidator) -> Answers:
-        """Ask user for notebook parameters and return dict with answers.
-
-        Validate answers with given validator."""
+    def ask_for_notebook_to_scan(self, notebooks: List[str]) -> str:
         questions = [
             {
                 'type': 'list',
@@ -109,6 +104,21 @@ class View:
                 'message': 'Choose notebook',
                 'choices': notebooks,
             },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            return answers['notebook'].strip()
+        else:
+            return ''
+
+    def ask_for_pages_to_append(
+            self, validator: validators.ScanPreferencesValidator) -> int:
+        """Ask user for notebook parameters and return dict with answers.
+
+        Validate answers with given validator."""
+        questions = [
             {
                 'type': 'input',
                 'name': 'append',
@@ -120,19 +130,36 @@ class View:
         answers = self._prompt(questions)
 
         if answers:
-            answers['notebook'] = answers['notebook'].strip()
-
             if answers['append']:
-                answers['append'] = answers['append'].strip()
+                return int(answers['append'].strip())
             else:
-                answers['append'] = '0'
-
-            return answers
+                return 0
         else:
-            return {
-                'notebook': '',
-                'append': '0',
-            }
+            return 0
+
+    def ask_for_pages_to_replace(
+            self, validator: validators.ScanPreferencesValidator) -> List[str]:
+        """Ask user for notebook parameters and return dict with answers.
+
+        Validate answers with given validator."""
+        questions = [
+            {
+                'type': 'input',
+                'name': 'replace',
+                'message': 'What pages to replace? (leave empty if none)',
+                'validate': validator.validate_pages_to_replace,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            replace = answers['replace'].strip().split()
+            replace = list(map(operator.methodcaller('strip'), replace))
+            replace = list(filter(lambda s: s != '', replace))
+            return replace
+        else:
+            return []
 
     def show_notebooks(self, notebooks: List[models.Notebook]) -> None:
         """Show list of notebooks or message if no notebooks found."""

@@ -70,28 +70,6 @@ class ScanCommandTestCase(unittest.TestCase):
         sane.open.assert_not_called()
         self.db.save_notebook.assert_not_called()
 
-    def test_execute_no_scan_prefs(self):
-        self.view.ask_for_scan_prefs.return_value = {
-            'notebook': '',
-            'append': '0',
-        }
-
-        command = commands.ScanCommand(self.db, self.view, self.conf)
-
-        self.assertRaises(SystemExit, command.execute)
-        sane.open.assert_not_called()
-        self.db.save_notebook.assert_not_called()
-        self.view.show_error.assert_called_once()
-
-    def test_execute_no_new_pages(self):
-        self.scan_prefs['append'] = '0'
-
-        command = commands.ScanCommand(self.db, self.view, self.conf)
-
-        self.assertRaises(SystemExit, command.execute)
-        self.db.save_notebook.assert_not_called()
-        self.view.show_error.assert_called_once()
-
     def test_execute_cannot_open_device(self):
         sane.open.side_effect = _sane.error
 

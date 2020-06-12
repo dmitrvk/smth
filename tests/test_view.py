@@ -23,20 +23,6 @@ class ViewTestCase(unittest.TestCase):
 
             self.assertDictEqual(answers, answers_mock)
 
-    def test_ask_for_scan_prefs(self):
-        answers = {
-            'notebook': 'test',
-            'append': '3',
-        }
-
-        with mock.patch('PyInquirer.prompt', return_value=answers):
-            validator = mock.MagicMock()
-            validator.validate_number_of_pages_to_append.return_value = True
-
-            actual_answers = self.view.ask_for_scan_prefs([], validator)
-
-            self.assertDictEqual(actual_answers, answers)
-
     def test_show_notebooks(self):
         notebooks = []
 

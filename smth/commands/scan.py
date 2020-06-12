@@ -41,24 +41,40 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
         scanner_ = scanner.Scanner(self.conf)
         scanner_.register(self.ScannerCallback(self.db, self.view, self.conf))
 
-        validator = validators.ScanPreferencesValidator()
-        answers = self.view.ask_for_scan_prefs(notebooks, validator)
-
         prefs = scanner.ScanPreferences()
 
-        if not answers['notebook']:
+        notebook_title = self.view.ask_for_notebook_to_scan(notebooks)
+
+        if not notebook_title:
             self.view.show_error('No notebook chosen.')
             sys.exit(1)
 
         try:
-            prefs.notebook = self.db.get_notebook_by_title(answers['notebook'])
+            prefs.notebook = self.db.get_notebook_by_title(notebook_title)
 
         except db.Error as exception:
             self.view.show_error(str(exception))
             log.exception(exception)
             sys.exit(1)
 
-        for i in range(0, int(answers['append'])):
+        validator = validators.ScanPreferencesValidator(prefs.notebook)
+        append = self.view.ask_for_pages_to_append(validator)
+
+        if prefs.notebook.total_pages > 0:
+            replace_answer = self.view.ask_for_pages_to_replace(validator)
+
+            replace = []
+            for item in replace_answer:
+                if '-' in item:
+                    range_start, range_end = map(int, item.split('-'))
+                    replace.extend(list(range(range_start, range_end + 1)))
+                else:
+                    replace.append(int(item))
+            replace = list(set(replace))  # Remove duplicates
+            replace.sort()
+            prefs.pages_queue.extend(replace)
+
+        for i in range(0, append):
             page = (prefs.notebook.first_page_number +
                     prefs.notebook.total_pages + i)
 

@@ -106,7 +106,10 @@ class TestNotebookValidator(unittest.TestCase):
 class TestScanPreferencesValidator(unittest.TestCase):
     """Test user input validation when choosing scan preferences."""
     def setUp(self):
-        self.validator = validators.ScanPreferencesValidator()
+        self.notebook = mock.MagicMock(**{
+            'total_pages': 0,
+        })
+        self.validator = validators.ScanPreferencesValidator(self.notebook)
 
     def test_validate_number_of_pages_to_append(self):
         self.assertTrue(

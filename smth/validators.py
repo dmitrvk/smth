@@ -1,9 +1,11 @@
+import operator
 import os
 import pathlib
+from typing import NoReturn
 
 from PyInquirer import ValidationError
 
-from smth import db
+from smth import db, models
 
 
 class NotebookValidator:
@@ -77,6 +79,9 @@ class NotebookValidator:
 class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
     """Validator for user input when choosing scan preferences."""
 
+    def __init__(self, notebook: models.Notebook):
+        self._notebook = notebook
+
     def validate_number_of_pages_to_append(self, number: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
         """Allow empty value or an integer > 0."""
         if len(number.strip()) == 0:
@@ -93,5 +98,49 @@ class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
         if int(number) > 100:
             raise ValidationError(
                 message='Please, enter a number from 0 to 100 or leave empty.')
+
+        return True
+
+    def validate_pages_to_replace(self, pages: str) -> bool:
+        def raise_error(item: str, reason: str) -> NoReturn:
+            raise ValidationError(
+                message=f"'{item}' is invalid: {reason}.")
+
+        replace = pages.strip().split()
+        replace = list(map(operator.methodcaller('strip'), replace))
+        replace = list(filter(lambda s: s != '', replace))
+
+        min_page = self._notebook.first_page_number
+        max_page = min_page + self._notebook.total_pages - 1
+
+        for item in replace:
+            if item.isnumeric():
+                page = int(item)
+
+                if not min_page <= page <= max_page:
+                    raise_error(
+                        item, f'page must be from {min_page} to {max_page}')
+            else:
+                if item.count('-') == 1:
+                    range_start, range_end = item.split('-')
+
+                    if range_start.isnumeric() and range_end.isnumeric():
+                        range_start = int(range_start)
+                        range_end = int(range_end)
+
+                        if range_start > range_end:
+                            raise_error(item, 'range start > end')
+                        elif not min_page <= range_start <= max_page:
+                            raise_error(
+                                item,
+                                f'page must be from {min_page} to {max_page}')
+                        elif not min_page <= range_end <= max_page:
+                            raise_error(
+                                item,
+                                f'page must be from {min_page} to {max_page}')
+                    else:
+                        raise_error(item, 'not a valid number')
+                else:
+                    raise_error(item, 'range is not valid')
 
         return True

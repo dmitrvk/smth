@@ -106,7 +106,8 @@ class Scanner:
 
             image = device.scan()
 
-            if page >= prefs.notebook.total_pages:
+            if page > (prefs.notebook.total_pages +
+                       prefs.notebook.first_page_number - 1):
                 prefs.notebook.total_pages += 1
 
             if len(prefs.pages_queue) > 0:
