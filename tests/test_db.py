@@ -50,6 +50,16 @@ class TestDB(unittest.TestCase):
         self.assertEqual(
             notebook.first_page_number, expected.first_page_number)
 
+    def test_get_notebook_by_path(self):
+        expected = self.notebooks[0]
+        notebook = self.db.get_notebook_by_path(expected.path)
+        self.assertEqual(notebook.title, expected.title)
+        self.assertEqual(notebook.type, expected.type)
+        self.assertEqual(notebook.path, expected.path)
+        self.assertEqual(notebook.total_pages, expected.total_pages)
+        self.assertEqual(
+            notebook.first_page_number, expected.first_page_number)
+
     def test_get_notebook_titles(self):
         titles = self.db.get_notebook_titles()
         expected = ['Notebook 1', 'Notebook 2', 'Notebook 3']

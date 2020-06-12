@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 from PyInquirer import ValidationError
 
@@ -42,8 +43,16 @@ class NotebookValidator:
         if len(path) == 0:
             raise ValidationError(message='Path must not be empty')
 
-        if os.path.exists(path):
+        path = pathlib.Path(os.path.expandvars(path)).expanduser().resolve()
+
+        if not path.is_dir() and path.exists():
             raise ValidationError(message=f"'{path}' already exists")
+
+        notebook = self._db.get_notebook_by_path(str(path))
+
+        if notebook.title != 'Untitled':
+            message = f"'{path}' already taken by notebook '{notebook.title}'"
+            raise ValidationError(message=message)
 
         return True
 

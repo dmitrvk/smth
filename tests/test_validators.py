@@ -13,6 +13,10 @@ class TestNotebookValidator(unittest.TestCase):
 
     def setUp(self):
         self.db = mock.MagicMock()
+        self.db.get_notebook_by_path.return_value = mock.MagicMock(**{
+            'title': 'Untitled',
+        })
+
         self.validator = validators.NotebookValidator(self.db)
 
     @fakefs_unittest.patchfs
@@ -35,7 +39,7 @@ class TestNotebookValidator(unittest.TestCase):
                 ValidationError,
                 self.validator.validate_title, 'Test')
 
-        # Directory already exists
+        # Directory with pages already exists
         fs.create_dir(os.path.expanduser('~/.local/share/smth/pages/Test'))
         with self.assertRaises(ValidationError):
             self.validator.validate_title('Test')
@@ -59,11 +63,11 @@ class TestNotebookValidator(unittest.TestCase):
     @fakefs_unittest.patchfs
     def test_validate_path(self, fs):
         self.assertTrue(
-            self.validator.validate_path('/home/test/file.pdf'))
+            self.validator.validate_path('/home/test/notebook.pdf'))
         self.assertTrue(
-            self.validator.validate_path('~/file.pdf'))
+            self.validator.validate_path('~/notebook.pdf'))
         self.assertTrue(
-            self.validator.validate_path('$HOME/file.pdf'))
+            self.validator.validate_path('$HOME/notebook.pdf'))
 
         # Empty path
         self.assertRaises(

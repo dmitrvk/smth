@@ -59,6 +59,8 @@ SQL_UPDATE_TYPE = '''UPDATE notebook_type
 
 SQL_GET_NOTEBOOK_BY_TITLE = '''SELECT * FROM notebook WHERE title=?'''
 
+SQL_GET_NOTEBOOK_BY_PATH = '''SELECT * FROM notebook WHERE path=?'''
+
 SQL_GET_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
 
 SQL_GET_TYPE_TITLES = '''SELECT title FROM notebook_type ORDER BY title'''
@@ -138,7 +140,29 @@ class DB:
                 notebook = self._make_notebook_from_row(row)
 
         except (sqlite3.Error, Error) as e:
-            self._handle_error('Failed to get notebook type from database', e)
+            self._handle_error('Failed to get notebook from database', e)
+
+        finally:
+            if connection:
+                connection.close()
+
+        return notebook
+
+    def get_notebook_by_path(self, path: str) -> models.Notebook:
+        """Return notebook with specific path from database."""
+        notebook = models.Notebook('', None, '')
+
+        connection = None
+
+        try:
+            connection = self._connect()
+            cursor = connection.execute(SQL_GET_NOTEBOOK_BY_PATH, (path,))
+            row = cursor.fetchone()
+            if row:
+                notebook = self._make_notebook_from_row(row)
+
+        except (sqlite3.Error, Error) as e:
+            self._handle_error('Failed to get notebook from database', e)
 
         finally:
             if connection:
