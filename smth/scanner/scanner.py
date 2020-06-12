@@ -1,5 +1,3 @@
-import abc
-import collections
 import logging
 import operator
 import time
@@ -7,69 +5,10 @@ from typing import List
 
 import _sane
 import sane
-import PIL.Image as pillow
 
-from smth import config, models
+from smth import config, scanner
 
 log = logging.getLogger(__name__)
-
-
-class Callback(abc.ABC):
-    """Used to notify about scanner's events. Must be subclassed."""
-
-    @abc.abstractmethod
-    def on_set_device(self) -> None:
-        """Called when no device is set.
-
-        A proper device should be set in app config inside this method."""
-
-    @abc.abstractmethod
-    def on_start(self, device_name: str, pages_queue: List[int]) -> None:
-        """Called when scanning process starts."""
-
-    @abc.abstractmethod
-    def on_start_scan_page(self, page: int) -> None:
-        """Called when scanning of a page starts."""
-
-    @abc.abstractmethod
-    def on_finish_scan_page(
-            self, notebook: models.Notebook, page: int,
-            image: pillow.Image) -> None:
-        """Called when scanning of a page finishes."""
-
-    @abc.abstractmethod
-    def on_finish(self, notebook: models.Notebook) -> None:
-        """Called when scanning process finishes."""
-
-    @abc.abstractmethod
-    def on_error(self, message: str) -> None:
-        """Called when error occurs when working with scanner."""
-
-
-class ScanPreferences:
-    """Used to specify what scanner should do."""
-
-    def __init__(self):
-        self._notebook = None
-        self._append_queue = collections.deque()
-
-    @property
-    def notebook(self) -> models.Notebook:
-        """A notebook which should be scanned."""
-        return self._notebook
-
-    @notebook.setter
-    def notebook(self, notebook: models.Notebook) -> None:
-        self._notebook = notebook
-
-    @property
-    def pages_queue(self) -> collections.deque:
-        """Numbers of pages that should be scanned."""
-        return self._append_queue
-
-
-class Error(Exception):
-    """An error which occurs when working with scanner."""
 
 
 class Scanner:
@@ -97,18 +36,19 @@ class Scanner:
             return devices
         except _sane.error as exception:
             log.exception(exception)
-            raise Error('Failed to load the list of devices')
+            raise scanner.Error('Failed to load the list of devices')
         except KeyboardInterrupt as exception:
             log.exception(exception)
-            raise Error('Keyboard interrupt while loading the list of devices')
+            raise scanner.Error(
+                'Keyboard interrupt while loading the list of devices')
         finally:
             sane.exit()
 
-    def register(self, callback: Callback) -> None:
+    def register(self, callback: scanner.Callback) -> None:
         """Provide callback implementation to subscribe on scanner's events."""
         self.callback = callback
 
-    def scan(self, prefs: ScanPreferences) -> None:
+    def scan(self, prefs: scanner.ScanPreferences) -> None:
         """Perform scanning with given preferences."""
         if not self.conf.scanner_device:
             if self.callback:
@@ -146,8 +86,8 @@ class Scanner:
         return device
 
     def _scan_with_prefs(
-            self, device: sane.SaneDev, prefs: ScanPreferences,
-            callback: Callback) -> None:
+            self, device: sane.SaneDev, prefs: scanner.ScanPreferences,
+            callback: scanner.Callback) -> None:
         """Perform actual scanning."""
         if len(prefs.pages_queue) == 0:
             callback.on_error('Nothing to scan')
@@ -182,4 +122,4 @@ class Scanner:
         if self.callback:
             self.callback.on_error(message)
         else:
-            raise Error(message)
+            raise scanner.Error(message)
