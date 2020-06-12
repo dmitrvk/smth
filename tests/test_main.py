@@ -55,12 +55,6 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 main.main()
                 command.execute.assert_called_once()
 
-    @mock.patch.object(sys, 'argv', ['__main__.py'])
-    def test_no_command(self):
-        output = testutils.capture_stdout(main.main)
-        for command in ['create', 'list', 'scan', 'types']:
-            self.assertIn(command, output)
-
     @mock.patch.object(sys, 'argv', ['__main__.py', 'test'])
     def test_unknown_command(self):
         output = testutils.capture_stdout(main.main)
