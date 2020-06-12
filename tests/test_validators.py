@@ -85,6 +85,14 @@ class TestNotebookValidator(unittest.TestCase):
             ValidationError,
             self.validator.validate_first_page_number, '-5')
 
+        # Number > 100
+        self.assertRaises(
+            ValidationError,
+            self.validator.validate_first_page_number, '5000')
+        self.assertRaises(
+            ValidationError,
+            self.validator.validate_first_page_number, '500')
+
         # Not a number
         self.assertRaises(
             ValidationError,
@@ -108,6 +116,14 @@ class TestScanPreferencesValidator(unittest.TestCase):
         self.assertRaises(
             ValidationError,
             self.validator.validate_number_of_pages_to_append, '-1')
+
+        # Number > 100
+        self.assertRaises(
+            ValidationError,
+            self.validator.validate_number_of_pages_to_append, '5000')
+        self.assertRaises(
+            ValidationError,
+            self.validator.validate_number_of_pages_to_append, '500')
 
         # Not a number
         self.assertRaises(

@@ -51,21 +51,38 @@ class NotebookValidator:
         number = number.strip()
 
         if not number.isnumeric():
-            raise ValidationError(message='Please, enter an integer >= 0.')
+            raise ValidationError(
+                message='Please, enter a number from 0 to 100.')
+
+        if len(number) > 3:
+            raise ValidationError(
+                message='Please, enter a number from 0 to 100')
+
+        if int(number) > 100:
+            raise ValidationError(
+                message='Please, enter a number from 0 to 100')
 
         return True
 
 
-class ScanPreferencesValidator:
+class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
     """Validator for user input when choosing scan preferences."""
 
-    def validate_number_of_pages_to_append(self, number: str) -> bool:
+    def validate_number_of_pages_to_append(self, number: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
         """Allow empty value or an integer > 0."""
         if len(number.strip()) == 0:
             return True
 
         if not number.isnumeric():
             raise ValidationError(
-                message='Please, enter an integer > 0 or leave empty.')
+                message='Please, enter a number from 0 to 100 or leave empty.')
+
+        if len(number) > 3:
+            raise ValidationError(
+                message='Please, enter a number from 0 to 100 or leave empty.')
+
+        if int(number) > 100:
+            raise ValidationError(
+                message='Please, enter a number from 0 to 100 or leave empty.')
 
         return True
