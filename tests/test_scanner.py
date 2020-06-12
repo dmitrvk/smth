@@ -19,12 +19,13 @@ class ScannerTestCase(unittest.TestCase):
         sane.exit = mock.MagicMock()
 
     def test_get_devices(self):
-        sane.get_devices.return_value = [
-            ('device', 'vendor', 'model', 'type'),
-        ]
+        sane_devices = [('device', 'vendor', 'model', 'type')]
+        sane.get_devices.return_value = sane_devices
 
         devices = scanner.Scanner.get_devices()
-        self.assertListEqual(devices, ['device'])
+        expected = [scanner.Device(*sane_devices[0])]
+
+        self.assertListEqual(devices, expected)
 
     def test_get_devices_sane_error(self):
         sane.get_devices.side_effect = _sane.error

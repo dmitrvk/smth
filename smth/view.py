@@ -1,10 +1,10 @@
+import operator
 import sys
 from typing import Dict, List
 
 import PyInquirer as inquirer
 
-from smth import models
-from smth import validators
+from smth import models, scanner, validators
 
 
 class View:
@@ -56,21 +56,43 @@ class View:
 
         return self._prompt(questions)
 
-    def ask_for_device(self, devices: List[str]) -> str:
-        """Show list of devices and let user choose one."""
+    def ask_for_device(self, devices: List[scanner.Device]) -> str:
+        """Show list of devices and let user choose one. Return device name."""
+        def prepare_choices(devices: List[scanner.Device]) -> List[str]:
+            """Prepare device choices for user."""
+            choices = []
+
+            for dev in devices:
+                choices.append(
+                    f'{dev.name} ({dev.vendor} {dev.model} {dev.type})')
+
+            choices.sort()
+            return choices
+
+        def extract_device_name_from_choice(choice: str) -> str:
+            """Return only device name from formatted string."""
+            if choice:
+                return choice.split('(')[0].rstrip()
+            else:
+                return ''
+
+        devices.sort(key=operator.attrgetter('name'))
+
+        choices = prepare_choices(devices)
+
         questions = [
             {
                 'type': 'list',
                 'name': 'device',
                 'message': 'Choose device',
-                'choices': sorted(devices),
+                'choices': choices,
             },
         ]
 
         answers = self._prompt(questions)
 
         if answers:
-            return answers.get('device', '')
+            return extract_device_name_from_choice(answers.get('device', ''))
         else:
             return ''
 

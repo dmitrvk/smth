@@ -1,5 +1,6 @@
+import collections
+import itertools
 import logging
-import operator
 import time
 from typing import List
 
@@ -9,6 +10,8 @@ import sane
 from smth import config, scanner
 
 log = logging.getLogger(__name__)
+
+Device = collections.namedtuple('Device', 'name vendor model type')
 
 
 class Scanner:
@@ -25,15 +28,14 @@ class Scanner:
         self.conf = conf
 
     @staticmethod
-    def get_devices() -> List[str]:
+    def get_devices() -> List[Device]:
         """Load the list of available devices.
 
         Equivalent to call `scanimage -L`.
         Return the list with devices' names."""
         try:
             sane.init()
-            devices = list(map(operator.itemgetter(0), sane.get_devices()))
-            return devices
+            return list(itertools.starmap(Device, sane.get_devices()))
         except _sane.error as exception:
             log.exception(exception)
             raise scanner.Error('Failed to load the list of devices')

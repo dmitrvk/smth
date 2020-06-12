@@ -83,9 +83,8 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
 
             try:
                 devices = scanner.Scanner.get_devices()
-                device = self.view.ask_for_device(devices)
-                self.view.show_separator()
-                self.conf.scanner_device = device
+                device_name = self.view.ask_for_device(devices)
+                self.conf.scanner_device = device_name
 
             except scanner.Error as exception:
                 self.view.show_error(f'Scanner error: {exception}.')
