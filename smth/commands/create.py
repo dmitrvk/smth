@@ -19,7 +19,14 @@ class CreateCommand(commands.Command):
         self.view = view_
 
     def execute(self) -> None:
-        """Ask user for new notebook info, save notebook in the database."""
+        """Ask user for new notebook info, save notebook in the database.
+
+
+        If path to PDF ends with '.pdf', it is treated as a file.  That allows
+        user to specify custom name for notebook's file.  Otherwise, treat the
+        path as a directory.  The file will be stored in that directory.
+        If the directory does not exist, create it with all parent directories.
+        """
         try:
             types = self.db.get_type_titles()
             validator = validators.NotebookValidator(self.db)
