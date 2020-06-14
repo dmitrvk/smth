@@ -1,4 +1,4 @@
-class NotebookType:
+class NotebookType:  # pylint: disable=too-many-instance-attributes
     """Contains information about notebook like its page size."""
 
     def __init__(self, title: str, page_width: int, page_height: int):

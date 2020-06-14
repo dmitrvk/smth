@@ -34,7 +34,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
             'title': 'notebook',
             'type': 'Type',
             'path': str(path),
-            'first_page_number': '1'
+            'first_page_number': 1
         }
 
         self.view = mock.MagicMock()
@@ -52,7 +52,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
             'title': 'notebook',
             'type': 'Type',
             'path': str(dir_path),
-            'first_page_number': '1'
+            'first_page_number': 1
         }
 
         self.view.ask_for_new_notebook_info.return_value = answers

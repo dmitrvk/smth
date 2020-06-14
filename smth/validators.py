@@ -10,10 +10,11 @@ from smth import db, models
 
 class NotebookValidator:
     """Validate user input when manipulating notebooks."""
-    def __init__(self, db: db.DB):
-        self._db = db
+    def __init__(self, db_: db.DB):
+        self._db = db_
 
     def validate_title(self, title: str) -> bool:
+        """Check if title is not empty and not already taken."""
         title = title.strip()
 
         if len(title) == 0:
@@ -28,18 +29,20 @@ class NotebookValidator:
 
         return True
 
-    def validate_type(self, type: str) -> bool:
-        type = type.strip()
+    def validate_type(self, type_: str) -> bool:
+        """Check if type is not empty and exists."""
+        type_ = type_.strip()
 
-        if len(type.strip()) == 0:
+        if len(type_.strip()) == 0:
             raise ValidationError(message='Notebook type must not be empty')
 
-        if not self._db.type_exists(type):
-            raise ValidationError(message=f"Type '{type}' does not exist")
+        if not self._db.type_exists(type_):
+            raise ValidationError(message=f"Type '{type_}' does not exist")
 
         return True
 
     def validate_path(self, path: str) -> bool:
+        """Check if path is not empty and not already taken."""
         path = path.strip()
 
         if len(path) == 0:
@@ -58,7 +61,8 @@ class NotebookValidator:
 
         return True
 
-    def validate_first_page_number(self, number: str) -> bool:
+    def validate_first_page_number(self, number: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
+        """Check if number is an integer from 0 to 100."""
         number = number.strip()
 
         if not number.isnumeric():
@@ -83,7 +87,9 @@ class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
         self._notebook = notebook
 
     def validate_number_of_pages_to_append(self, number: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Allow empty value or an integer > 0."""
+        """Check if number is an integer from 0 to 100.
+
+        Allow empty value."""
         if len(number.strip()) == 0:
             return True
 
@@ -102,6 +108,11 @@ class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
         return True
 
     def validate_pages_to_replace(self, pages: str) -> bool:
+        """Check if given string with pages is correct.
+
+        Given string must contain integers with page numbers separated with a
+        space.  Ranges (e.g. 3-5) are allowed.  Pages must exist in a
+        notebook."""
         def raise_error(item: str, reason: str) -> NoReturn:
             raise ValidationError(
                 message=f"'{item}' is invalid: {reason}.")

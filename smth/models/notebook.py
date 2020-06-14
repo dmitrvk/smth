@@ -1,8 +1,12 @@
+import pathlib
+
 from .notebook_type import NotebookType
 
 
-class Notebook:
+class Notebook:  # pylint: disable=too-many-instance-attributes
     """Collection of pages orderded by their numbers."""
+
+    PAGES_ROOT = pathlib.Path('~/.local/share/smth/pages').expanduser()
 
     def __init__(self, title: str, notebook_type: NotebookType, path: str):
         self._id = -1
@@ -67,6 +71,10 @@ class Notebook:
             self._first_page_number = number
         else:
             self._first_page_number = 1
+
+    def get_page_path(self, page: int) -> pathlib.Path:
+        """Return absolute path to notebook's page with given number."""
+        return self.PAGES_ROOT / self.title / f'{page}.jpg'
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__) and

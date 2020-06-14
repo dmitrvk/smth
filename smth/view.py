@@ -1,10 +1,12 @@
 import operator
 import sys
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import PyInquirer as inquirer
 
 from smth import models, scanner, validators
+
+Answers = Dict[str, Any]
 
 
 class View:
@@ -15,8 +17,6 @@ class View:
         inquirer.Token.Selected: '#673ab7',
         inquirer.Token.Pointer: '#673ab7',
     })
-
-    Answers = Dict[str, str]
 
     def ask_for_new_notebook_info(
             self, types: List[str],
@@ -54,7 +54,16 @@ class View:
             },
         ]
 
-        return self._prompt(questions)
+        answers = self._prompt(questions)
+
+        if answers:
+            answers['title'] = answers['title'].strip()
+            answers['type'] = answers['type'].strip()
+            answers['path'] = answers['path'].strip()
+            answers['first_page_number'] = int(answers['first_page_number'])
+            return answers
+
+        return {}
 
     def ask_for_device(self, devices: List[scanner.Device]) -> str:
         """Show list of devices and let user choose one. Return device name."""
@@ -73,8 +82,8 @@ class View:
             """Return only device name from formatted string."""
             if choice:
                 return choice.split('(')[0].rstrip()
-            else:
-                return ''
+
+            return ''
 
         devices.sort(key=operator.attrgetter('name'))
 
@@ -93,10 +102,11 @@ class View:
 
         if answers:
             return extract_device_name_from_choice(answers.get('device', ''))
-        else:
-            return ''
+
+        return ''
 
     def ask_for_notebook_to_scan(self, notebooks: List[str]) -> str:
+        """Ask for notebook which user wants to scan and return its title."""
         questions = [
             {
                 'type': 'list',
@@ -110,12 +120,12 @@ class View:
 
         if answers:
             return answers['notebook'].strip()
-        else:
-            return ''
+
+        return ''
 
     def ask_for_pages_to_append(
             self, validator: validators.ScanPreferencesValidator) -> int:
-        """Ask user for notebook parameters and return dict with answers.
+        """Ask user for number of pages user wants to append to a notebook.
 
         Validate answers with given validator."""
         questions = [
@@ -132,10 +142,10 @@ class View:
         if answers:
             if answers['append']:
                 return int(answers['append'].strip())
-            else:
-                return 0
-        else:
+
             return 0
+
+        return 0
 
     def ask_for_pages_to_replace(
             self, validator: validators.ScanPreferencesValidator) -> List[str]:
@@ -158,37 +168,40 @@ class View:
             replace = list(map(operator.methodcaller('strip'), replace))
             replace = list(filter(lambda s: s != '', replace))
             return replace
-        else:
-            return []
 
-    def show_notebooks(self, notebooks: List[models.Notebook]) -> None:
+        return []
+
+    def show_notebooks(self, notebooks: List[models.Notebook]) -> None:  # pylint: disable=no-self-use  # noqa: E501
         """Show list of notebooks or message if no notebooks found."""
         if notebooks and len(notebooks) > 0:
             print('All notebooks:')
-            for n in notebooks:
-                type = n.type.title
+            for notebook in notebooks:
+                type_ = notebook.type.title
 
-                if n.total_pages == 1:
-                    print(f'  {n.title}  {n.total_pages} page  ({type})')
+                if notebook.total_pages == 1:
+                    print(f'  {notebook.title}  '
+                          f'{notebook.total_pages} page  ({type_})')
                 else:
-                    print(f'  {n.title}  {n.total_pages} pages  ({type})')
+                    print(f'  {notebook.title}  '
+                          f'{notebook.total_pages} pages  ({type_})')
         else:
             print('No notebooks found.')
 
-    def show_types(self, types: List[models.NotebookType]) -> None:
+    def show_types(self, types: List[models.NotebookType]) -> None:  # pylint: disable=no-self-use  # noqa: E501
         """Show list of notebook types or message if no types found."""
         if types and len(types) > 0:
             print('All notebook types:')
-            for t in types:
-                print(f'  {t.title}  {t.page_width}x{t.page_height}mm')
+            for type_ in types:
+                print(f'  {type_.title}  '
+                      f'{type_.page_width}x{type_.page_height}mm')
         else:
             print('No types found.')
 
-    def show_info(self, message: str) -> None:
+    def show_info(self, message: str) -> None:  # pylint: disable=no-self-use
         """Print message to stdout."""
         print(message)
 
-    def show_error(self, message: str) -> None:
+    def show_error(self, message: str) -> None:  # pylint: disable=no-self-use
         """Print message to stderr."""
         print(message, file=sys.stderr)
 

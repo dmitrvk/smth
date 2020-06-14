@@ -2,22 +2,25 @@ import logging
 import os
 import pathlib
 import sys
+from typing import List
 
 import fpdf
 
-from smth import commands, db, models, validators, view
+from smth import db, models, validators, view
+
+from . import command
 
 log = logging.getLogger(__name__)
 
 
-class CreateCommand(commands.Command):
+class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Creates a new notebook."""
 
     def __init__(self, db_: db.DB, view_: view.View):
-        self.db = db_
+        self._db = db_
         self.view = view_
 
-    def execute(self) -> None:
+    def execute(self, args: List[str] = None) -> None:
         """Ask user for new notebook info, save notebook in the database.
 
 
@@ -27,8 +30,8 @@ class CreateCommand(commands.Command):
         If the directory does not exist, create it with all parent directories.
         """
         try:
-            types = self.db.get_type_titles()
-            validator = validators.NotebookValidator(self.db)
+            types = self._db.get_type_titles()
+            validator = validators.NotebookValidator(self._db)
 
             answers = self.view.ask_for_new_notebook_info(types, validator)
 
@@ -37,25 +40,28 @@ class CreateCommand(commands.Command):
                 self.view.show_info('Nothing created.')
                 return
 
-            title = answers['title'].strip()
-            type_ = self.db.get_type_by_title(answers['type'].strip())
-            path = self._expand_path(answers['path'])
+            title = answers['title']
+            type_ = self._db.get_type_by_title(answers['type'])
+            path = pathlib.Path(
+                os.path.expandvars(answers['path'])).expanduser().resolve()
 
-            if path.endswith('.pdf'):
-                dir_ = os.path.dirname(path)
-                if not os.path.exists(dir_):
-                    pathlib.Path(dir_).mkdir(parents=True)
+            if str(path).endswith('.pdf'):
+                if not path.parent.exists():
+                    path.parent.mkdir(parents=True, exist_ok=True)
             else:
-                if not os.path.exists(path):
-                    pathlib.Path(path).mkdir(parents=True)
-                path = os.path.join(path, f'{title}.pdf')
+                if not path.exists():
+                    path.mkdir(parents=True, exist_ok=True)
+                path = path / f'{title}.pdf'
 
             notebook = models.Notebook(title, type_, path)
-            notebook.first_page_number = int(answers['first_page_number'])
+            notebook.first_page_number = answers['first_page_number']
 
-            self._create_empty_pdf(notebook.path)
+            pdf = fpdf.FPDF()
+            pdf.add_page()
+            pdf.output(path)
+            log.info("Created empty PDF at '{path}'")
 
-            self.db.save_notebook(notebook)
+            self._db.save_notebook(notebook)
 
             pages_root = os.path.expanduser('~/.local/share/smth/pages')
             pages_dir = os.path.join(pages_root, notebook.title)
@@ -69,15 +75,3 @@ class CreateCommand(commands.Command):
             log.exception(exception)
             self.view.show_error(str(exception))
             sys.exit(1)
-
-    def _expand_path(self, path: str) -> str:
-        """Return full absolute path."""
-        path = str(path).strip()
-        path = os.path.expandvars(os.path.expanduser(path))
-        return os.path.abspath(path)
-
-    def _create_empty_pdf(self, path: str) -> None:
-        pdf = fpdf.FPDF()
-        pdf.add_page()
-        pdf.output(path)
-        log.info("Created empty PDF at '{path}'")

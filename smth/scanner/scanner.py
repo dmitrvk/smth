@@ -7,7 +7,9 @@ from typing import List
 import _sane
 import sane
 
-from smth import config, scanner
+from smth import config
+
+from . import callback, error, preferences
 
 log = logging.getLogger(__name__)
 
@@ -38,19 +40,19 @@ class Scanner:
             return list(itertools.starmap(Device, sane.get_devices()))
         except _sane.error as exception:
             log.exception(exception)
-            raise scanner.Error('Failed to load the list of devices')
+            raise error.Error('Failed to load the list of devices')
         except KeyboardInterrupt as exception:
             log.exception(exception)
-            raise scanner.Error(
+            raise error.Error(
                 'Keyboard interrupt while loading the list of devices')
         finally:
             sane.exit()
 
-    def register(self, callback: scanner.Callback) -> None:
+    def register(self, callback_: callback.Callback) -> None:
         """Provide callback implementation to subscribe on scanner's events."""
-        self.callback = callback
+        self.callback = callback_
 
-    def scan(self, prefs: scanner.ScanPreferences) -> None:
+    def scan(self, prefs: preferences.ScanPreferences) -> None:
         """Perform scanning with given preferences."""
         if not self.conf.scanner_device:
             if self.callback:
@@ -64,7 +66,7 @@ class Scanner:
             try:
                 sane.init()
                 device = self._get_device(self.conf.scanner_device)
-                self._scan_with_prefs(device, prefs, self.callback)
+                self._scan_with_prefs(device, prefs)
 
             except _sane.error as exception:
                 self._handle_error(str(exception))
@@ -88,11 +90,12 @@ class Scanner:
         return device
 
     def _scan_with_prefs(
-            self, device: sane.SaneDev, prefs: scanner.ScanPreferences,
-            callback: scanner.Callback) -> None:
+            self,
+            device: sane.SaneDev,
+            prefs: preferences.ScanPreferences) -> None:
         """Perform actual scanning."""
         if len(prefs.pages_queue) == 0:
-            callback.on_error('Nothing to scan')
+            self.callback.on_error('Nothing to scan')
             return
 
         if self.callback:
@@ -101,8 +104,8 @@ class Scanner:
         while len(prefs.pages_queue) > 0:
             page = prefs.pages_queue.popleft()
 
-            if callback:
-                callback.on_start_scan_page(page)
+            if self.callback:
+                self.callback.on_start_scan_page(page)
 
             image = device.scan()
 
@@ -113,8 +116,8 @@ class Scanner:
             if len(prefs.pages_queue) > 0:
                 time.sleep(self.conf.scanner_delay)
 
-            if callback:
-                callback.on_finish_scan_page(
+            if self.callback:
+                self.callback.on_finish_scan_page(
                     prefs.notebook, page, image)
 
         if self.callback:
@@ -125,4 +128,4 @@ class Scanner:
         if self.callback:
             self.callback.on_error(message)
         else:
-            raise scanner.Error(message)
+            raise error.Error(message)

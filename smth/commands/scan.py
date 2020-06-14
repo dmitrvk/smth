@@ -1,21 +1,22 @@
 import logging
-import pathlib
 import sys
 from typing import List
 
 import fpdf
 import PIL.Image as pillow
 
-from smth import commands, config, db, models, scanner, validators, view
+from smth import config, db, models, scanner, validators, view
+
+from . import command
 
 log = logging.getLogger(__name__)
 
 
-class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
+class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Allows to scan a notebook."""
 
     def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
-        self.db = db_
+        self._db = db_
         self.view = view_
         self.conf = conf
 
@@ -24,7 +25,7 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
         notebooks = []
 
         try:
-            notebooks = self.db.get_notebook_titles()
+            notebooks = self._db.get_notebook_titles()
         except db.Error as exception:
             log.exception(exception)
             self.view.show_error(str(exception))
@@ -39,46 +40,9 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
             self.conf.scanner_device = ''
 
         scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(self.ScannerCallback(self.db, self.view, self.conf))
+        scanner_.register(self.ScannerCallback(self._db, self.view, self.conf))
 
-        prefs = scanner.ScanPreferences()
-
-        notebook_title = self.view.ask_for_notebook_to_scan(notebooks)
-
-        if not notebook_title:
-            self.view.show_error('No notebook chosen.')
-            sys.exit(1)
-
-        try:
-            prefs.notebook = self.db.get_notebook_by_title(notebook_title)
-
-        except db.Error as exception:
-            self.view.show_error(str(exception))
-            log.exception(exception)
-            sys.exit(1)
-
-        validator = validators.ScanPreferencesValidator(prefs.notebook)
-        append = self.view.ask_for_pages_to_append(validator)
-
-        if prefs.notebook.total_pages > 0:
-            replace_answer = self.view.ask_for_pages_to_replace(validator)
-
-            replace = []
-            for item in replace_answer:
-                if '-' in item:
-                    range_start, range_end = map(int, item.split('-'))
-                    replace.extend(list(range(range_start, range_end + 1)))
-                else:
-                    replace.append(int(item))
-            replace = list(set(replace))  # Remove duplicates
-            replace.sort()
-            prefs.pages_queue.extend(replace)
-
-        for i in range(0, append):
-            page = (prefs.notebook.first_page_number +
-                    prefs.notebook.total_pages + i)
-
-            prefs.pages_queue.append(page)
+        prefs = self._make_scan_prefs(notebooks)
 
         try:
             scanner_.scan(prefs)
@@ -89,8 +53,10 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
             sys.exit(1)
 
     class ScannerCallback(scanner.Callback):
+        """Callback implementation defining what to do on scanner events."""
+
         def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
-            self.db = db_
+            self._db = db_
             self.view = view_
             self.conf = conf
 
@@ -123,15 +89,14 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
         def on_finish_scan_page(
                 self, notebook: models.Notebook, page: int,
                 image: pillow.Image) -> None:
-            page_path = self._get_page_path(notebook, page)
-
+            page_path = notebook.get_page_path(page)
             image.save(str(page_path))
 
             self.view.show_info(f'Page {page} saved at {page_path}')
             log.info("Scanned page %s of '%s'", page, notebook.title)
 
         def on_finish(self, notebook: models.Notebook):
-            self.db.save_notebook(notebook)
+            self._db.save_notebook(notebook)
 
             self.view.show_separator()
             self.view.show_info('Creating PDF...')
@@ -142,10 +107,8 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
 
             for i in range(0, notebook.total_pages):
                 page = notebook.first_page_number + i
-                page_path = self._get_page_path(notebook, page)
-                pdf.add_page()
                 pdf.image(
-                    str(page_path), 0, 0,
+                    str(notebook.get_page_path(page)), 0, 0,
                     notebook.type.page_width, notebook.type.page_height)
 
             pdf.output(notebook.path, 'F')
@@ -160,7 +123,45 @@ class ScanCommand(commands.Command):  # pylint: disable=too-few-public-methods
             log.error('Scanner error: %s.', message)
             sys.exit(1)
 
-        def _get_page_path(
-                self, notebook: models.Notebook, page: int) -> pathlib.Path:
-            pages_root = pathlib.Path('~/.local/share/smth/pages').expanduser()
-            return pages_root / notebook.title / f'{page}.jpg'
+    def _make_scan_prefs(
+            self, notebooks: models.Notebook) -> scanner.ScanPreferences():
+        prefs = scanner.ScanPreferences()
+
+        notebook_title = self.view.ask_for_notebook_to_scan(notebooks)
+
+        if not notebook_title:
+            self.view.show_error('No notebook chosen.')
+            sys.exit(1)
+
+        try:
+            prefs.notebook = self._db.get_notebook_by_title(notebook_title)
+
+        except db.Error as exception:
+            self.view.show_error(str(exception))
+            log.exception(exception)
+            sys.exit(1)
+
+        validator = validators.ScanPreferencesValidator(prefs.notebook)
+        append = self.view.ask_for_pages_to_append(validator)
+
+        if prefs.notebook.total_pages > 0:
+            replace_answer = self.view.ask_for_pages_to_replace(validator)
+
+            replace = []
+            for item in replace_answer:
+                if '-' in item:
+                    range_start, range_end = map(int, item.split('-'))
+                    replace.extend(list(range(range_start, range_end + 1)))
+                else:
+                    replace.append(int(item))
+            replace = list(set(replace))  # Remove duplicates
+            replace.sort()
+            prefs.pages_queue.extend(replace)
+
+        for i in range(0, append):
+            page = (prefs.notebook.first_page_number +
+                    prefs.notebook.total_pages + i)
+
+            prefs.pages_queue.append(page)
+
+        return prefs

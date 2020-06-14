@@ -10,7 +10,12 @@ class ViewTestCase(unittest.TestCase):
         self.view = view.View()
 
     def test_ask_for_new_notebook_info(self):
-        answers_mock = {'answer': 'test'}
+        answers_mock = {
+            'title': 'notebook',
+            'type': 'A4',
+            'path': '/test/path.pdf',
+            'first_page_number': 1,
+        }
 
         with mock.patch('PyInquirer.prompt', return_value=answers_mock):
             validator = mock.MagicMock()

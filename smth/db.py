@@ -1,3 +1,5 @@
+"""This module provides an interface to sqlite database."""
+
 import logging
 import sqlite3
 from typing import List
@@ -7,7 +9,6 @@ from smth import models
 
 class Error(Exception):
     """An error which occurs when working with a database."""
-    pass
 
 
 log = logging.getLogger(__name__)
@@ -73,6 +74,8 @@ SQL_TYPE_COUNT = '''SELECT COUNT(*) FROM notebook_type WHERE title=?'''
 
 
 class DB:
+    """Class used to perform operation with the database."""
+
     def __init__(self, path='smth.db'):
         """Create tables and default notebook type if necessary."""
         self._path = path
@@ -88,8 +91,8 @@ class DB:
                 connection.execute(SQL_CREATE_TABLE_NOTEBOOK_TYPE)
                 log.info("Table 'notebook_type' created")
 
-                typeA4 = models.NotebookType('A4', 210, 297)
-                self.save_type(typeA4)
+                type_a4 = models.NotebookType('A4', 210, 297)
+                self.save_type(type_a4)
                 log.info("Type 'A4' created")
 
             cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook',))
@@ -101,14 +104,16 @@ class DB:
 
             connection.commit()
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to initialize the database', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to initialize the database', exception)
 
         finally:
             if connection:
                 connection.close()
 
     def get_notebooks(self) -> List[models.Notebook]:
+        """Return all notebooks from the database."""
         notebooks = []
         connection = None
 
@@ -117,8 +122,9 @@ class DB:
             for row in connection.execute(SQL_GET_NOTEBOOKS):
                 notebooks.append(self._make_notebook_from_row(row))
 
-        except (sqlite3.Error, Error) as e:
-            self._handle_error('Failed to get notebooks from database', e)
+        except (sqlite3.Error, Error) as exception:
+            self._handle_error(
+                'Failed to get notebooks from database', exception)
 
         finally:
             if connection:
@@ -139,8 +145,9 @@ class DB:
             if row:
                 notebook = self._make_notebook_from_row(row)
 
-        except (sqlite3.Error, Error) as e:
-            self._handle_error('Failed to get notebook from database', e)
+        except (sqlite3.Error, Error) as exception:
+            self._handle_error(
+                'Failed to get notebook from database', exception)
 
         finally:
             if connection:
@@ -161,8 +168,9 @@ class DB:
             if row:
                 notebook = self._make_notebook_from_row(row)
 
-        except (sqlite3.Error, Error) as e:
-            self._handle_error('Failed to get notebook from database', e)
+        except (sqlite3.Error, Error) as exception:
+            self._handle_error(
+                'Failed to get notebook from database', exception)
 
         finally:
             if connection:
@@ -180,8 +188,9 @@ class DB:
             for row in connection.execute(SQL_GET_NOTEBOOK_TITLES):
                 titles.append(row['title'])
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to get notebooks from database', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to get notebooks from database', exception)
 
         finally:
             if connection:
@@ -199,8 +208,9 @@ class DB:
             for row in connection.execute(SQL_GET_TYPES):
                 types.append(self._make_type_from_row(row))
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to get notebook types from database', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to get notebook types from database', exception)
 
         finally:
             if connection:
@@ -218,8 +228,9 @@ class DB:
             for row in connection.execute(SQL_GET_TYPE_TITLES):
                 titles.append(row['title'])
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to get notebooks from database', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to get notebooks from database', exception)
 
         finally:
             if connection:
@@ -227,20 +238,21 @@ class DB:
 
         return titles
 
-    def get_type_by_id(self, id: int) -> models.NotebookType:
+    def get_type_by_id(self, id_: int) -> models.NotebookType:
         """Return notebook type with specified id from database."""
         type_ = models.NotebookType('', 0, 0)
         connection = None
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_GET_TYPE_BY_ID, (id,))
+            cursor = connection.execute(SQL_GET_TYPE_BY_ID, (id_,))
             row = cursor.fetchone()
             if row:
                 type_ = self._make_type_from_row(row)
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to get notebook type from database', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to get notebook type from database', exception)
 
         finally:
             if connection:
@@ -249,6 +261,7 @@ class DB:
         return type_
 
     def get_type_by_title(self, title: str) -> models.NotebookType:
+        """Return type with given title from the database."""
         type_ = models.NotebookType('', 0, 0)
         connection = None
 
@@ -259,8 +272,9 @@ class DB:
             if row:
                 type_ = self._make_type_from_row(row)
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to get notebook type from database', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to get notebook type from database', exception)
 
         finally:
             if connection:
@@ -269,6 +283,7 @@ class DB:
         return type_
 
     def notebook_exists(self, title: str) -> bool:
+        """Check if notebook with the given title exists in the database."""
         exists = False
         connection = None
 
@@ -277,8 +292,9 @@ class DB:
             cursor = connection.execute(SQL_NOTEBOOK_COUNT, (title,))
             exists = cursor.fetchone()[0] > 0
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to check if notebook exists', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to check if notebook exists', exception)
 
         finally:
             if connection:
@@ -287,6 +303,7 @@ class DB:
         return exists
 
     def type_exists(self, title: str) -> bool:
+        """Check if type with the given title exists in the database."""
         exists = False
 
         connection = None
@@ -296,8 +313,9 @@ class DB:
             cursor = connection.execute(SQL_TYPE_COUNT, (title,))
             exists = cursor.fetchone()[0] > 0
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to check if notebook type exists', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to check if notebook type exists', exception)
 
         finally:
             if connection:
@@ -326,29 +344,30 @@ class DB:
 
             connection.commit()
 
-        except sqlite3.Error as e:
-            self._handle_error('Failed to save notebook', e)
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to save notebook', exception)
 
         finally:
             if connection:
                 connection.close()
 
-    def save_type(self, type: models.NotebookType) -> None:
+    def save_type(self, type_: models.NotebookType) -> None:
         """Create or update notebook type."""
         connection = None
 
         try:
             connection = sqlite3.connect(self._path)
 
-            if type.id < 0:
+            if type_.id < 0:
                 values = (
-                    type.title, type.page_width, type.page_height,
-                    type.pages_paired)
+                    type_.title, type_.page_width, type_.page_height,
+                    type_.pages_paired)
                 connection.execute(SQL_CREATE_TYPE, values)
             else:
                 values = (
-                    type.title, type.page_width, type.page_height,
-                    type.pages_paired, type.id)
+                    type_.title, type_.page_width, type_.page_height,
+                    type_.pages_paired, type_.id)
                 connection.execute(SQL_UPDATE_TYPE, values)
 
             connection.commit()
@@ -367,10 +386,10 @@ class DB:
         connection.row_factory = sqlite3.Row
         return connection
 
-    def _handle_error(self, message: str, e: sqlite3.Error) -> None:
+    def _handle_error(self, message: str, error: sqlite3.Error) -> None:  # pylint: disable=no-self-use  # noqa: E501
         """Log error message and propagate db.Error."""
         log.exception(message)
-        raise Error(f'{message}: {e}.') from None
+        raise Error(f'{message}: {error}.') from None
 
     def _make_notebook_from_row(self, row: sqlite3.Row) -> models.Notebook:
         type_ = self.get_type_by_id(row['type_id'])
@@ -380,7 +399,7 @@ class DB:
         notebook.first_page_number = row['first_page_number']
         return notebook
 
-    def _make_type_from_row(self, row: sqlite3.Row) -> models.NotebookType:
+    def _make_type_from_row(self, row: sqlite3.Row) -> models.NotebookType:  # pylint: disable=no-self-use  # noqa: E501
         type_ = models.NotebookType(
             row['title'], row['page_width'], row['page_height'])
         type_.id = row['id']
