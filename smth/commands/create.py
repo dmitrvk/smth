@@ -1,12 +1,11 @@
 import logging
 import os
 import pathlib
-import sys
 from typing import List
 
 import fpdf
 
-from smth import db, models, validators, view
+from smth import db, models, validators
 
 from . import command
 
@@ -15,10 +14,6 @@ log = logging.getLogger(__name__)
 
 class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Creates a new notebook."""
-
-    def __init__(self, db_: db.DB, view_: view.View):
-        self._db = db_
-        self.view = view_
 
     def execute(self, args: List[str] = None) -> None:
         """Ask user for new notebook info, save notebook in the database.
@@ -72,6 +67,4 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
             log.info(message)
             self.view.show_info(message)
         except db.Error as exception:
-            log.exception(exception)
-            self.view.show_error(str(exception))
-            sys.exit(1)
+            self._exit_with_error(exception)

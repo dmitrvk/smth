@@ -1,5 +1,4 @@
 import logging
-import sys
 from typing import List
 
 import fpdf
@@ -16,8 +15,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Allows to scan a notebook."""
 
     def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
-        self._db = db_
-        self.view = view_
+        super().__init__(db_, view_)
         self.conf = conf
 
     def execute(self, args: List[str] = None) -> None:
@@ -27,9 +25,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         try:
             notebooks = self._db.get_notebook_titles()
         except db.Error as exception:
-            log.exception(exception)
-            self.view.show_error(str(exception))
-            sys.exit(1)
+            self._exit_with_error(exception)
 
         if not notebooks:
             message = 'No notebooks found. Create one with `smth create`.'
@@ -40,7 +36,8 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.conf.scanner_device = ''
 
         scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(self.ScannerCallback(self._db, self.view, self.conf))
+        scanner_.register(self.ScannerCallback(
+            self, self._db, self.view, self.conf))
 
         prefs = self._make_scan_prefs(notebooks)
 
@@ -48,14 +45,15 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             scanner_.scan(prefs)
 
         except scanner.Error as exception:
-            self.view.show_error(f'{exception}.')
-            log.exception(exception)
-            sys.exit(1)
+            self._exit_with_error(exception)
 
     class ScannerCallback(scanner.Callback):
         """Callback implementation defining what to do on scanner events."""
 
-        def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
+        def __init__(
+                self, command_: command.Command,
+                db_: db.DB, view_: view.View, conf: config.Config):
+            self._command = command_
             self._db = db_
             self.view = view_
             self.conf = conf
@@ -69,9 +67,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 self.conf.scanner_device = device_name
 
             except scanner.Error as exception:
-                self.view.show_error(f'Scanner error: {exception}.')
-                log.exception(exception)
-                sys.exit(1)
+                self.on_error(str(exception))
 
         def on_start(self, device_name: str, pages_queue: List[int]) -> None:
             self.view.show_separator()
@@ -119,9 +115,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.view.show_info('Done.')
 
         def on_error(self, message):
-            self.view.show_error(f'Scanner error: {message}.')
-            log.error('Scanner error: %s.', message)
-            sys.exit(1)
+            self._command._exit_with_error(message)
 
     def _make_scan_prefs(
             self, notebooks: models.Notebook) -> scanner.ScanPreferences():
@@ -130,16 +124,13 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         notebook_title = self.view.ask_for_notebook_to_scan(notebooks)
 
         if not notebook_title:
-            self.view.show_error('No notebook chosen.')
-            sys.exit(1)
+            self._exit_with_error('No notebook chosen.')
 
         try:
             prefs.notebook = self._db.get_notebook_by_title(notebook_title)
 
         except db.Error as exception:
-            self.view.show_error(str(exception))
-            log.exception(exception)
-            sys.exit(1)
+            self._exit_with_error(exception)
 
         validator = validators.ScanPreferencesValidator(prefs.notebook)
         append = self.view.ask_for_pages_to_append(validator)
