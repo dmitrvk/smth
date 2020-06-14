@@ -8,7 +8,8 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
 
     PAGES_ROOT = pathlib.Path('~/.local/share/smth/pages').expanduser()
 
-    def __init__(self, title: str, notebook_type: NotebookType, path: str):
+    def __init__(
+            self, title: str, notebook_type: NotebookType, path: pathlib.Path):
         self._id = -1
         self.title = title
         self._type = notebook_type
@@ -40,12 +41,12 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
         return self._type
 
     @property
-    def path(self) -> int:
+    def path(self) -> pathlib.Path:
         """Path to PDF file in the filesystem."""
         return self._path
 
     @path.setter
-    def path(self, path) -> None:
+    def path(self, path: pathlib.Path) -> None:
         self._path = path
 
     @property

@@ -1,6 +1,7 @@
 """This module provides an interface to sqlite database."""
 
 import logging
+import pathlib
 import sqlite3
 from typing import List
 
@@ -332,12 +333,12 @@ class DB:
 
             if notebook.id < 0:
                 values = (
-                    notebook.title, notebook.type.title, notebook.path,
+                    notebook.title, notebook.type.title, str(notebook.path),
                     notebook.total_pages, notebook.first_page_number)
                 connection.execute(SQL_CREATE_NOTEBOOK, values)
             else:
                 values = (
-                    notebook.title, notebook.type.title, notebook.path,
+                    notebook.title, notebook.type.title, str(notebook.path),
                     notebook.total_pages, notebook.first_page_number,
                     notebook.id)
                 connection.execute(SQL_UPDATE_NOTEBOOK, values)
@@ -393,7 +394,8 @@ class DB:
 
     def _make_notebook_from_row(self, row: sqlite3.Row) -> models.Notebook:
         type_ = self.get_type_by_id(row['type_id'])
-        notebook = models.Notebook(row['title'], type_, row['path'])
+        notebook = models.Notebook(
+            row['title'], type_, pathlib.Path(row['path']))
         notebook.id = row['id']
         notebook.total_pages = row['total_pages']
         notebook.first_page_number = row['first_page_number']

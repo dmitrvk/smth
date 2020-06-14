@@ -58,7 +58,7 @@ def main():
         elif command == 'scan':
             commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
         elif command == 'types':
-            commands.TypesCommand(db_, view_).execute()
+            commands.TypesCommand(db_, view_).execute(sys.argv[2:])
         else:
             view_.show_info(f"Unknown command '{command}'.")
             view_.show_info(HELP_MESSAGE)

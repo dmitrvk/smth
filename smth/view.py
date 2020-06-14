@@ -65,6 +65,48 @@ class View:
 
         return {}
 
+    def ask_for_new_type_info(
+            self, validator: validators.TypeValidator) -> Answers:
+        """Ask user for notebook parameters and return answers.
+
+        Validate answers with given validator."""
+        questions = [
+            {
+                'type': 'input',
+                'name': 'title',
+                'message': 'Enter title:',
+                'validate': validator.validate_title,
+            },
+            {
+                'type': 'input',
+                'name': 'page_width',
+                'message': 'Enter page width in millimeters:',
+                'validate': validator.validate_page_size,
+            },
+            {
+                'type': 'input',
+                'name': 'page_height',
+                'message': 'Enter page height in millimeters:',
+                'validate': validator.validate_page_size,
+            },
+            {
+                'type': 'confirm',
+                'name': 'pages_paired',
+                'message': 'Are pages paired? (default - no)',
+                'default': False,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            answers['title'] = answers['title'].strip()
+            answers['page_width'] = int(answers['page_width'])
+            answers['page_height'] = int(answers['page_height'])
+            return answers
+
+        return {}
+
     def ask_for_device(self, devices: List[scanner.Device]) -> str:
         """Show list of devices and let user choose one. Return device name."""
         def prepare_choices(devices: List[scanner.Device]) -> List[str]:

@@ -80,6 +80,38 @@ class NotebookValidator:
         return True
 
 
+class TypeValidator:
+    """Validate user input when manipulating types."""
+    def __init__(self, db_: db.DB):
+        self._db = db_
+
+    def validate_title(self, title: str) -> bool:
+        """Check if title is not empty and not already taken."""
+        title = title.strip()
+
+        if len(title) == 0:
+            raise ValidationError(message='Title must not be empty.')
+
+        if self._db.type_exists(title):
+            raise ValidationError(message=f"Type '{title}' exists")
+
+        return True
+
+    def validate_page_size(self, size: int) -> bool:
+        """Check if given input is an integer from 10 to 1000."""
+        size = size.strip()
+
+        if not size.isnumeric():
+            raise ValidationError(
+                message='Please, enter a number from 10 to 1000')
+
+        if int(size) < 10 or int(size) > 1000:
+            raise ValidationError(
+                message='Please, enter a number from 10 to 1000')
+
+        return True
+
+
 class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
     """Validator for user input when choosing scan preferences."""
 

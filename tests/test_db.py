@@ -45,7 +45,7 @@ class TestDB(unittest.TestCase):
         notebook = self.db.get_notebook_by_title(expected.title)
         self.assertEqual(notebook.title, expected.title)
         self.assertEqual(notebook.type, expected.type)
-        self.assertEqual(notebook.path, expected.path)
+        self.assertEqual(str(notebook.path), expected.path)
         self.assertEqual(notebook.total_pages, expected.total_pages)
         self.assertEqual(
             notebook.first_page_number, expected.first_page_number)
@@ -55,7 +55,7 @@ class TestDB(unittest.TestCase):
         notebook = self.db.get_notebook_by_path(expected.path)
         self.assertEqual(notebook.title, expected.title)
         self.assertEqual(notebook.type, expected.type)
-        self.assertEqual(notebook.path, expected.path)
+        self.assertEqual(str(notebook.path), expected.path)
         self.assertEqual(notebook.total_pages, expected.total_pages)
         self.assertEqual(
             notebook.first_page_number, expected.first_page_number)
