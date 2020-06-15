@@ -97,20 +97,39 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.view.show_separator()
             self.view.show_info('Creating PDF...')
 
-            pdf = fpdf.FPDF(
-                unit='pt',
-                format=[
-                    int(notebook.type.page_width * 150 / 25.4),
-                    int(notebook.type.page_height * 150 / 25.4),
-                ])
+            pdf_page_size = [
+                int(notebook.type.page_width * 150 / 25.4),
+                int(notebook.type.page_height * 150 / 25.4),
+            ]
+
+            if notebook.type.pages_paired:
+                pdf_page_size[0] *= 2
+
+            pdf = fpdf.FPDF(unit='pt', format=pdf_page_size)
 
             for i in range(0, notebook.total_pages):
                 page = notebook.first_page_number + i
-                pdf.add_page()
-                pdf.image(
-                    str(notebook.get_page_path(page)), 0, 0,
-                    int(notebook.type.page_width * 150 / 25.4),
-                    int(notebook.type.page_height * 150 / 25.4))
+
+                if notebook.type.pages_paired:
+                    if notebook.first_page_number % 2 == page % 2:
+                        # left page
+                        pdf.add_page()
+                        pdf.image(
+                            str(notebook.get_page_path(page)),
+                            0, 0,
+                            int(pdf_page_size[0] / 2), pdf_page_size[1])
+                    else:
+                        # right page
+                        pdf.image(
+                            str(notebook.get_page_path(page)),
+                            int(pdf_page_size[0] / 2), 0,
+                            int(pdf_page_size[0] / 2), pdf_page_size[1])
+                else:
+                    pdf.add_page()
+                    pdf.image(
+                        str(notebook.get_page_path(page)),
+                        0, 0,
+                        pdf_page_size[0], pdf_page_size[1])
 
             pdf.output(notebook.path, 'F')
 
