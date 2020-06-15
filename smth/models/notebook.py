@@ -88,21 +88,41 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
             img = img.rotate(90, expand=True)
             orig_width, orig_height = img.size
 
-        type_width_pt = math.ceil(self.type.page_width * resolution / 25.4)
-        type_height_pt = math.ceil(self.type.page_height * resolution / 25.4)
+        page_width_pt = math.ceil(self.type.page_width * resolution / 25.4)
+        page_height_pt = math.ceil(self.type.page_height * resolution / 25.4)
 
         if self.type.pages_paired:
-            pass
-        else:
-            if type_width_pt > type_height_pt:
+            if page_height_pt < orig_width:
                 img = img.rotate(-90, expand=True)
                 orig_width, orig_height = img.size
 
-            if type_width_pt < orig_width:
-                img = img.crop((0, 0, type_width_pt, img.size[1]))
+            if self.first_page_number % 2 == page % 2:
+                # left page, crop from left side
+                if page_width_pt < orig_width:
+                    img = img.crop((0, 0, page_width_pt, orig_height))
+            else:
+                # right page, crop from right side
+                if page_width_pt < orig_width:
+                    if page_width_pt * 2 < orig_width:
+                        offset_x = page_width_pt
+                    else:
+                        offset_x = orig_width - page_width_pt
 
-            if type_height_pt < orig_height:
-                img = img.crop((0, 0, img.size[0], type_height_pt))
+                    box = (offset_x, 0, page_width_pt + offset_x, orig_height)
+                    img = img.crop(box)
+
+            if page_height_pt < orig_height:
+                img = img.crop((0, 0, img.size[0], page_height_pt))
+        else:
+            if page_width_pt > page_height_pt:
+                img = img.rotate(-90, expand=True)
+                orig_width, orig_height = img.size
+
+            if page_width_pt < orig_width:
+                img = img.crop((0, 0, page_width_pt, orig_height))
+
+            if page_height_pt < orig_height:
+                img = img.crop((0, 0, img.size[0], page_height_pt))
 
         return img
 

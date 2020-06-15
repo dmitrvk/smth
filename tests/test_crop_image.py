@@ -68,6 +68,48 @@ class CropImageTestCase(unittest.TestCase):
         expected = (orig_image.size[1], orig_image.size[0])
         self.assertTupleEqual(image.size, expected)
 
+    def test_crop_paired_pages_left_page(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(170, 200)
+        self.notebook.type.pages_paired = True
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
+    def test_crop_paired_pages_right_page(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(170, 200)
+        self.notebook.type.pages_paired = True
+        image = self.notebook.crop_image(2, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
+    def test_crop_paired_pages_left_page_portrait_only(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(210, 297)
+        self.notebook.type.pages_paired = True
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
+    def test_crop_paired_pages_right_page_protrait_only(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(210, 297)
+        self.notebook.type.pages_paired = True
+        image = self.notebook.crop_image(2, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
+    def test_crop_paired_pages_two_pages_at_once_left_page(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(100, 150)
+        self.notebook.type.pages_paired = True
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
+    def test_crop_paired_pages_two_pages_at_once_right_page(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(100, 150)
+        self.notebook.type.pages_paired = True
+        image = self.notebook.crop_image(2, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
     def _new_image(self, width_mm: int, height_mm: int) -> Image.Image:
         return Image.new(
             'RGB', (self._mm_to_pt(width_mm), self._mm_to_pt(height_mm)))
