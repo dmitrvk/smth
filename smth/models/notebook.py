@@ -1,6 +1,7 @@
+import math
 import pathlib
 
-from PIL import Image as PIL
+from PIL import Image as pillow
 
 from .notebook_type import NotebookType
 
@@ -76,11 +77,29 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
             self._first_page_number = 1
 
     def crop_image(
-            self, page: int, image: PIL.Image, resolution: int) -> PIL.Image:
+            self, page: int, image: pillow.Image,
+            resolution: int) -> pillow.Image:
         """Rotate and crop image so it fits the notebook's type."""
         img = image.copy()
 
-        initial_width, initial_height = img.size
+        orig_width, orig_height = img.size
+
+        if orig_width > orig_height:
+            img = img.rotate(90)
+
+        orig_width, orig_height = img.size
+
+        type_width_pt = math.ceil(self.type.page_width * resolution / 25.4)
+        type_height_pt = math.ceil(self.type.page_height * resolution / 25.4)
+
+        if self.type.pages_paired:
+            pass
+        else:
+            if type_width_pt < orig_width:
+                img = img.crop((0, 0, type_width_pt, img.size[1]))
+
+            if type_height_pt < orig_height:
+                img = img.crop((0, 0, img.size[0], type_height_pt))
 
         return img
 
