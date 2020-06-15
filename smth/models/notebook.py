@@ -1,5 +1,7 @@
 import pathlib
 
+from PIL import Image as PIL
+
 from .notebook_type import NotebookType
 
 
@@ -72,6 +74,15 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
             self._first_page_number = number
         else:
             self._first_page_number = 1
+
+    def crop_image(
+            self, page: int, image: PIL.Image, resolution: int) -> PIL.Image:
+        """Rotate and crop image so it fits the notebook's type."""
+        img = image.copy()
+
+        initial_width, initial_height = img.size
+
+        return img
 
     def get_page_path(self, page: int) -> pathlib.Path:
         """Return absolute path to notebook's page with given number."""

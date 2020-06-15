@@ -108,6 +108,7 @@ class Scanner:
                 self.callback.on_start_scan_page(page)
 
             image = device.scan()
+            image = prefs.notebook.crop_image(page, image, device.resolution)
 
             if page > (prefs.notebook.total_pages +
                        prefs.notebook.first_page_number - 1):
