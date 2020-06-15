@@ -1,6 +1,7 @@
 import collections
 import itertools
 import logging
+import math
 import time
 from typing import List
 
@@ -114,12 +115,12 @@ class Scanner:
                        prefs.notebook.first_page_number - 1):
                 prefs.notebook.total_pages += 1
 
-            if len(prefs.pages_queue) > 0:
-                time.sleep(self.conf.scanner_delay)
-
             if self.callback:
                 self.callback.on_finish_scan_page(
                     prefs.notebook, page, image)
+
+            if len(prefs.pages_queue) > 0:
+                time.sleep(self.conf.scanner_delay)
 
         if self.callback:
             self.callback.on_finish(prefs.notebook)
