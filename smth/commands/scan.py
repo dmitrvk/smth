@@ -99,13 +99,18 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
             pdf = fpdf.FPDF(
                 unit='pt',
-                format=[notebook.type.page_width, notebook.type.page_height])
+                format=[
+                    int(notebook.type.page_width * 150 / 25.4),
+                    int(notebook.type.page_height * 150 / 25.4),
+                ])
 
             for i in range(0, notebook.total_pages):
                 page = notebook.first_page_number + i
+                pdf.add_page()
                 pdf.image(
                     str(notebook.get_page_path(page)), 0, 0,
-                    notebook.type.page_width, notebook.type.page_height)
+                    int(notebook.type.page_width * 150 / 25.4),
+                    int(notebook.type.page_height * 150 / 25.4))
 
             pdf.output(notebook.path, 'F')
 
