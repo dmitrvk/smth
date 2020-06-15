@@ -85,9 +85,8 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
         orig_width, orig_height = img.size
 
         if orig_width > orig_height:
-            img = img.rotate(90)
-
-        orig_width, orig_height = img.size
+            img = img.rotate(90, expand=True)
+            orig_width, orig_height = img.size
 
         type_width_pt = math.ceil(self.type.page_width * resolution / 25.4)
         type_height_pt = math.ceil(self.type.page_height * resolution / 25.4)
@@ -95,6 +94,10 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
         if self.type.pages_paired:
             pass
         else:
+            if type_width_pt > type_height_pt:
+                img = img.rotate(-90, expand=True)
+                orig_width, orig_height = img.size
+
             if type_width_pt < orig_width:
                 img = img.crop((0, 0, type_width_pt, img.size[1]))
 

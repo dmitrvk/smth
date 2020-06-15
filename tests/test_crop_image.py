@@ -41,6 +41,33 @@ class CropImageTestCase(unittest.TestCase):
         image = self.notebook.crop_image(1, orig_image, self.resolution)
         self.assertTupleEqual(image.size, orig_image.size)
 
+    def test_crop_landscape_single_page(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(297, 210)
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
+    def test_crop_landscape_single_page_too_wide(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(320, 210)
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        expected = (orig_image.size[1], self._type_height_pt())
+        self.assertTupleEqual(image.size, expected)
+
+    def test_crop_landscape_single_page_too_long(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(297, 240)
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        expected = (self._type_width_pt(), orig_image.size[0])
+        self.assertTupleEqual(image.size, expected)
+
+    def test_crop_landscape_single_page_too_large(self):
+        orig_image = self._new_image(220, 300)
+        self._set_type_size_mm(320, 240)
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        expected = (orig_image.size[1], orig_image.size[0])
+        self.assertTupleEqual(image.size, expected)
+
     def _new_image(self, width_mm: int, height_mm: int) -> Image.Image:
         return Image.new(
             'RGB', (self._mm_to_pt(width_mm), self._mm_to_pt(height_mm)))
