@@ -76,7 +76,7 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
         else:
             self._first_page_number = 1
 
-    def crop_image(
+    def crop_image(  # pylint: disable=too-many-branches
             self, page: int, image: pillow.Image,
             resolution: int) -> pillow.Image:
         """Rotate and crop image so it fits the notebook's type."""

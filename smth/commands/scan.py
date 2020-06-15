@@ -36,8 +36,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.conf.scanner_device = ''
 
         scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(self.ScannerCallback(
-            self, self._db, self.view, self.conf))
+        callback = self.ScannerCallback(self, self._db, self.view, self.conf)
+        callback.on_error = self._exit_with_error
+        scanner_.register(callback)
 
         prefs = self._make_scan_prefs(notebooks)
 
@@ -139,7 +140,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.view.show_info('Done.')
 
         def on_error(self, message):
-            self._command._exit_with_error(message)
+            pass
 
     def _make_scan_prefs(
             self, notebooks: models.Notebook) -> scanner.ScanPreferences():

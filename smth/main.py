@@ -8,8 +8,6 @@ from smth import commands, config, db, view
 
 DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 
-CONFIG_PATH = pathlib.Path('~/.config/smth/smth.conf').expanduser()
-
 DB_PATH = DATA_ROOT / 'smth.db'
 
 LOG_PATH = DATA_ROOT / 'smth.log'
