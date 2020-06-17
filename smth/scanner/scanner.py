@@ -1,13 +1,15 @@
 import collections
 import itertools
 import logging
+import math
 import time
 from typing import List
 
 import _sane
 import sane
+import PIL.Image as pillow
 
-from smth import config
+from smth import config, models
 
 from . import callback, error, preferences
 
@@ -108,21 +110,50 @@ class Scanner:
                 self.callback.on_start_scan_page(page)
 
             image = device.scan()
-            image = prefs.notebook.crop_image(page, image, device.resolution)
 
-            if page > (prefs.notebook.total_pages +
-                       prefs.notebook.first_page_number - 1):
-                prefs.notebook.total_pages += 1
+            if prefs.notebook.type.pages_paired:
+                page_width_pt = math.ceil(
+                    prefs.notebook.type.page_width * device.resolution / 25.4)
+                orig_width = image.size[1]
 
-            if self.callback:
-                self.callback.on_finish_scan_page(
-                    prefs.notebook, page, image)
+                if (page_width_pt * 2 < orig_width and
+                        prefs.notebook.first_page_number % 2 == page % 2):
+                    # two pages on image, crop both left and right pages
+                    self._process_scanned_page(
+                        page, prefs.notebook, image, device.resolution)
 
-            if len(prefs.pages_queue) > 0:
+                    self._process_scanned_page(
+                        page + 1, prefs.notebook, image, device.resolution)
+
+                    if prefs.pages_queue:
+                        if prefs.pages_queue[0] == page + 1:
+                            prefs.pages_queue.popleft()
+                else:
+                    self._process_scanned_page(
+                        page, prefs.notebook, image, device.resolution)
+            else:
+                self._process_scanned_page(
+                    page, prefs.notebook, image, device.resolution)
+
+            if prefs.pages_queue:
                 time.sleep(self.conf.scanner_delay)
 
         if self.callback:
             self.callback.on_finish(prefs.notebook)
+
+    def _process_scanned_page(
+            self, page: int, notebook: models.Notebook, image: pillow.Image,
+            resolution: int) -> None:
+        image = notebook.crop_image(
+            page, image, resolution)
+
+        if page > (notebook.total_pages +
+                   notebook.first_page_number - 1):
+            notebook.total_pages += 1
+
+        if self.callback:
+            self.callback.on_finish_scan_page(
+                notebook, page, image)
 
     def _handle_error(self, message: str) -> None:
         """Call `on_error()` callback or raise an exception."""

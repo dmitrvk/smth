@@ -8,7 +8,7 @@ class ScanPreferences:
 
     def __init__(self):
         self._notebook = None
-        self._append_queue = collections.deque()
+        self._pages_queue = collections.deque()
 
     @property
     def notebook(self) -> models.Notebook:
@@ -22,4 +22,4 @@ class ScanPreferences:
     @property
     def pages_queue(self) -> collections.deque:
         """Numbers of pages that should be scanned."""
-        return self._append_queue
+        return self._pages_queue
