@@ -5,7 +5,7 @@ from unittest import mock
 import _sane
 import sane
 
-from smth import commands, db
+from smth import commands, db, scanner
 
 
 class ScanCommandTestCase(unittest.TestCase):
@@ -98,12 +98,24 @@ class ScanCommandTestCase(unittest.TestCase):
         self.scanner.close.assert_called_once()
         self.db.save_notebook.assert_not_called()
 
-    def test_execute_scan_error(self):
+    def test_execute_sane_error(self):
         self.scanner.scan.side_effect = _sane.error
 
         command = commands.ScanCommand(self.db, self.view, self.conf)
 
         self.assertRaises(SystemExit, command.execute)
+        self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called_once()
+
+    def test_execute_scanner_error(self):
+        with mock.patch('smth.scanner.Scanner') as Scanner:
+            Scanner.return_value = mock.MagicMock(**{
+                'scan.side_effect': scanner.Error,
+            })
+
+            command = commands.ScanCommand(self.db, self.view, self.conf)
+
+            self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called_once()
 
@@ -114,3 +126,9 @@ class ScanCommandTestCase(unittest.TestCase):
 
         self.view.ask_for_scan_prefs.assert_not_called()
         self.scanner.scan.assert_not_called()
+
+    def test_execute_with_set_device_option(self):
+        args = ['--set-device']
+        with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
+            commands.ScanCommand(self.db, self.view, self.conf).execute(args)
+        self.assertEqual(self.conf.scanner_device, '')
