@@ -34,12 +34,7 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
         with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
             config_file.write(config_file_contents)
 
-        conf = config.Config()
-
-        # When reading bad config, it should be rewritten with default values
-        conf = config.Config()
-        self.assertEqual(conf.scanner_device, '')
-        self.assertEqual(conf.scanner_delay, 0)
+        self.assertRaises(config.Error, config.Config)
 
     def test_scanner_device(self):
         config_file_contents = '''[scanner]

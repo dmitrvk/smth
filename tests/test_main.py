@@ -70,4 +70,4 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 View.return_value = view
 
                 self.assertRaises(SystemExit, main.main)
-                view.show_error.assert_called_once_with('Fail')
+                view.show_error.assert_called_once_with('Fail.')

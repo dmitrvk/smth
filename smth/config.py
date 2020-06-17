@@ -14,18 +14,24 @@ class Config:
         self.config = configparser.ConfigParser()
 
         # Default configuration
-        self.config = configparser.ConfigParser()
-        self.config['scanner'] = {}
-        self.config['scanner']['device'] = ''
-        self.config['scanner']['delay'] = '0'
+        self.default_config = configparser.ConfigParser()
+        self.default_config['scanner'] = {}
+        self.default_config['scanner']['device'] = ''
+        self.default_config['scanner']['delay'] = '0'
 
         if self.CONFIG_PATH.exists():
             try:
                 self.config.read(str(self.CONFIG_PATH))
-                log.debug('Loaded config from %s', {str(self.CONFIG_PATH)})
             except configparser.Error as exception:
                 log.exception(exception)
-                self._write_config()
+                raise Error(f'Cannot load config: {exception}')
+
+            if not self.config.sections():
+                message = f"Cannot load config from '{str(self.CONFIG_PATH)}'"
+                log.error(message)
+                raise Error(message)
+
+            log.debug('Loaded config from %s', {str(self.CONFIG_PATH)})
         else:
             self.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
             self._write_config()
@@ -53,5 +59,12 @@ class Config:
         self._write_config()
 
     def _write_config(self):
-        with open(str(self.CONFIG_PATH), 'w') as config_file:
-            self.config.write(config_file)
+        try:
+            with open(str(self.CONFIG_PATH), 'w') as config_file:
+                self.config.write(config_file)
+        except (OSError, configparser.Error) as exception:
+            raise Error(f'Cannot write config: {exception}')
+
+
+class Error(Exception):
+    pass

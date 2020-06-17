@@ -35,14 +35,19 @@ def main():
     setup_logging()
     log = logging.getLogger(__name__)
 
-    conf = config.Config()
-
     view_ = view.View()
+
+    try:
+        conf = config.Config()
+    except config.Error as exception:
+        view_.show_error(f'{exception}.')
+        log.exception(exception)
+        sys.exit(1)
 
     try:
         db_ = db.DB(DB_PATH)
     except db.Error as exception:
-        view_.show_error(str(exception))
+        view_.show_error(f'{exception}.')
         log.exception(exception)
         sys.exit(1)
 

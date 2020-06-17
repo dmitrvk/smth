@@ -33,7 +33,10 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             return
 
         if args and '--set-device' in args:
-            self.conf.scanner_device = ''
+            try:
+                self.conf.scanner_device = ''
+            except config.Error as exception:
+                self._exit_with_error(exception)
 
         scanner_ = scanner.Scanner(self.conf)
         callback = self.ScannerCallback(self, self._db, self.view, self.conf)
