@@ -122,10 +122,7 @@ class View:
 
         def extract_device_name_from_choice(choice: str) -> str:
             """Return only device name from formatted string."""
-            if choice:
-                return choice.split('(')[0].rstrip()
-
-            return ''
+            return choice.split('(')[0].rstrip()
 
         devices.sort(key=operator.attrgetter('name'))
 
@@ -182,10 +179,7 @@ class View:
         answers = self._prompt(questions)
 
         if answers:
-            if answers['append']:
-                return int(answers['append'].strip())
-
-            return 0
+            return int(answers['append'].strip())
 
         return 0
 
