@@ -61,6 +61,25 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
         for command in ['create', 'list', 'scan', 'types']:
             self.assertIn(command, output)
 
+    @mock.patch.object(sys, 'argv', ['__main__.py'])
+    def test_default_command(self):
+        with mock.patch('smth.commands.ScanCommand') as Command:
+            command = mock.MagicMock()
+            Command.return_value = command
+            main.main()
+            command.execute.assert_called_once()
+
+    def test_config_error(self):
+        with mock.patch('smth.config.Config') as Config:
+            Config.side_effect = config.Error('Fail')
+
+            with mock.patch('smth.view.View') as View:
+                view = mock.MagicMock()
+                View.return_value = view
+
+                self.assertRaises(SystemExit, main.main)
+                view.show_error.assert_called_once_with('Fail.')
+
     def test_db_error(self):
         with mock.patch('smth.db.DB') as DB:
             DB.side_effect = db.Error('Fail')

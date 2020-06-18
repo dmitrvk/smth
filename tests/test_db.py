@@ -117,6 +117,7 @@ class TestDB(unittest.TestCase):
         self.assertRaises(db.Error, db.DB)
         self.assertRaises(db.Error, self.db.get_notebooks)
         self.assertRaises(db.Error, self.db.get_notebook_by_title, '')
+        self.assertRaises(db.Error, self.db.get_notebook_by_path, '')
         self.assertRaises(db.Error, self.db.get_notebook_titles)
         self.assertRaises(db.Error, self.db.get_types)
         self.assertRaises(db.Error, self.db.get_type_titles)

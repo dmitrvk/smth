@@ -1,3 +1,4 @@
+import pathlib
 import unittest
 from unittest import mock
 
@@ -55,6 +56,12 @@ class TestNotebook(unittest.TestCase):
 
         self.notebook.first_page_number = -10
         self.assertEqual(self.notebook.first_page_number, 1)
+
+    def test_get_page_path(self):
+        expected = pathlib.Path(
+            '~/.local/share/smth/pages/title/1.jpg').expanduser()
+        actual = self.notebook.get_page_path(1)
+        self.assertEqual(actual, expected)
 
     def test__repr__(self):
         type = mock.MagicMock()

@@ -110,6 +110,12 @@ class CropImageTestCase(unittest.TestCase):
         image = self.notebook.crop_image(2, orig_image, self.resolution)
         self.assertTupleEqual(image.size, self._type_size_pt())
 
+    def test_crop_orig_landscape(self):
+        orig_image = self._new_image(300, 220)
+        self._set_type_size_mm(100, 150)
+        image = self.notebook.crop_image(1, orig_image, self.resolution)
+        self.assertTupleEqual(image.size, self._type_size_pt())
+
     def _new_image(self, width_mm: int, height_mm: int) -> Image.Image:
         return Image.new(
             'RGB', (self._mm_to_pt(width_mm), self._mm_to_pt(height_mm)))

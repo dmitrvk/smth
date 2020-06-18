@@ -1,4 +1,5 @@
 import logging
+from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
@@ -28,11 +29,17 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
         self.assertEqual(conf.scanner_delay, 3)
 
     def test_read_config_error(self):
-        config_file_contents = '''badsection]
+        bad_config = '''badsection]
             badconfig!'''
 
         with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
+            config_file.write(bad_config)
+
+        self.assertRaises(config.Error, config.Config)
+
+        # Empty config
+        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+            config_file.write('')
 
         self.assertRaises(config.Error, config.Config)
 
@@ -69,3 +76,14 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
 
         with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
             self.assertIn('delay = 3', config_file.read())
+
+    def test_os_error_when_writing(self):
+        with mock.patch('configparser.ConfigParser') as ConfigParser:
+            ConfigParser.return_value = mock.MagicMock(**{
+                'write.side_effect': OSError,
+            })
+
+            conf = config.Config()
+
+            with self.assertRaises(config.Error):
+                conf.scanner_device = 'device'
