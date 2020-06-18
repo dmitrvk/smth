@@ -77,7 +77,7 @@ class ScanCommandTestCase(unittest.TestCase):
 
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
-        self.view.show_error.assert_called_once()
+        self.view.show_error.assert_called()
 
     def test_execute_db_error(self):
         self.db.get_notebook_titles.side_effect = db.Error
@@ -95,7 +95,6 @@ class ScanCommandTestCase(unittest.TestCase):
         command = commands.ScanCommand(self.db, self.view, self.conf)
 
         self.assertRaises(SystemExit, command.execute)
-        self.scanner.close.assert_called_once()
         self.db.save_notebook.assert_not_called()
 
     def test_execute_sane_error(self):
@@ -105,7 +104,7 @@ class ScanCommandTestCase(unittest.TestCase):
 
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
-        self.view.show_error.assert_called_once()
+        self.view.show_error.assert_called()
 
     def test_execute_scanner_error(self):
         with mock.patch('smth.scanner.Scanner') as Scanner:

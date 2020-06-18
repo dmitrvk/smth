@@ -61,7 +61,7 @@ class Scanner:
                 self.callback.on_set_device()
 
         if not self.conf.scanner_device:
-            self._handle_error('Device is not set')
+            self._handle_error('Device is not set.')
         else:
             device = None
 

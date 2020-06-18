@@ -67,8 +67,12 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
             try:
                 devices = scanner.Scanner.get_devices()
-                device_name = self.view.ask_for_device(devices)
-                self.conf.scanner_device = device_name
+
+                if devices:
+                    device_name = self.view.ask_for_device(devices)
+                    self.conf.scanner_device = device_name
+                else:
+                    self.view.show_error('No devices found.')
 
             except scanner.Error as exception:
                 self.on_error(str(exception))
