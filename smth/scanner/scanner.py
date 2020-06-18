@@ -71,12 +71,12 @@ class Scanner:
                 self._scan_with_prefs(device, prefs)
 
             except _sane.error as exception:
-                self._handle_error(str(exception))
                 log.exception(exception)
+                self._handle_error(str(exception))
 
             except KeyboardInterrupt:
-                self._handle_error('Keyboard interrupt')
                 log.error('Scan failed due to keyboard interrupt')
+                self._handle_error('Keyboard interrupt')
 
             finally:
                 if device:

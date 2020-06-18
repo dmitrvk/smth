@@ -25,7 +25,7 @@ class ScannerTestCase(unittest.TestCase):
         sane.scan = mock.MagicMock()
         sane.get_devices = mock.MagicMock()
 
-        self.image = Image.new('RGB', (1000, 2000))
+        self.image = Image.new('RGB', (1280, 1760))
 
         self.device = mock.MagicMock(**{
             'devname': 'device',
@@ -65,6 +65,95 @@ class ScannerTestCase(unittest.TestCase):
 
         self.assertRaises(scanner.Error, scanner_.scan, prefs)
 
+    def test_scan_keyboard_interrupt(self):
+        sane.open.side_effect = KeyboardInterrupt
+
+        scanner_ = scanner.Scanner(self.conf)
+
+        callback = mock.MagicMock()
+        scanner_.register(callback)
+
+        prefs = scanner.ScanPreferences()
+        scanner_.scan(prefs)
+
+        sane.scan.assert_not_called()
+        callback.on_error.assert_called_once()
+
+        sane.exit.assert_called_once()
+
+    def test_scan(self):
+        type_ = models.NotebookType('', 210, 297)
+        notebook = models.Notebook('', type_, '')
+
+        prefs = scanner.ScanPreferences()
+        prefs.notebook = notebook
+        prefs.pages_queue.extend([1, 2, 3])
+
+        callback = mock.MagicMock()
+
+        scanner_ = scanner.Scanner(self.conf)
+        scanner_.register(callback)
+
+        scanner_.scan(prefs)
+
+        callback.on_start.assert_called_once_with('device', [1, 2, 3])
+
+        callback.on_start_scan_page.assert_has_calls([
+            mock.call(1),
+            mock.call(2),
+            mock.call(3),
+        ])
+
+        page_width_pt = math.ceil(type_.page_width * 150 / 25.4)
+        page_height_pt = math.ceil(type_.page_height * 150 / 25.4)
+
+        self.image = self.image.crop((0, 0, page_width_pt, page_height_pt))
+
+        callback.on_finish_scan_page.assert_has_calls([
+            mock.call(notebook, 1, self.image),
+            mock.call(notebook, 2, self.image),
+            mock.call(notebook, 3, self.image),
+        ])
+
+        self.assertEqual(notebook.total_pages, 3)
+
+    def test_scan_paired_pages(self):
+        type_ = models.NotebookType('', 160, 200)
+        type_.pages_paired = True
+        notebook = models.Notebook('', type_, '')
+
+        prefs = scanner.ScanPreferences()
+        prefs.notebook = notebook
+        prefs.pages_queue.extend([1, 2, 3])
+
+        callback = mock.MagicMock()
+
+        scanner_ = scanner.Scanner(self.conf)
+        scanner_.register(callback)
+
+        scanner_.scan(prefs)
+
+        callback.on_start.assert_called_once_with('device', [1, 2, 3])
+
+        callback.on_start_scan_page.assert_has_calls([
+            mock.call(1),
+            mock.call(2),
+            mock.call(3),
+        ])
+
+        page_width_pt = math.ceil(type_.page_width * 150 / 25.4)
+        page_height_pt = math.ceil(type_.page_height * 150 / 25.4)
+
+        self.image = self.image.crop((0, 0, page_width_pt, page_height_pt))
+
+        callback.on_finish_scan_page.assert_has_calls([
+            mock.call(notebook, 1, self.image),
+            mock.call(notebook, 2, self.image),
+            mock.call(notebook, 3, self.image),
+        ])
+
+        self.assertEqual(notebook.total_pages, 3)
+
     def test_scan_two_pages_at_once(self):
         type_ = models.NotebookType('', 100, 200)
         type_.pages_paired = True
@@ -101,3 +190,15 @@ class ScannerTestCase(unittest.TestCase):
         ])
 
         self.assertEqual(notebook.total_pages, 4)
+
+    def test_scan_nothing_to_scan(self):
+        scanner_ = scanner.Scanner(self.conf)
+
+        callback = mock.MagicMock()
+        scanner_.register(callback)
+
+        prefs = scanner.ScanPreferences()
+        scanner_.scan(prefs)
+
+        sane.scan.assert_not_called()
+        callback.on_error.assert_called_once()
