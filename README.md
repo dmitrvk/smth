@@ -1,16 +1,33 @@
-# smth
+<h1 align="center">smth</h1>
 
-[![build](https://github.com/dmitrvk/smth/workflows/build/badge.svg)](https://github.com/dmitrvk/smth/actions)
-[![codecov](https://codecov.io/gh/dmitrvk/smth/branch/master/graph/badge.svg?token=NH8F6U8988)](https://codecov.io/gh/dmitrvk/smth)
-[![license](https://img.shields.io/pypi/l/smth)](https://github.com/dmitrvk/smth/blob/master/LICENSE)
-[![pypi](https://img.shields.io/pypi/v/smth)](https://pypi.org/project/smth)
-![python](https://img.shields.io/pypi/pyversions/smth)
+<h3 align="center">Command-line tool for scanning in batch mode on Linux.</h3>
 
-*smth* is a command-line tool which allows you to scan in batch mode on Linux.
+<p align="center">
+  <a href="https://github.com/dmitrvk/smth/actions">
+    <img alt="build" src="https://github.com/dmitrvk/smth/workflows/build/badge.svg"/>
+  </a>
+  <a href="https://codecov.io/gh/dmitrvk/smth">
+    <img alt="codecov" src="https://codecov.io/gh/dmitrvk/smth/branch/master/graph/badge.svg?token=NH8F6U8988"/>
+  </a>
+  <a href="https://github.com/dmitrvk/smth/blob/master/LICENSE">
+    <img alt="license" src="https://img.shields.io/pypi/l/smth"/>
+  </a>
+  <a href="https://pypi.org/project/smth">
+    <img alt="pypi" src="https://img.shields.io/pypi/v/smth"/>
+  </a>
+  <a href="https://pypi.org/project/smth">
+    <img alt="python" src="https://img.shields.io/pypi/pyversions/smth"/>
+  </a>
+</p>
 
-[![demo][demo-url]][demo-url]
+<p align="center">
+  <a href="#features">Features</a> &middot;
+  <a href="#installation">Installation</a> &middot;
+  <a href="#usage">Usage</a> &middot;
+  <a href="#configuration">Configuration</a>
+</p>
 
-[demo-url]: https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif
+<p align="center"><img src="https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif"></p>
 
 ## Features
 
