@@ -8,7 +8,7 @@ from PyInquirer import ValidationError
 from smth import validators
 
 
-class TestNotebookValidator(unittest.TestCase):
+class NotebookValidatorTestCase(unittest.TestCase):
     """Test user input validation when creating a notebook."""
 
     def setUp(self):
@@ -118,7 +118,45 @@ class TestNotebookValidator(unittest.TestCase):
             self.validator.validate_first_page_number, 'test')
 
 
-class TestScanPreferencesValidator(unittest.TestCase):
+class TypeValidatorTestCase(unittest.TestCase):
+    def setUp(self):
+        self.db = mock.MagicMock(**{
+            'type_exists.return_value': False,
+        })
+
+        self.validator = validators.TypeValidator(self.db)
+
+    def test_validate_title(self):
+        self.assertTrue(self.validator.validate_title('Test Type'))
+
+        # Empty
+        self.assertRaises(
+            ValidationError, self.validator.validate_title, '')
+
+        # Exists
+        self.db.type_exists.return_value = True
+        self.assertRaises(
+            ValidationError, self.validator.validate_title, 'Title')
+
+    def test_validate_page_size(self):
+        self.assertTrue(self.validator.validate_page_size('10'))
+        self.assertTrue(self.validator.validate_page_size('100'))
+        self.assertTrue(self.validator.validate_page_size('1000'))
+
+        # Not a number
+        self.assertRaises(
+            ValidationError, self.validator.validate_page_size, 'size10')
+
+        # Too small
+        self.assertRaises(
+            ValidationError, self.validator.validate_page_size, '1')
+
+        # Too large
+        self.assertRaises(
+            ValidationError, self.validator.validate_page_size, '10000')
+
+
+class ScanPreferencesValidatorTestCase(unittest.TestCase):
     """Test user input validation when choosing scan preferences."""
     def setUp(self):
         self.notebook = mock.MagicMock(**{

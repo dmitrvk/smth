@@ -97,7 +97,7 @@ class TypeValidator:
 
         return True
 
-    def validate_page_size(self, size: int) -> bool:  # pylint: disable=no-self-use  # noqa: E501
+    def validate_page_size(self, size: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
         """Check if given input is an integer from 10 to 1000."""
         size = size.strip()
 
