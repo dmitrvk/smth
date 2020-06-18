@@ -1,5 +1,4 @@
 import logging
-import pathlib
 from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest

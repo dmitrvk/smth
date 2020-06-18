@@ -6,8 +6,8 @@ import time
 from typing import List
 
 import _sane
-import sane
 import PIL.Image as pillow
+import sane
 
 from smth import config, models
 
