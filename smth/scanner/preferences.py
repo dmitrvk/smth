@@ -23,7 +23,3 @@ class ScanPreferences:
     def pages_queue(self) -> collections.deque:
         """Numbers of pages that should be scanned."""
         return self._pages_queue
-
-    def __eq__(self, other):
-        return (self.notebook.title == other.notebook.title and
-                self.pages_queue == other.pages_queue)
