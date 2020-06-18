@@ -139,7 +139,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                         0, 0,
                         pdf_page_size[0], pdf_page_size[1])
 
-            pdf.output(notebook.path, 'F')
+            pdf.output(notebook.path)
 
             self.view.show_info(f"PDF saved at '{notebook.path}'.")
             self.view.show_separator()
