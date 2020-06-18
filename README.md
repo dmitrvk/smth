@@ -1,4 +1,4 @@
-<h1 align="center">smth</h1>
+<h1 align="center"><img alt="smth" src="https://www.mymusichere.me/public/logo.svg" width="137"/></h1>
 
 <h3 align="center">Command-line tool for scanning in batch mode on Linux.</h3>
 
