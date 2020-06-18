@@ -80,6 +80,21 @@ class TestNotebookValidator(unittest.TestCase):
         self.assertRaises(
             ValidationError, self.validator.validate_path, 'test')
 
+    @fakefs_unittest.patchfs
+    def test_validate_path_already_taken(self, fs):
+        notebook = mock.MagicMock(**{
+            'title': 'notebook',
+        })
+
+        db = mock.MagicMock(**{
+            'get_notebook_by_path.return_value': notebook,
+        })
+
+        validator = validators.NotebookValidator(db)
+
+        self.assertRaises(
+            ValidationError, validator.validate_path, '/test/path.pdf')
+
     def test_validate_first_page_number(self):
         self.assertTrue(self.validator.validate_first_page_number('0'))
         self.assertTrue(self.validator.validate_first_page_number('1'))
@@ -107,7 +122,8 @@ class TestScanPreferencesValidator(unittest.TestCase):
     """Test user input validation when choosing scan preferences."""
     def setUp(self):
         self.notebook = mock.MagicMock(**{
-            'total_pages': 0,
+            'first_page_number': 1,
+            'total_pages': 10,
         })
         self.validator = validators.ScanPreferencesValidator(self.notebook)
 
@@ -136,3 +152,38 @@ class TestScanPreferencesValidator(unittest.TestCase):
         self.assertRaises(
             ValidationError,
             self.validator.validate_number_of_pages_to_append, 'test')
+
+    def test_validate_pages_to_replace(self):
+        self.assertTrue(
+            self.validator.validate_pages_to_replace('1 2 3-5 4-7')
+        )
+
+        # Negative number
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '-1 2')
+
+        # Not a number
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, ' a 2')
+
+        # Number < first page number
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '0')
+
+        # Number > max page number
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '20')
+
+        # Invalid range
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '-1-2')
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '5-2')
+
+        # Invalid range start
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '0-3')
+
+        # Invalid range end
+        self.assertRaises(
+            ValidationError, self.validator.validate_pages_to_replace, '2-30')
