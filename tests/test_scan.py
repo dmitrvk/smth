@@ -4,8 +4,9 @@ from unittest import mock
 
 import _sane
 import sane
+from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import commands, db, models, scanner
+from smth import commands, config, db, models, scanner
 
 
 class ScanCommandTestCase(unittest.TestCase):
@@ -158,6 +159,30 @@ class ScanCommandTestCase(unittest.TestCase):
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
             commands.ScanCommand(self.db, self.view, self.conf).execute(args)
         self.assertEqual(self.conf.scanner_device, '')
+
+    @fakefs_unittest.patchfs
+    def test_execute_set_device_config_error(self, fs):
+        fs.create_file(str(config.Config.CONFIG_PATH))
+
+        config_file_contents = '''[scanner]
+            device = scanner
+            delay = 3'''
+
+        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+            config_file.write(config_file_contents)
+
+        args = ['--set-device']
+
+        with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
+            with mock.patch(
+                    'smth.config.Config.scanner_device',
+                    new_callable=mock.PropertyMock) as scanner_device:
+
+                scanner_device.side_effect = config.Error
+
+                conf = config.Config()
+                command = commands.ScanCommand(self.db, self.view, conf)
+                self.assertRaises(SystemExit, command.execute, args)
 
     def test_execute_no_notebook_chosen(self):
         self.view.ask_for_notebook_to_scan.return_value = ''
