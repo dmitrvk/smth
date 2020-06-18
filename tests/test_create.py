@@ -37,7 +37,6 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
             'first_page_number': 1
         }
 
-        self.view = mock.MagicMock()
         self.view.ask_for_new_notebook_info.return_value = answers
 
         commands.CreateCommand(self.db, self.view).execute()
