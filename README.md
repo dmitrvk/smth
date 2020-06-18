@@ -4,19 +4,19 @@
 
 <p align="center">
   <a href="https://github.com/dmitrvk/smth/actions">
-    <img alt="build" src="https://github.com/dmitrvk/smth/workflows/build/badge.svg"/>
+    <img alt="build" src="https://img.shields.io/github/workflow/status/dmitrvk/smth/build?color=00cc00&style=flat-square"/>
   </a>
   <a href="https://codecov.io/gh/dmitrvk/smth">
-    <img alt="codecov" src="https://codecov.io/gh/dmitrvk/smth/branch/master/graph/badge.svg?token=NH8F6U8988"/>
+    <img alt="codecov" src="https://img.shields.io/codecov/c/github/dmitrvk/smth?color=00cc00&style=flat-square&token=NH8F6U8988"/>
   </a>
   <a href="https://github.com/dmitrvk/smth/blob/master/LICENSE">
-    <img alt="license" src="https://img.shields.io/pypi/l/smth"/>
+    <img alt="license" src="https://img.shields.io/pypi/l/smth?color=00cc00&style=flat-square"/>
   </a>
   <a href="https://pypi.org/project/smth">
-    <img alt="pypi" src="https://img.shields.io/pypi/v/smth"/>
+    <img alt="pypi" src="https://img.shields.io/pypi/v/smth?color=00cc00&style=flat-square"/>
   </a>
   <a href="https://pypi.org/project/smth">
-    <img alt="python" src="https://img.shields.io/pypi/pyversions/smth"/>
+    <img alt="python" src="https://img.shields.io/pypi/pyversions/smth?color=00cc00&style=flat-square"/>
   </a>
 </p>
 
