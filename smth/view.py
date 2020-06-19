@@ -12,11 +12,7 @@ Answers = Dict[str, Any]
 class View:
     """"User interface base class."""
 
-    PROMPT_STYLE = inquirer.style_from_dict({
-        inquirer.Token.QuestionMark: '#673ab7',
-        inquirer.Token.Selected: '#673ab7',
-        inquirer.Token.Pointer: '#673ab7',
-    })
+    PROMPT_STYLE = inquirer.style_from_dict({})
 
     def ask_for_new_notebook_info(
             self, types: List[str],
