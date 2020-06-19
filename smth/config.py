@@ -34,6 +34,7 @@ class Config:
             log.debug('Loaded config from %s', {str(self.CONFIG_PATH)})
         else:
             self.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            self.config = self.default_config
             self._write_config()
 
             log.debug('Created default config at %s', {str(self.CONFIG_PATH)})
