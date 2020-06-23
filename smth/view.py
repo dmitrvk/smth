@@ -175,7 +175,12 @@ class View:
         answers = self._prompt(questions)
 
         if answers:
-            return int(answers['append'].strip())
+            append = answers['append'].strip()
+
+            if append:
+                return int(append)
+
+            return 0
 
         return 0
 

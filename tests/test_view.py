@@ -146,6 +146,20 @@ class ViewTestCase(unittest.TestCase):
 
         self.assertEqual(answer, 0)
 
+    def test_ask_for_pages_to_append_empty_answer(self):
+        answers = {
+            'append': ' ',
+        }
+
+        validator = mock.MagicMock(**{
+            'validate_number_of_pages_to_append.return_value': True,
+        })
+
+        with mock.patch('PyInquirer.prompt', return_value=answers):
+            answer = self.view.ask_for_pages_to_append(validator)
+
+        self.assertEqual(answer, 0)
+
     def test_ask_for_pages_to_replace(self):
         answers = {
             'replace': ' 1 2  3-6 4-7  '
