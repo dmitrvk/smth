@@ -27,7 +27,7 @@
   <a href="#configuration">Configuration</a>
 </p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/dmitrvk/smth/readme/smth.gif"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dmitrvk/smth/develop/smth.gif"></p>
 
 ## Features
 
