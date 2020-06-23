@@ -5,7 +5,7 @@ with open('README.md', 'r') as readme:
 
 setuptools.setup(
     name='smth',
-    version='0.2.0',
+    version='0.3.0',
     keywords='scan sane cli',
     description='Scan in batch mode from console',
     long_description=long_description,

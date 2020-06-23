@@ -1,4 +1,4 @@
-<h1 align="center"><img alt="smth" src="https://raw.githubusercontent.com/dmitrvk/smth/develop/logo.svg" width="137"/></h1>
+<h1 align="center"><img alt="smth" src="https://raw.githubusercontent.com/dmitrvk/smth/master/logo.svg" width="137"/></h1>
 
 <h3 align="center">Command-line tool for scanning in batch mode on Linux</h3>
 
@@ -27,7 +27,7 @@
   <a href="#configuration">Configuration</a>
 </p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/dmitrvk/smth/develop/smth.gif"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif"></p>
 
 ## Features
 
