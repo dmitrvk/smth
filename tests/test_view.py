@@ -226,6 +226,19 @@ class ViewTestCase(unittest.TestCase):
         output = testutils.capture_stdout(self.view.show_types, [])
         self.assertIn('No types found', output)
 
+    def test_confirm(self):
+        with mock.patch('PyInquirer.prompt', return_value={'answer': True}):
+            answer = self.view.confirm('question')
+            self.assertTrue(answer)
+
+        with mock.patch('PyInquirer.prompt', return_value={'answer': False}):
+            answer = self.view.confirm('question')
+            self.assertFalse(answer)
+
+        with mock.patch('PyInquirer.prompt', return_value=None):
+            answer = self.view.confirm('question')
+            self.assertFalse(answer)
+
     def test_show_info(self):
         message = 'Test message'
         output = testutils.capture_stdout(self.view.show_info, message)
