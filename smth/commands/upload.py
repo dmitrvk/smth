@@ -12,6 +12,12 @@ class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods
     def execute(self, args: List[str] = None):
         """Upload notebook's PDF file to Google Drive."""
         try:
+            import pydrive.auth  # noqa: F401
+            import pydrive.drive  # noqa: F401
+        except ImportError:
+            self._exit_with_error('PyDrive not found.')
+
+        try:
             notebooks = self._db.get_notebook_titles()
         except db.Error as exception:
             self._exit_with_error(exception)

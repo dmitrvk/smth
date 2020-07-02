@@ -36,3 +36,13 @@ class UploadCommandTestCase(unittest.TestCase):
         self.db.get_notebook_titles.return_value = []
         commands.UploadCommand(self.db, self.view).execute()
         self.view.ask_for_notebook.assert_not_called()
+
+    def test_execute_pydrive_import_error(self):
+        with mock.patch('builtins.__import__') as __import__:
+            __import__.side_effect = ImportError
+
+            with self.assertRaises(SystemExit):
+                commands.UploadCommand(self.db, self.view).execute()
+
+            self.view.ask_for_notebook.assert_not_called()
+            self.view.show_error.assert_called_once()
