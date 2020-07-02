@@ -234,6 +234,24 @@ class View:
         else:
             print('No types found.')
 
+    def confirm(self, question: str) -> bool:  # pylint: disable=no-self-use
+        """Ask for confirmation and return the answer (yes/no question)."""
+        questions = [
+            {
+                'type': 'confirm',
+                'name': 'answer',
+                'message': question,
+                'default': False,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            return answers['answer']
+
+        return False
+
     def show_info(self, message: str) -> None:  # pylint: disable=no-self-use
         """Print message to stdout."""
         print(message)

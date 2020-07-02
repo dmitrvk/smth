@@ -1,4 +1,5 @@
 import logging
+import pathlib
 from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
@@ -30,7 +31,8 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
     def test_execute(self):
         self.db.get_notebook_titles.return_value = ['notebook']
 
-        notebook = models.Notebook('notebook', None, '/test/path.pdf')
+        notebook = models.Notebook('notebook', None,
+                                   pathlib.Path('/test/path.pdf'))
         self.db.get_notebook_by_title.return_value = notebook
 
         self.view.ask_for_notebook.return_value = 'notebook'
@@ -78,11 +80,12 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
             'mimeType': 'application/vnd.google-apps.folder',
         }
 
-        self.drive.CreateFile.assert_called_with(folder_metadata)
+        expected_call = mock.call(folder_metadata)
+        self.assertIn(expected_call, self.drive.CreateFile.mock_calls)
 
     def test_execute_smth_folder_exists(self):
         self.drive.ListFile.return_value = mock.MagicMock(**{
-            'GetList.return_value': [{'title': 'smth'}],
+            'GetList.return_value': [{'id': 'folder_id', 'title': 'smth'}],
         })
 
         commands.UploadCommand(self.db, self.view).execute()

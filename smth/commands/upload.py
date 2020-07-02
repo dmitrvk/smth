@@ -53,8 +53,6 @@ class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods
 
         drive = pydrive.drive.GoogleDrive(gauth)
 
-        self._create_smth_folder_if_not_exists(drive)
-
         try:
             notebooks = self._db.get_notebook_titles()
         except db.Error as exception:
@@ -63,14 +61,54 @@ class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods
         if notebooks:
             notebook = self.view.ask_for_notebook(notebooks)
 
+            self.view.show_separator()
+
             if notebook:
                 path = self._db.get_notebook_by_title(notebook).path
-                self.view.show_info(f"File '{path}' should be uploaded to Google Drive here.")  # noqa: E501
-                self.view.show_info('This feature will be implemented in future versions')  # noqa: E501
+
+                smth_folder_id = self._create_smth_folder_if_not_exists(drive)
+
+                self.view.show_separator()
+
+                self.view.show_info('Checking if file already exists...')
+
+                query = (f"""'{smth_folder_id}' in parents and
+                        trashed=false and
+                        mimeType='application/pdf'""")
+                file_list = drive.ListFile({'q': query}).GetList()
+
+                for file in file_list:
+                    if file['title'] == path.name:
+                        override_file = self.view.confirm(
+                            f"File 'smth/{path.name}' "
+                            "exists on Google Drive. Override?")
+
+                        if override_file:
+                            self.view.show_info(
+                                f"Uploading '{str(path)}' to Google Drive...")
+                            file.SetContentFile(str(path))
+                            file.Upload()
+                            self.view.show_info(
+                                f"File '{path.name}' "
+                                "uploaded to Google Drive.")
+
+                        return
+
+                file_on_drive = drive.CreateFile({
+                    'title': path.name,
+                    'parents': [{"id": smth_folder_id}],
+                    'mimeType': 'application/pdf',
+                })
+
+                file_on_drive.SetContentFile(str(path))
+                file_on_drive.Upload()
+
+                self.view.show_info(
+                    f"File '{path.name}' uploaded to Google Drive.")
         else:
             self.view.show_info('No notebooks found.')
 
-    def _create_smth_folder_if_not_exists(self, drive):
+    def _create_smth_folder_if_not_exists(self, drive) -> str:
         self.view.show_info("Checking if folder 'smth' exists...")
 
         query = ("""'root' in parents and
@@ -78,20 +116,20 @@ class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods
                 mimeType='application/vnd.google-apps.folder'""")
         file_list = drive.ListFile({'q': query}).GetList()
 
-        folder_exists = False
-        for file in file_list:
-            if file['title'] == 'smth':
-                folder_exists = True
+        for folder in file_list:
+            if folder['title'] == 'smth':
+                self.view.show_info('OK. Folder exists.')
+                return folder['id']
 
-        if folder_exists:
-            self.view.show_info('OK. Folder exists.')
-        else:
-            folder_metadata = {
-                'title': 'smth',
-                'mimeType': 'application/vnd.google-apps.folder',
-            }
+        folder_metadata = {
+            'title': 'smth',
+            'mimeType': 'application/vnd.google-apps.folder',
+        }
 
-            folder = drive.CreateFile(folder_metadata)
-            folder.Upload()
+        folder = drive.CreateFile(folder_metadata)
+        folder.Upload()
+        self._smth_folder_id = folder['id']
 
-            self.view.show_info("Created folder 'smth'.")
+        self.view.show_info("Created folder 'smth'.")
+
+        return folder['id']
