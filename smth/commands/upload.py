@@ -32,7 +32,28 @@ class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods
 
     def execute(self, args: List[str] = None):
         """Upload notebook's PDF file to Google Drive."""
-        self._auth()
+        try:
+            import pydrive.auth
+            import pydrive.drive
+        except ImportError:
+            self._exit_with_error('PyDrive not found.')
+
+        gauth = pydrive.auth.GoogleAuth()
+        gauth.settings['client_config_file'] = str(self.CLIENT_SECRETS_PATH)
+
+        if not self.CLIENT_SECRETS_PATH.exists():
+            with open(str(self.CLIENT_SECRETS_PATH), 'w') as secrets_file:
+                json.dump(self.CLIENT_SECRETS, secrets_file)
+
+        if self.CREDENTIALS_PATH.exists():
+            gauth.LoadCredentialsFile(str(self.CREDENTIALS_PATH))
+        else:
+            gauth.CommandLineAuth()
+            gauth.SaveCredentialsFile(str(self.CREDENTIALS_PATH))
+
+        drive = pydrive.drive.GoogleDrive(gauth)
+
+        self._create_smth_folder_if_not_exists(drive)
 
         try:
             notebooks = self._db.get_notebook_titles()
@@ -49,21 +70,28 @@ class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods
         else:
             self.view.show_info('No notebooks found.')
 
-    def _auth(self):
-        try:
-            import pydrive.auth
-        except ImportError:
-            self._exit_with_error('PyDrive not found.')
+    def _create_smth_folder_if_not_exists(self, drive):
+        self.view.show_info("Checking if folder 'smth' exists...")
 
-        gauth = pydrive.auth.GoogleAuth()
-        gauth.settings['client_config_file'] = str(self.CLIENT_SECRETS_PATH)
+        query = ("""'root' in parents and
+                trashed=false and
+                mimeType='application/vnd.google-apps.folder'""")
+        file_list = drive.ListFile({'q': query}).GetList()
 
-        if not self.CLIENT_SECRETS_PATH.exists():
-            with open(str(self.CLIENT_SECRETS_PATH), 'w') as secrets_file:
-                json.dump(self.CLIENT_SECRETS, secrets_file)
+        folder_exists = False
+        for file in file_list:
+            if file['title'] == 'smth':
+                folder_exists = True
 
-        if self.CREDENTIALS_PATH.exists():
-            gauth.LoadCredentialsFile(str(self.CREDENTIALS_PATH))
+        if folder_exists:
+            self.view.show_info('OK. Folder exists.')
         else:
-            gauth.CommandLineAuth()
-            gauth.SaveCredentialsFile(str(self.CREDENTIALS_PATH))
+            folder_metadata = {
+                'title': 'smth',
+                'mimeType': 'application/vnd.google-apps.folder',
+            }
+
+            folder = drive.CreateFile(folder_metadata)
+            folder.Upload()
+
+            self.view.show_info("Created folder 'smth'.")
