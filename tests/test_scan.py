@@ -28,7 +28,7 @@ class ScanCommandTestCase(unittest.TestCase):
         }
 
         self.view = mock.MagicMock(**{
-            'ask_for_notebook_to_scan.return_value': self.notebook.title,
+            'ask_for_notebook.return_value': self.notebook.title,
             'ask_for_pages_to_append.return_value': 3,
             'ask_for_pages_to_replace.return_value': ['1', '2', '3-4'],
         })
@@ -97,7 +97,7 @@ class ScanCommandTestCase(unittest.TestCase):
         command = commands.ScanCommand(self.db, self.view, self.conf)
 
         self.assertRaises(SystemExit, command.execute)
-        self.view.ask_for_notebook_to_scan.assert_not_called()
+        self.view.ask_for_notebook.assert_not_called()
         self.view.ask_for_pages_to_append.assert_not_called()
         self.view.ask_for_pages_to_replace.assert_not_called()
         sane.open.assert_not_called()
@@ -149,7 +149,7 @@ class ScanCommandTestCase(unittest.TestCase):
 
         commands.ScanCommand(self.db, self.view, self.conf).execute()
 
-        self.view.ask_for_notebook_to_scan.assert_not_called()
+        self.view.ask_for_notebook.assert_not_called()
         self.view.ask_for_pages_to_append.assert_not_called()
         self.view.ask_for_pages_to_replace.assert_not_called()
         self.scanner.scan.assert_not_called()
@@ -185,7 +185,7 @@ class ScanCommandTestCase(unittest.TestCase):
                 self.assertRaises(SystemExit, command.execute, args)
 
     def test_execute_no_notebook_chosen(self):
-        self.view.ask_for_notebook_to_scan.return_value = ''
+        self.view.ask_for_notebook.return_value = ''
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
             command = commands.ScanCommand(self.db, self.view, self.conf)
             self.assertRaises(SystemExit, command.execute)

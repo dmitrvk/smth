@@ -58,6 +58,8 @@ def main():
             commands.CreateCommand(db_, view_).execute()
         elif command == 'list':
             commands.ListCommand(db_, view_).execute()
+        elif command == 'open':
+            commands.OpenCommand(db_, view_).execute()
         elif command == 'scan':
             commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
         elif command == 'types':

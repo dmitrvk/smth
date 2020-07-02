@@ -140,8 +140,8 @@ class View:
 
         return ''
 
-    def ask_for_notebook_to_scan(self, notebooks: List[str]) -> str:
-        """Ask for notebook which user wants to scan and return its title."""
+    def ask_for_notebook(self, notebooks: List[str]) -> str:
+        """Ask for notebook and return its title."""
         questions = [
             {
                 'type': 'list',

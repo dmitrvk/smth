@@ -102,7 +102,7 @@ class ViewTestCase(unittest.TestCase):
 
         self.assertEqual(chosen_device, '')
 
-    def test_ask_for_notebook_to_scan(self):
+    def test_ask_for_notebook(self):
         notebooks = ['notebook 1', 'notebook 2', 'notebook 3']
 
         answers = {
@@ -110,15 +110,15 @@ class ViewTestCase(unittest.TestCase):
         }
 
         with mock.patch('PyInquirer.prompt', return_value=answers):
-            notebook = self.view.ask_for_notebook_to_scan(notebooks)
+            notebook = self.view.ask_for_notebook(notebooks)
 
         self.assertEqual(notebook, answers['notebook'])
 
-    def test_ask_for_notebook_to_scan_no_answer(self):
+    def test_ask_for_notebook_no_answer(self):
         notebooks = ['notebook 1', 'notebook 2', 'notebook 3']
 
         with mock.patch('PyInquirer.prompt', return_value=None):
-            notebook = self.view.ask_for_notebook_to_scan(notebooks)
+            notebook = self.view.ask_for_notebook(notebooks)
 
         self.assertEqual(notebook, '')
 

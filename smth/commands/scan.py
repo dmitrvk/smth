@@ -153,7 +153,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self, notebooks: models.Notebook) -> scanner.ScanPreferences():
         prefs = scanner.ScanPreferences()
 
-        notebook_title = self.view.ask_for_notebook_to_scan(notebooks)
+        notebook_title = self.view.ask_for_notebook(notebooks)
 
         if not notebook_title:
             self._exit_with_error('No notebook chosen.')
