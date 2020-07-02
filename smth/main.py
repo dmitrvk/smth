@@ -64,6 +64,8 @@ def main():
             commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
         elif command == 'types':
             commands.TypesCommand(db_, view_).execute(sys.argv[2:])
+        elif command == 'upload':
+            commands.UploadCommand(db_, view_).execute()
         else:
             view_.show_info(f"Unknown command '{command}'.")
             view_.show_info(HELP_MESSAGE)

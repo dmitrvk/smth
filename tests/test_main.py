@@ -63,6 +63,14 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 main.main()
                 command.execute.assert_called_once()
 
+    def test_upload_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'upload']):
+            with mock.patch('smth.commands.UploadCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
+                main.main()
+                command.execute.assert_called_once()
+
     @mock.patch.object(sys, 'argv', ['__main__.py', 'test'])
     def test_unknown_command(self):
         output = testutils.capture_stdout(main.main)
