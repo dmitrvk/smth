@@ -99,6 +99,34 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
         with self.assertRaises(AssertionError):
             self.drive.CreateFile.assert_called_with(folder_metadata)
 
+    def test_execute_file_exists(self):
+        self.db.get_notebook_titles.return_value = ['notebook']
+
+        notebook = models.Notebook('notebook', None,
+                                   pathlib.Path('/path/to/notebook.pdf'))
+        self.db.get_notebook_by_title.return_value = notebook
+
+        file_mock = mock.MagicMock()
+
+        # file['title'] should return filename
+        file_mock.__getitem__.return_value = 'notebook.pdf'
+
+        self.drive.ListFile.return_value = mock.MagicMock(**{
+            'GetList.return_value': [
+                {'id': 'folder_id', 'title': 'smth'},
+                file_mock,
+            ],
+        })
+
+        self.view.confirm.return_value = True
+
+        commands.UploadCommand(self.db, self.view).execute()
+
+        self.view.confirm.assert_called_once()
+        file_mock.SetContentFile.assert_called_once_with(
+            '/path/to/notebook.pdf')
+        file_mock.Upload.assert_called_once()
+
     def test_execute_db_error(self):
         self.db.get_notebook_titles.side_effect = db.Error('Failed')
 
