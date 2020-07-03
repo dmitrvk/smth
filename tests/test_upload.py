@@ -1,4 +1,5 @@
 import logging
+import os
 import pathlib
 from unittest import mock
 
@@ -11,7 +12,6 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
     def setUp(self):
         self.setUpPyfakefs(modules_to_reload=[commands, config])
         self.fs.create_dir(str(config.Config.CONFIG_PATH.parent))
-        self.fs.create_file(str(commands.UploadCommand.CLIENT_SECRETS_PATH))
 
         logging.disable()
 
@@ -60,13 +60,11 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
         self.gauth.LoadCredentialsFile.assert_called_once()
 
     def test_execute_no_client_secrets(self):
-        with mock.patch(
-                'smth.commands.UploadCommand.CLIENT_SECRETS_PATH') as PATH:
-            PATH.exists.return_value = True
-            commands.UploadCommand(self.db, self.view).execute()
-
-        path = str(commands.UploadCommand.CLIENT_SECRETS_PATH)
-        self.assertTrue(self.fs.exists(path))
+        self.assertFalse(os.path.exists(
+            str(commands.UploadCommand.CLIENT_SECRETS_PATH)))
+        commands.UploadCommand(self.db, self.view).execute()
+        self.assertTrue(os.path.exists(
+            str(commands.UploadCommand.CLIENT_SECRETS_PATH)))
 
     def test_execute_smth_folder_not_exists(self):
         self.drive.ListFile.return_value = mock.MagicMock(**{
