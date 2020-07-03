@@ -47,6 +47,14 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 main.main()
                 command.execute.assert_called_once()
 
+    def test_share_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'share']):
+            with mock.patch('smth.commands.ShareCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
+                main.main()
+                command.execute.assert_called_once()
+
     def test_types_command(self):
         with mock.patch.object(sys, 'argv', ['', 'types']):
             with mock.patch('smth.commands.TypesCommand') as Command:

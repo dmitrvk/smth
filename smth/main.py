@@ -62,6 +62,8 @@ def main():
             commands.OpenCommand(db_, view_).execute()
         elif command == 'scan':
             commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
+        elif command == 'share':
+            commands.ShareCommand(db_, view_).execute()
         elif command == 'types':
             commands.TypesCommand(db_, view_).execute(sys.argv[2:])
         elif command == 'upload':
