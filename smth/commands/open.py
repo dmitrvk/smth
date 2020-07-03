@@ -2,12 +2,14 @@ import logging
 import subprocess
 from typing import List
 
-from smth import commands, db
+from smth import db
+
+from . import command
 
 log = logging.getLogger(__name__)
 
 
-class OpenCommand(commands.Command):  # pylint: disable=too-few-public-methods
+class OpenCommand(command.Command):  # pylint: disable=too-few-public-methods
     """A command which can be executed with arguments."""
 
     def execute(self, args: List[str] = None):

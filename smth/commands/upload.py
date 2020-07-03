@@ -3,12 +3,14 @@ import logging
 import pathlib
 from typing import List
 
-from smth import commands, db
+from smth import db
+
+from . import command
 
 log = logging.getLogger(__name__)
 
 
-class UploadCommand(commands.Command):  # pylint: disable=too-few-public-methods  # noqa: E501
+class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods  # noqa: E501
     """A command for uploading notebooks to Google Drive."""
 
     CLIENT_SECRETS = {
