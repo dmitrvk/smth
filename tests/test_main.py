@@ -55,6 +55,16 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 main.main()
                 command.execute.assert_called_once()
 
+    def test_share_command_pydrive_not_found(self):
+        with mock.patch.object(sys, 'argv', ['', 'share']):
+            with mock.patch('smth.commands.ShareCommand') as Command:
+                with mock.patch('importlib.util.find_spec') as find_spec:
+                    command = mock.MagicMock()
+                    Command.return_value = command
+                    find_spec.return_value = None
+                    testutils.capture_stdout(main.main)
+                    command.execute.assert_not_called()
+
     def test_types_command(self):
         with mock.patch.object(sys, 'argv', ['', 'types']):
             with mock.patch('smth.commands.TypesCommand') as Command:
@@ -78,6 +88,16 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 Command.return_value = command
                 main.main()
                 command.execute.assert_called_once()
+
+    def test_upload_command_pydrive_not_found(self):
+        with mock.patch.object(sys, 'argv', ['', 'upload']):
+            with mock.patch('smth.commands.UploadCommand') as Command:
+                with mock.patch('importlib.util.find_spec') as find_spec:
+                    command = mock.MagicMock()
+                    Command.return_value = command
+                    find_spec.return_value = None
+                    testutils.capture_stdout(main.main)
+                    command.execute.assert_not_called()
 
     @mock.patch.object(sys, 'argv', ['__main__.py', 'test'])
     def test_unknown_command(self):

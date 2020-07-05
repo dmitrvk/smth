@@ -1,10 +1,11 @@
 """smth main module."""
 
+import importlib.util
 import logging
 import pathlib
 import sys
 
-from smth import commands, config, db, view
+from smth import cloud, commands, config, db, view
 
 DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
 
@@ -63,11 +64,17 @@ def main():
         elif command == 'scan':
             commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
         elif command == 'share':
-            commands.ShareCommand(db_, view_).execute()
+            if importlib.util.find_spec('pydrive'):
+                commands.ShareCommand(db_, view_, cloud.Cloud()).execute()
+            else:
+                view_.show_info('PyDrive not found.')
         elif command == 'types':
             commands.TypesCommand(db_, view_).execute(sys.argv[2:])
         elif command == 'upload':
-            commands.UploadCommand(db_, view_).execute()
+            if importlib.util.find_spec('pydrive'):
+                commands.UploadCommand(db_, view_, cloud.Cloud()).execute()
+            else:
+                view_.show_info('PyDrive not found.')
         else:
             view_.show_info(f"Unknown command '{command}'.")
             view_.show_info(HELP_MESSAGE)
