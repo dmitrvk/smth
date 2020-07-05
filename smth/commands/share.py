@@ -28,7 +28,7 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         if not self.CLIENT_SECRETS_PATH.exists():
             with open(str(self.CLIENT_SECRETS_PATH), 'w') as secrets_file:
-                json.dump(self.CLIENT_SECRETS, secrets_file)
+                json.dump(upload.UploadCommand.CLIENT_SECRETS, secrets_file)
 
         if self.CREDENTIALS_PATH.exists():
             gauth.LoadCredentialsFile(str(self.CREDENTIALS_PATH))
