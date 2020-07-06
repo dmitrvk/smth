@@ -4,6 +4,8 @@ import pathlib
 import pydrive.auth
 import pydrive.drive
 
+from . import callback
+
 
 class Cloud:
     """Represents a Google Drive cloud storage."""
@@ -28,7 +30,8 @@ class Cloud:
     CREDENTIALS_PATH = pathlib.Path(
         '~/.config/smth/credentials.json').expanduser()
 
-    def __init__(self):
+    def __init__(self, callback_: callback.Callback):
+        self._callback = callback_
         self._gdrive = pydrive.drive.GoogleDrive(self._auth())
         self._smth_folder_id = self._create_smth_folder_if_not_exists()
 
@@ -51,10 +54,21 @@ class Cloud:
 
     def upload_file(self, path: pathlib.Path) -> None:
         """Upload file to 'smth' folder on Google Drive."""
+        self._callback.on_start_uploading_file(path)
+
         for file in self._get_list_of_pdf_files_in_smth_dir():
             if file['title'] == path.name:
-                file.SetContentFile(str(path))
-                file.Upload()
+                if self._callback.on_confirm_override_file(path.name):
+                    try:
+                        file.SetContentFile(str(path))
+                        file.Upload()
+                        self._callback.on_finish_uploading_file(path)
+                    except OSError as exception:
+                        self._callback.on_error(str(exception))
+                    except KeyboardInterrupt:
+                        message = 'Keyboard interrupt while uploading file.'
+                        self._callback.on_error(message)
+
                 return
 
         file_on_drive = self._gdrive.CreateFile({
@@ -63,20 +77,39 @@ class Cloud:
             'mimeType': 'application/pdf',
         })
 
-        file_on_drive.SetContentFile(str(path))
-        file_on_drive.Upload()
+        try:
+            file_on_drive.SetContentFile(str(path))
+            file_on_drive.Upload()
+            self._callback.on_finish_uploading_file(path)
+        except OSError as exception:
+            self._callback.on_error(str(exception))
+        except KeyboardInterrupt:
+            message = 'Keyboard interrupt while uploading file.'
+            self._callback.on_error(message)
 
     def share_file(self, filename: str) -> None:
         """Share file in 'smth' folder on Google Drive and return a link."""
+        self._callback.on_start_sharing_file(filename)
+
         for file in self._get_list_of_pdf_files_in_smth_dir():
             if file['title'] == filename:
-                file.InsertPermission({
-                    'type': 'anyone',
-                    'value': 'anyone',
-                    'role': 'reader',
-                })
+                try:
+                    file.InsertPermission({
+                        'type': 'anyone',
+                        'value': 'anyone',
+                        'role': 'reader',
+                    })
 
-                return file['alternateLink']
+                    self._callback.on_finish_sharing_file(
+                        filename, file['alternateLink'])
+
+                    return
+                except KeyboardInterrupt:
+                    message = 'Keyboard interrupt while sharing file.'
+                    self._callback.on_error(message)
+
+        message = f"File '{filename}' not found on Google Drive."
+        self._callback.on_error(message)
 
     def _create_smth_folder_if_not_exists(self) -> str:
         """Return folder's id."""
@@ -89,8 +122,14 @@ class Cloud:
             'mimeType': 'application/vnd.google-apps.folder',
         }
 
-        folder = self._gdrive.CreateFile(folder_metadata)
-        folder.Upload()
+        try:
+            folder = self._gdrive.CreateFile(folder_metadata)
+            folder.Upload()
+            self._callback.on_create_smth_folder()
+        except KeyboardInterrupt:
+            message = ("Keyboard interrupt while creating 'smth' folder "
+                       "on Google Drive.")
+            self._callback.on_error(message)
 
         return folder['id']
 
@@ -99,11 +138,23 @@ class Cloud:
                 trashed=false and
                 mimeType='application/vnd.google-apps.folder'""")
 
-        return self._gdrive.ListFile({'q': query}).GetList()
+        try:
+            return self._gdrive.ListFile({'q': query}).GetList()
+        except KeyboardInterrupt:
+            message = ('Keyboard interrupt while loading the list of '
+                       'files in root folder on Google Drive.')
+            self._callback.on_error(message)
+            return []
 
     def _get_list_of_pdf_files_in_smth_dir(self):
         query = (f"""'{self._smth_folder_id}' in parents and
                 trashed=false and
                 mimeType='application/pdf'""")
 
-        return self._gdrive.ListFile({'q': query}).GetList()
+        try:
+            return self._gdrive.ListFile({'q': query}).GetList()
+        except KeyboardInterrupt:
+            message = ("Keyboard interrupt while loading the list of "
+                       "files in 'smth' folder on Google Drive.")
+            self._callback.on_error(message)
+            return []

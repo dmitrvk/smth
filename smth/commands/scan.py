@@ -25,7 +25,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         try:
             notebooks = self._db.get_notebook_titles()
         except db.Error as exception:
-            self._exit_with_error(exception)
+            self.exit_with_error(exception)
 
         if not notebooks:
             message = 'No notebooks found. Create one with `smth create`.'
@@ -36,11 +36,11 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             try:
                 self.conf.scanner_device = ''
             except config.Error as exception:
-                self._exit_with_error(exception)
+                self.exit_with_error(exception)
 
         scanner_ = scanner.Scanner(self.conf)
         callback = self.ScannerCallback(self, self._db, self.view, self.conf)
-        callback.on_error = self._exit_with_error
+        callback.on_error = self.exit_with_error
         scanner_.register(callback)
 
         prefs = self._make_scan_prefs(notebooks)
@@ -49,7 +49,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             scanner_.scan(prefs)
 
         except scanner.Error as exception:
-            self._exit_with_error(exception)
+            self.exit_with_error(exception)
 
     class ScannerCallback(scanner.Callback):
         """Callback implementation defining what to do on scanner events."""
@@ -156,13 +156,13 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         notebook_title = self.view.ask_for_notebook(notebooks)
 
         if not notebook_title:
-            self._exit_with_error('No notebook chosen.')
+            self.exit_with_error('No notebook chosen.')
 
         try:
             prefs.notebook = self._db.get_notebook_by_title(notebook_title)
 
         except db.Error as exception:
-            self._exit_with_error(exception)
+            self.exit_with_error(exception)
 
         validator = validators.ScanPreferencesValidator(prefs.notebook)
         append = self.view.ask_for_pages_to_append(validator)

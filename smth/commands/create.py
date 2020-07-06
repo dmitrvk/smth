@@ -67,4 +67,4 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
             log.info(message)
             self.view.show_info(message)
         except db.Error as exception:
-            self._exit_with_error(exception)
+            self.exit_with_error(exception)

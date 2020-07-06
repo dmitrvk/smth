@@ -25,7 +25,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
                 types = self._db.get_types()
                 self.view.show_types(types)
             except db.Error as exception:
-                self._exit_with_error(exception)
+                self.exit_with_error(exception)
 
     def _create_type(self):
         validator = validators.TypeValidator(self._db)
@@ -45,7 +45,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
         try:
             self._db.save_type(type_)
         except db.Error as exception:
-            self._exit_with_error(exception)
+            self.exit_with_error(exception)
 
         message = (f"Created type '{type_.title}' "
                    f"{type_.page_width}x{type_.page_height}mm")

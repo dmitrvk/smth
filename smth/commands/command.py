@@ -19,7 +19,7 @@ class Command(abc.ABC):  # pylint: disable=too-few-public-methods
     def execute(self, args: List[str] = None):
         """Run command with the given arguments."""
 
-    def _exit_with_error(self, error: [Exception, str]) -> NoReturn:
+    def exit_with_error(self, error: [Exception, str]) -> NoReturn:
         """Show error to user, log error message and exit with code 1."""
         if isinstance(error, Exception):
             self.view.show_error(str(error))

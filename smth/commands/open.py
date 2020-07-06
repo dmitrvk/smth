@@ -17,7 +17,7 @@ class OpenCommand(command.Command):  # pylint: disable=too-few-public-methods
         try:
             notebooks = self._db.get_notebook_titles()
         except db.Error as exception:
-            self._exit_with_error(exception)
+            self.exit_with_error(exception)
 
         if notebooks:
             notebook = self.view.ask_for_notebook(notebooks)
