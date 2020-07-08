@@ -1,3 +1,4 @@
+import importlib.util
 import logging
 from typing import List
 
@@ -6,7 +7,7 @@ import PIL.Image as pillow
 
 from smth import config, db, models, scanner, validators, view
 
-from . import command
+from . import command, upload
 
 log = logging.getLogger(__name__)
 
@@ -143,6 +144,11 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
             self.view.show_info(f"PDF saved at '{notebook.path}'.")
             self.view.show_separator()
+
+            if importlib.util.find_spec('pydrive'):
+                if self.view.confirm('Upload notebook to Google Drive?'):
+                    args = [notebook.title]
+                    upload.UploadCommand(self._db, self.view).execute(args)
 
             self.view.show_info('Done.')
 

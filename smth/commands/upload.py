@@ -24,14 +24,26 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
             self.exit_with_error(exception)
 
         if notebooks:
-            notebook = self.view.ask_for_notebook(notebooks)
+            path = None
 
-            if not notebook:
-                return
+            if args:
+                notebook_title = args[0]
 
-            path = self._db.get_notebook_by_title(notebook).path
+                for title in notebooks:
+                    if title == notebook_title:
+                        try:
+                            path = self._db.get_notebook_by_title(title).path
+                            self._cloud.upload_file(path)
+                            return
+                        except db.Error as exception:
+                            self.exit_with_error(exception)
 
-            self._cloud.upload_file(path)
+            if not path:
+                notebook = self.view.ask_for_notebook(notebooks)
+
+                if notebook:
+                    path = self._db.get_notebook_by_title(notebook).path
+                    self._cloud.upload_file(path)
         else:
             self.view.show_info('No notebooks found.')
 
