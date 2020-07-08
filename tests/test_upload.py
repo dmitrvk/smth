@@ -45,6 +45,15 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
         self.cloud.upload_file.assert_not_called()
         self.view.show_error.assert_called_once_with('Failed')
 
+    def test_execute_db_error_when_title_provided_in_args(self):
+        self.db.get_notebook_by_title.side_effect = db.Error('Failed')
+
+        command = commands.UploadCommand(self.db, self.view)
+
+        self.assertRaises(SystemExit, command.execute, [self.notebook.title])
+        self.cloud.upload_file.assert_not_called()
+        self.view.show_error.assert_called_once_with('Failed')
+
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []
         commands.UploadCommand(self.db, self.view).execute()

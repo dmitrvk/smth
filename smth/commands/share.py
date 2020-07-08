@@ -25,16 +25,20 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
         if notebooks:
             notebook = self.view.ask_for_notebook(notebooks)
 
-            if not notebook:
-                return
+            if notebook:
+                path = None
 
-            path = self._db.get_notebook_by_title(notebook).path
+                try:
+                    path = self._db.get_notebook_by_title(notebook).path
+                except db.Error as exception:
+                    self.exit_with_error(exception)
 
-            self._cloud.share_file(path.name)
+                if path:
+                    self._cloud.share_file(path.name)
         else:
             self.view.show_info('No notebooks found.')
 
-    class CloudCallback(cloud.Callback):
+    class CloudCallback(cloud.SharingCallback):
         def __init__(self, command_: command.Command, view_: view.View):
             super().__init__()
             self._command = command_
@@ -47,19 +51,7 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
             if link:
                 self._view.show_info(f"Link to '{filename}': {link}")
             else:
-                self.view.show_error(f"Could not share '{filename}'.")
+                self._view.show_error(f"Could not share '{filename}'.")
 
         def on_error(self, message: str) -> None:
             self._command.exit_with_error(message)
-
-        def on_start_uploading_file(self, path) -> None:
-            pass
-
-        def on_confirm_override_file(self, filename: str) -> bool:
-            pass
-
-        def on_finish_uploading_file(self, path) -> None:
-            pass
-
-        def on_create_smth_folder(self) -> None:
-            pass

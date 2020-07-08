@@ -71,3 +71,20 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
     def test_on_error(self):
         self.assertTrue(hasattr(self.callback, 'on_error'))
         self.callback.on_error('Error')
+
+    def test_on_finish_upload_to_google_drive(self):
+        type_ = models.NotebookType('', 160, 200)
+        type_.pages_paired = True
+        notebook = models.Notebook('test', type_, pathlib.Path('/path.pdf'))
+
+        with mock.patch('importlib.util.find_spec') as find_spec:
+            find_spec.return_value = 'spec'
+
+            with mock.patch('smth.commands.upload.UploadCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
+
+                self.callback.on_finish(notebook)
+
+                self.view.confirm.assert_called_once()
+                command.execute.assert_called_once_with([notebook.title])

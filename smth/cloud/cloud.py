@@ -62,20 +62,10 @@ class Cloud:
         """Upload file to 'smth' folder on Google Drive."""
         self._callback.on_start_uploading_file(path)
 
-        for file in self._get_list_of_pdf_files_in_smth_dir():
-            if file['title'] == path.name:
+        for file_on_drive in self._get_list_of_pdf_files_in_smth_dir():
+            if file_on_drive['title'] == path.name:
                 if self._callback.on_confirm_override_file(path.name):
-                    try:
-                        file.SetContentFile(str(path))
-                        file.Upload()
-                        self._callback.on_finish_uploading_file(path)
-                    except OSError as exception:
-                        self._callback.on_error(str(exception))
-                    except httplib2.ServerNotFoundError as exception:
-                        self._callback.on_error(str(exception))
-                    except KeyboardInterrupt:
-                        message = 'Keyboard interrupt while uploading file.'
-                        self._callback.on_error(message)
+                    self._upload(path, file_on_drive)
 
                 return
 
@@ -85,6 +75,9 @@ class Cloud:
             'mimeType': 'application/pdf',
         })
 
+        self._upload(path, file_on_drive)
+
+    def _upload(self, path: pathlib.Path, file_on_drive):
         try:
             file_on_drive.SetContentFile(str(path))
             file_on_drive.Upload()
@@ -156,6 +149,7 @@ class Cloud:
             return self._gdrive.ListFile({'q': query}).GetList()
         except httplib2.ServerNotFoundError as exception:
             self._callback.on_error(str(exception))
+            return []
         except KeyboardInterrupt:
             message = ('Keyboard interrupt while loading the list of '
                        'files in root folder on Google Drive.')
@@ -171,6 +165,7 @@ class Cloud:
             return self._gdrive.ListFile({'q': query}).GetList()
         except httplib2.ServerNotFoundError as exception:
             self._callback.on_error(str(exception))
+            return []
         except KeyboardInterrupt:
             message = ("Keyboard interrupt while loading the list of "
                        "files in 'smth' folder on Google Drive.")

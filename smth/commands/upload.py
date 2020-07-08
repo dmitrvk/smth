@@ -47,7 +47,7 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
         else:
             self.view.show_info('No notebooks found.')
 
-    class CloudCallback(cloud.Callback):
+    class CloudCallback(cloud.UploadingCallback):
         def __init__(self, command_: command.Command, view_: view.View):
             super().__init__()
             self._command = command_
@@ -70,9 +70,3 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
 
         def on_error(self, message: str) -> None:
             self._command.exit_with_error(message)
-
-        def on_start_sharing_file(self, filename: str) -> None:
-            pass
-
-        def on_finish_sharing_file(self, filename: str, link: str) -> None:
-            pass
