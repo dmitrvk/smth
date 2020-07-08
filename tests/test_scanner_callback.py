@@ -43,7 +43,10 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
         notebook = models.Notebook('', type_, pathlib.Path('/test/path.pdf'))
         notebook.total_pages = 3
 
-        self.callback.on_finish(notebook)
+        with mock.patch('importlib.util.find_spec') as find_spec:
+            find_spec.return_value = None
+
+            self.callback.on_finish(notebook)
 
         self.db.save_notebook.assert_called_once()
         self.assertEqual(self.pdf.add_page.call_count, 3)
@@ -56,7 +59,10 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
         notebook = models.Notebook('', type_, pathlib.Path('/test/path.pdf'))
         notebook.total_pages = 4
 
-        self.callback.on_finish(notebook)
+        with mock.patch('importlib.util.find_spec') as find_spec:
+            find_spec.return_value = None
+
+            self.callback.on_finish(notebook)
 
         self.db.save_notebook.assert_called_once()
         self.assertEqual(self.pdf.add_page.call_count, 2)
