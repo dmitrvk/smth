@@ -1,6 +1,6 @@
 <h1 align="center"><img alt="smth" src="https://raw.githubusercontent.com/dmitrvk/smth/master/logo.svg" width="137"/></h1>
 
-<h3 align="center">Command-line tool for scanning in batch mode on Linux</h3>
+<h3 align="center">Command-line tool for scanning books and handwriting in batch mode on Linux</h3>
 
 <p align="center">
   <a href="https://github.com/dmitrvk/smth/actions">
@@ -35,6 +35,7 @@
 * Merge scanned images automatically into a single PDF file
 * Add new pages to existing sheets scanned before
 * Replace pages by scanning them again
+* Upload PDF files to Google Drive (requires [PyDrive])
 
 ## Installation
 
@@ -53,6 +54,12 @@ sudo python setup.py install
 If you got an error with missing `sane/sane.h`,
 make sure you have *sane* installed.
 For Debian-based distributions, you may need to install `libsane-dev` package.
+
+If you want to upload scanned documents to Google Drive, install [PyDrive]:
+
+```
+pip install PyDrive
+```
 
 ## Usage
 
@@ -133,26 +140,55 @@ If the width of two pages is larger then the scanner glass' width,
 then left pages will be cropped from the top left corner and
 the right pages will be cropped from the top right corner.
 
+### Uploading to Google Drive
+
+*smth is still in active development.  Use this at your own risk.*
+
+This feature requires [PyDrive] installed.
+
+The `upload` command is used to upload notebooks to Google Drive.
+The first time you will be asked to visit a link, grant access to the
+application and copy-and-paste the verification code.
+After that you can choose a notebook you want to upload.
+
+**'smth' folder will be created in the root folder on your Google Drive.
+All files will be uploaded in that folder.**
+
+After successful uploading you may want to share the file with others.
+You can do this with your web browser or a mobile app,
+but also you can run the `share` command, choose a notebook you want to
+share and copy the link.  The PDF file on Google Drive will become available for
+reading to anyone with the link.
+
 ### Commands
 
 #### create
 
-Create a new notebook with specified title, type, path to PDF and 1st page
+Create a new notebook with specified title, type, path to PDF and the 1st page
 number.
 
 #### list
 
 Show a list of available notebooks.
 
+#### open
+
+Open notebook's PDF file in the default PDF viewer.
+
 #### scan
 
-Scan notebook adding new pages and/or replacing existing ones.
+Scan notebook: add new pages and/or replace existing ones.
 
 Optional arguments:
 * `--set-device` - reset the device which is used to
 prefrorm scanning and choose another one.
 
 If *smth* is run without arguments, this command will be run by default.
+
+#### share
+
+Make a notebook's PDF file on Google Drive available for anyone with a link and
+show the link.
 
 #### types
 
@@ -186,6 +222,10 @@ Optional arguments:
 
 The type of A4 format in portrait orientation is created by default.
 
+#### upload
+
+Upload a notebook's PDF file to 'smth' folder on Google Drive.
+
 ## Configuration
 
 Configuration is stored in `~/.config/smth/smth.conf`:
@@ -211,10 +251,12 @@ $ smth scan --set-device
 
 Time in seconds which should pass before scanning of the next page starts.
 
-Set this option to higher value if you need extra time to put next sheet on
+Set this option to a higher value if you need extra time to put next sheet on
 scanner's glass.
 
 ## Licensing
 
 This project is licensed under the
 [GNU General Public License v3.0](LICENSE).
+
+[PyDrive]: https://github.com/gsuitedevs/PyDrive
