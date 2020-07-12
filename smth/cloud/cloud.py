@@ -1,9 +1,12 @@
 import json
 import pathlib
 
-import httplib2
-import pydrive.auth
-import pydrive.drive
+try:
+    import httplib2
+    import pydrive.auth
+    import pydrive.drive
+except ImportError:
+    pass
 
 from . import callback
 
