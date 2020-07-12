@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from smth import db, cloud, view
+from smth import cloud, db, view
 
 from . import command
 

@@ -1,8 +1,9 @@
-import httplib2
 import pathlib
 import shutil
 import unittest
 from unittest import mock
+
+import httplib2
 
 from smth import cloud
 
