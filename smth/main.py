@@ -18,8 +18,11 @@ PAGES_ROOT = DATA_ROOT / 'pages/'
 HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     create      create new notebook
     list        show all available notebooks
+    open        open notebook in default PDF viewer
     scan        scan notebook
-    types       show all available notebook types'''
+    share       share notebook uploaded to Google Drive (requires PyDrive)
+    types       show all available notebook types
+    upload      upload notebook to Google Drive (requires PyDrive)'''
 
 
 def main():
