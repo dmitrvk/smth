@@ -86,9 +86,22 @@ class Scanner:
 
     def _get_device(self, device_name: str) -> sane.SaneDev:
         device = sane.open(device_name)
-        device.format = self.DEVICE_PREFERENCES['format']
-        device.mode = self.DEVICE_PREFERENCES['mode']
-        device.resolution = self.DEVICE_PREFERENCES['resolution']
+
+        if hasattr(device, 'mode'):
+            device.mode = self.conf.scanner_mode
+        else:
+            self._handle_error("Scanner 'mode' option cannot be set.")
+
+        if hasattr(device, 'format'):
+            device.format = self.DEVICE_PREFERENCES['format']
+        else:
+            self._handle_error("Scanner 'format' option cannot be set.")
+
+        if hasattr(device, 'resolution'):
+            device.resolution = self.DEVICE_PREFERENCES['resolution']
+        else:
+            self._handle_error("Scanner 'resolution' option cannot be set.")
+
         return device
 
     def _scan_with_prefs(

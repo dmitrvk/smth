@@ -18,6 +18,7 @@ class Config:
         self.default_config['scanner'] = {}
         self.default_config['scanner']['device'] = ''
         self.default_config['scanner']['delay'] = '0'
+        self.default_config['scanner']['mode'] = 'gray'
 
         if self.CONFIG_PATH.exists():
             try:
@@ -57,6 +58,16 @@ class Config:
     @scanner_delay.setter
     def scanner_delay(self, delay: int) -> None:
         self.config.set('scanner', 'delay', str(delay))
+        self._write_config()
+
+    @property
+    def scanner_mode(self) -> int:
+        """Gray or color. Gray if not set."""
+        return self.config.get('scanner', 'mode', fallback='gray')
+
+    @scanner_mode.setter
+    def scanner_mode(self, mode: str) -> None:
+        self.config.set('scanner', 'mode', mode.lower())
         self._write_config()
 
     def _write_config(self):
