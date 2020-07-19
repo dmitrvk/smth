@@ -93,12 +93,12 @@ class Scanner:
             self._handle_error("Scanner 'mode' option cannot be set.")
 
         if hasattr(device, 'format'):
-            device.format = self.DEVICE_PREFERENCES['format']
+            device.format = self.conf.scanner_format
         else:
             self._handle_error("Scanner 'format' option cannot be set.")
 
         if hasattr(device, 'resolution'):
-            device.resolution = self.DEVICE_PREFERENCES['resolution']
+            device.resolution = self.conf.scanner_resolution
         else:
             self._handle_error("Scanner 'resolution' option cannot be set.")
 
