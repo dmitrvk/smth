@@ -18,7 +18,6 @@ class Config:
         self.default_config['scanner'] = {}
         self.default_config['scanner']['device'] = ''
         self.default_config['scanner']['delay'] = '0'
-        self.default_config['scanner']['format'] = 'jpeg'
         self.default_config['scanner']['mode'] = 'gray'
         self.default_config['scanner']['resolution'] = '150'
 
@@ -63,19 +62,9 @@ class Config:
         self._write_config()
 
     @property
-    def scanner_format(self) -> str:
-        """File format of scanner's output images. Use JPEG by default."""
-        return self.config.get('scanner', 'format', fallback='jpeg')
-
-    @scanner_format.setter
-    def scanner_format(self, format: str) -> None:
-        self.config.set('scanner', 'format', str(format))
-        self._write_config()
-
-    @property
     def scanner_mode(self) -> str:
         """Gray or color. Gray if not set."""
-        return self.config.get('scanner', 'mode', fallback='gray')
+        return self.config.get('scanner', 'mode', fallback='gray').lower()
 
     @scanner_mode.setter
     def scanner_mode(self, mode: str) -> None:
