@@ -2,7 +2,6 @@ import collections
 import itertools
 import logging
 import math
-import operator
 import time
 from typing import List
 
@@ -82,42 +81,42 @@ class Scanner:
     def _get_device(self, device_name: str) -> sane.SaneDev:
         device = sane.open(device_name)
 
+        if hasattr(device, 'format'):
+            device.format = 'jpeg'
+        else:
+            self._handle_error("Scanner 'format' option cannot be set.")
+
         available_options = device.get_options()
 
-        device.format = 'jpeg'
+        config_options = {}
 
-        if hasattr(device, 'mode'):
-            for option in available_options:
-                if option[1] == 'mode':
-                    lower_caller = operator.methodcaller('lower')
-                    allowed_values = list(map(lower_caller, option[8]))
+        try:
+            config_options = {
+                'mode': self.conf.scanner_mode,
+                'resolution': self.conf.scanner_resolution,
+            }
 
-                    if self.conf.scanner_mode in allowed_values:
-                        device.mode = self.conf.scanner_mode
-                    else:
-                        message = ("Wrong value "
-                                   f"'{self.conf.scanner_mode}'"
-                                   " for option 'mode' in config file.\n"
-                                   f"Allowed values: {allowed_values}")
-                        self._handle_error(message)
-        else:
-            self._handle_error("Scanner 'mode' option cannot be set.")
+            for conf_option in config_options:
+                if hasattr(device, conf_option):
+                    for option in available_options:
+                        value = config_options[conf_option]
+                        allowed_values = option[8]
 
-        if hasattr(device, 'resolution'):
-            for option in available_options:
-                if option[1] == 'resolution':
-                    allowed_values = option[8]
+                        if option[1] == conf_option:
+                            if value in allowed_values:
+                                setattr(device, conf_option, value) else:
+                                message = ("Wrong value "
+                                           f"'{value}' for option "
+                                           f"'{conf_option}' "
+                                           "in config file.\n"
+                                           f"Allowed values: {allowed_values}")
+                                self._handle_error(message)
+                else:
+                    message = "Scanner '{conf_option}' option cannot be set."
+                    self._handle_error(message)
 
-                    if self.conf.scanner_resolution in allowed_values:
-                        device.resolution = self.conf.scanner_resolution
-                    else:
-                        message = ("Wrong value "
-                                   f"'{self.conf.scanner_resolution}'"
-                                   " for option 'resolution' in config file.\n"
-                                   f"Allowed values: {allowed_values}")
-                        self._handle_error(message)
-        else:
-            self._handle_error("Scanner 'resolution' option cannot be set.")
+        except config.Error as exception:
+            self._handle_error(str(exception))
 
         return device
 

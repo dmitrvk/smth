@@ -18,7 +18,7 @@ class Config:
         self.default_config['scanner'] = {}
         self.default_config['scanner']['device'] = ''
         self.default_config['scanner']['delay'] = '0'
-        self.default_config['scanner']['mode'] = 'gray'
+        self.default_config['scanner']['mode'] = 'Gray'
         self.default_config['scanner']['resolution'] = '150'
         self.default_config['scanner']['ask_upload'] = 'True'
 
@@ -65,17 +65,20 @@ class Config:
     @property
     def scanner_mode(self) -> str:
         """Gray or color. Gray if not set."""
-        return self.config.get('scanner', 'mode', fallback='gray').lower()
+        return self.config.get('scanner', 'mode', fallback='Gray')
 
     @scanner_mode.setter
     def scanner_mode(self, mode: str) -> None:
-        self.config.set('scanner', 'mode', mode.lower())
+        self.config.set('scanner', 'mode', mode)
         self._write_config()
 
     @property
     def scanner_resolution(self) -> int:
         """Scanner resolution (PPI). Use 150 by default."""
-        return self.config.getint('scanner', 'resolution', fallback=150)
+        try:
+            return self.config.getint('scanner', 'resolution', fallback=150)
+        except ValueError as exception:
+            raise Error(str(exception))
 
     @scanner_resolution.setter
     def scanner_resolution(self, resolution: int) -> None:
