@@ -145,10 +145,14 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.view.show_info(f"PDF saved at '{notebook.path}'.")
             self.view.show_separator()
 
-            if importlib.util.find_spec('pydrive'):
-                if self.view.confirm('Upload notebook to Google Drive?'):
-                    args = [notebook.title]
-                    upload.UploadCommand(self._db, self.view).execute(args)
+            try:
+                if (importlib.util.find_spec('pydrive') and
+                        self.conf.scanner_ask_upload):
+                    if self.view.confirm('Upload notebook to Google Drive?'):
+                        args = [notebook.title]
+                        upload.UploadCommand(self._db, self.view).execute(args)
+            except config.Error as exception:
+                self.view.show_error(f'Config file error: {str(exception)}')
 
             self.view.show_info('Done.')
 

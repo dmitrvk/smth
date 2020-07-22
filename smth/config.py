@@ -20,6 +20,7 @@ class Config:
         self.default_config['scanner']['delay'] = '0'
         self.default_config['scanner']['mode'] = 'gray'
         self.default_config['scanner']['resolution'] = '150'
+        self.default_config['scanner']['ask_upload'] = 'True'
 
         if self.CONFIG_PATH.exists():
             try:
@@ -79,6 +80,20 @@ class Config:
     @scanner_resolution.setter
     def scanner_resolution(self, resolution: int) -> None:
         self.config.set('scanner', 'resolution', str(resolution))
+        self._write_config()
+
+    @property
+    def scanner_ask_upload(self) -> str:
+        """Defines whether to ask for uploading to cloud when scan finishes."""
+        try:
+            return self.config.getboolean(
+                'scanner', 'ask_upload', fallback=True)
+        except ValueError as exception:
+            raise Error(str(exception))
+
+    @scanner_ask_upload.setter
+    def scanner_ask_upload(self, ask_upload: bool) -> None:
+        self.config.set('scanner', 'ask_upload', ask_upload)
         self._write_config()
 
     def _write_config(self):
