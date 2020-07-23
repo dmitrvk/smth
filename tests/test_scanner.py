@@ -19,6 +19,7 @@ class ScannerTestCase(unittest.TestCase):
         self.conf = mock.MagicMock(**{
             'scanner_device': 'device',
             'scanner_delay': 0,
+            'scanner_resolution': 150,
         })
 
         sane.init = mock.MagicMock()
@@ -30,6 +31,7 @@ class ScannerTestCase(unittest.TestCase):
         self.device = mock.MagicMock(**{
             'devname': 'device',
             'scan.return_value': self.image,
+            'resolution': self.conf.scanner_resolution,
         })
 
         sane.open = mock.MagicMock(return_value=self.device)

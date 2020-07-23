@@ -104,7 +104,8 @@ class Scanner:
 
                         if option[1] == conf_option:
                             if value in allowed_values:
-                                setattr(device, conf_option, value) else:
+                                setattr(device, conf_option, value)
+                            else:
                                 message = ("Wrong value "
                                            f"'{value}' for option "
                                            f"'{conf_option}' "
