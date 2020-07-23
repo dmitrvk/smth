@@ -96,7 +96,7 @@ class Config:
 
     @scanner_ask_upload.setter
     def scanner_ask_upload(self, ask_upload: bool) -> None:
-        self.config.set('scanner', 'ask_upload', ask_upload)
+        self.config.set('scanner', 'ask_upload', str(ask_upload))
         self._write_config()
 
     def _write_config(self):
