@@ -19,6 +19,8 @@ class ScannerTestCase(unittest.TestCase):
         self.conf = mock.MagicMock(**{
             'scanner_device': 'device',
             'scanner_delay': 0,
+            'scanner_mode': 'Gray',
+            'scanner_resolution': 150,
         })
 
         sane.init = mock.MagicMock()
@@ -30,6 +32,14 @@ class ScannerTestCase(unittest.TestCase):
         self.device = mock.MagicMock(**{
             'devname': 'device',
             'scan.return_value': self.image,
+            'mode': 'Gray',
+            'resolution': self.conf.scanner_resolution,
+            'get_options.return_value': [
+                (1, 'mode', None, None, None, None, None, None,
+                    ['Gray', 'Color']),
+                (2, 'resolution', None, None, None, None, None, None,
+                    [75, 150, 300, 600]),
+            ],
         })
 
         sane.open = mock.MagicMock(return_value=self.device)

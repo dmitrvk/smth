@@ -21,12 +21,6 @@ Device = collections.namedtuple('Device', 'name vendor model type')
 class Scanner:
     """Represents a scanner device which can scan notebooks."""
 
-    DEVICE_PREFERENCES = {
-        'format': 'jpeg',
-        'mode': 'gray',
-        'resolution': 150,
-    }
-
     def __init__(self, conf: config.Config):
         self.callback = None
         self.conf = conf
@@ -86,9 +80,41 @@ class Scanner:
 
     def _get_device(self, device_name: str) -> sane.SaneDev:
         device = sane.open(device_name)
-        device.format = self.DEVICE_PREFERENCES['format']
-        device.mode = self.DEVICE_PREFERENCES['mode']
-        device.resolution = self.DEVICE_PREFERENCES['resolution']
+        device.format = 'jpeg'
+
+        available_options = device.get_options()
+
+        config_options = {}
+
+        try:
+            config_options = {
+                'mode': self.conf.scanner_mode,
+                'resolution': self.conf.scanner_resolution,
+            }
+
+            for conf_option in config_options:
+                if hasattr(device, conf_option):
+                    for option in available_options:
+                        value = config_options[conf_option]
+                        allowed_values = option[8]
+
+                        if option[1] == conf_option:
+                            if value in allowed_values:
+                                setattr(device, conf_option, value)
+                            else:
+                                message = ("Wrong value "
+                                           f"'{value}' for option "
+                                           f"'{conf_option}' "
+                                           "in config file.\n"
+                                           f"Allowed values: {allowed_values}")
+                                self._handle_error(message)
+                else:
+                    message = "Scanner '{conf_option}' option cannot be set."
+                    self._handle_error(message)
+
+        except config.Error as exception:
+            self._handle_error(str(exception))
+
         return device
 
     def _scan_with_prefs(

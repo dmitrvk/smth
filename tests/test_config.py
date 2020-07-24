@@ -77,6 +77,57 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
         with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
             self.assertIn('delay = 3', config_file.read())
 
+    def test_scanner_resolution(self):
+        config_file_contents = '''[scanner]
+            resolution = 150'''
+
+        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+            config_file.write(config_file_contents)
+
+        conf = config.Config()
+
+        self.assertEqual(conf.scanner_resolution, 150)
+
+        conf.scanner_resolution = 300
+        self.assertEqual(conf.scanner_resolution, 300)
+
+        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
+            self.assertIn('resolution = 300', config_file.read())
+
+    def test_scanner_mode(self):
+        config_file_contents = '''[scanner]
+            mode = Gray'''
+
+        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+            config_file.write(config_file_contents)
+
+        conf = config.Config()
+
+        self.assertEqual(conf.scanner_mode, 'Gray')
+
+        conf.scanner_mode = 'Color'
+        self.assertEqual(conf.scanner_mode, 'Color')
+
+        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
+            self.assertIn('mode = Color', config_file.read())
+
+    def test_scanner_ask_upload(self):
+        config_file_contents = '''[scanner]
+            ask_upload = True'''
+
+        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+            config_file.write(config_file_contents)
+
+        conf = config.Config()
+
+        self.assertEqual(conf.scanner_ask_upload, True)
+
+        conf.scanner_ask_upload = False
+        self.assertEqual(conf.scanner_ask_upload, False)
+
+        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
+            self.assertIn('ask_upload = False', config_file.read())
+
     def test_os_error_when_writing(self):
         with mock.patch('configparser.ConfigParser') as ConfigParser:
             ConfigParser.return_value = mock.MagicMock(**{
