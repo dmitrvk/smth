@@ -234,6 +234,9 @@ Configuration is stored in `~/.config/smth/smth.conf`:
 [scanner]
 device = <device>
 delay = 0
+mode = Gray
+resolution = 150
+ask_upload = True
 ```
 
 ### device
@@ -253,6 +256,22 @@ Time in seconds which should pass before scanning of the next page starts.
 
 Set this option to a higher value if you need extra time to put next sheet on
 scanner's glass.
+
+### mode
+
+Selects the scan mode (e.g., Gray or Color)
+
+### resolution
+
+Sets the resolution of the scanned images (e.g., 75, 150, 300 etc.).
+
+### ask_upload
+
+If `True` (and [PyDrive] is installed),
+you will be asked whether you want to upload a
+notebook to Google Drive when scanning is completed.
+
+Set the parameter to `False` to disable this behavior.
 
 ## Licensing
 
