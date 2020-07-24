@@ -80,11 +80,7 @@ class Scanner:
 
     def _get_device(self, device_name: str) -> sane.SaneDev:
         device = sane.open(device_name)
-
-        if hasattr(device, 'format'):
-            device.format = 'jpeg'
-        else:
-            self._handle_error("Scanner 'format' option cannot be set.")
+        device.format = 'jpeg'
 
         available_options = device.get_options()
 
