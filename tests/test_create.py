@@ -62,6 +62,25 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         pdf_path = dir_path / 'notebook.pdf'
         self.assertTrue(pdf_path.exists())
 
+    def test_execute_path_not_pdf_and_file_already_exists_in_dir(self):
+        dir_path = pathlib.Path('/test/path')
+
+        answers = {
+            'title': 'notebook',
+            'type': 'Type',
+            'path': str(dir_path),
+            'first_page_number': 1
+        }
+
+        self.fs.create_file(str(dir_path / 'notebook.pdf'))
+
+        self.view.ask_for_new_notebook_info.return_value = answers
+
+        command = commands.CreateCommand(self.db, self.view)
+        self.assertRaises(SystemExit, command.execute)
+        self.db.save_notebook.assert_not_called()
+        self.view.show_error.assert_called()
+
     def test_execute_no_answers(self):
         self.view.ask_for_new_notebook_info.return_value = None
         self.pdf.output = mock.MagicMock()
