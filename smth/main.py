@@ -17,6 +17,7 @@ PAGES_ROOT = DATA_ROOT / 'pages/'
 
 HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     create      create new notebook
+    delete      delete notebook
     list        show all available notebooks
     open        open notebook in default PDF viewer
     scan        scan notebook
@@ -60,6 +61,8 @@ def main():
 
         if command == 'create':
             commands.CreateCommand(db_, view_).execute()
+        elif command == 'delete':
+            commands.DeleteCommand(db_, view_).execute()
         elif command == 'list':
             commands.ListCommand(db_, view_).execute()
         elif command == 'open':

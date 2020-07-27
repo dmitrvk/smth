@@ -51,6 +51,8 @@ SQL_UPDATE_NOTEBOOK = '''UPDATE notebook
     path=?, total_pages=?, first_page_number=?
     WHERE id=?'''
 
+SQL_DELETE_NOTEBOOK = '''DELETE FROM notebook WHERE id=?'''
+
 SQL_CREATE_TYPE = '''INSERT INTO
     notebook_type(title, page_width, page_height, pages_paired)
     VALUES(?, ?, ?, ?)'''
@@ -348,6 +350,22 @@ class DB:
         except sqlite3.Error as exception:
             self._handle_error(
                 'Failed to save notebook', exception)
+
+        finally:
+            if connection:
+                connection.close()
+
+    def delete_notebook_by_id(self, id: int) -> None:
+        """Delete notebook with the given id from the database."""
+        connection = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            connection.execute(SQL_DELETE_NOTEBOOK, (id,))
+            connection.commit()
+
+        except sqlite3.Error as exception:
+            self._handle_error('Failed to save notebook type', exception)
 
         finally:
             if connection:

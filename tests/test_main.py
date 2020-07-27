@@ -81,6 +81,14 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 main.main()
                 command.execute.assert_called_once()
 
+    def test_delete_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'delete']):
+            with mock.patch('smth.commands.DeleteCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
+                main.main()
+                command.execute.assert_called_once()
+
     def test_upload_command(self):
         with mock.patch.object(sys, 'argv', ['', 'upload']):
             with mock.patch('smth.commands.UploadCommand') as Command:
