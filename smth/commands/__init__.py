@@ -6,9 +6,11 @@ from .open import OpenCommand
 from .scan import ScanCommand
 from .share import ShareCommand
 from .types import TypesCommand
+from .update import UpdateCommand
 from .upload import UploadCommand
 
 __all__ = [
     'Command', 'CreateCommand', 'DeleteCommand', 'ListCommand', 'OpenCommand',
-    'ScanCommand', 'ShareCommand', 'TypesCommand', 'UploadCommand'
+    'ScanCommand', 'ShareCommand', 'TypesCommand', 'UpdateCommand',
+    'UploadCommand'
 ]

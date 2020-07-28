@@ -89,6 +89,14 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 main.main()
                 command.execute.assert_called_once()
 
+    def test_update_command(self):
+        with mock.patch.object(sys, 'argv', ['', 'update']):
+            with mock.patch('smth.commands.UpdateCommand') as Command:
+                command = mock.MagicMock()
+                Command.return_value = command
+                main.main()
+                command.execute.assert_called_once()
+
     def test_upload_command(self):
         with mock.patch.object(sys, 'argv', ['', 'upload']):
             with mock.patch('smth.commands.UploadCommand') as Command:

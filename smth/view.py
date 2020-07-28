@@ -61,6 +61,54 @@ class View:
 
         return {}
 
+    def ask_for_updated_notebook_properties(
+            self, notebook: models.Notebook, types: List[str]) -> Answers:
+        """Ask user for updated notebook parameters and return answers.
+
+        Validate answers with given validator."""
+        questions = [
+            {
+                'type': 'input',
+                'name': 'title',
+                'message': 'Enter title:',
+                'default': notebook.title,
+                # 'validate': validator.validate_title,
+            },
+            {
+                'type': 'list',
+                'name': 'type',
+                'message': 'Choose type',
+                'choices': types,
+                'default': notebook.type.title,
+                # 'validate': validator.validate_type,
+            },
+            {
+                'type': 'input',
+                'name': 'path',
+                'message': 'Enter path to PDF:',
+                'default': str(notebook.path),
+                # 'validate': validator.validate_path,
+            },
+            {
+                'type': 'input',
+                'name': 'first_page_number',
+                'message': 'Enter 1st page number:',
+                'default': str(notebook.first_page_number),
+                # 'validate': validator.validate_first_page_number,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            answers['title'] = answers['title'].strip()
+            answers['type'] = answers['type'].strip()
+            answers['path'] = answers['path'].strip()
+            answers['first_page_number'] = int(answers['first_page_number'])
+            return answers
+
+        return {}
+
     def ask_for_new_type_info(
             self, validator: validators.TypeValidator) -> Answers:
         """Ask user for notebook parameters and return answers.

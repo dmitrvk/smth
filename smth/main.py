@@ -76,6 +76,8 @@ def main():
                 view_.show_info('PyDrive not found.')
         elif command == 'types':
             commands.TypesCommand(db_, view_).execute(sys.argv[2:])
+        elif command == 'update':
+            commands.UpdateCommand(db_, view_).execute(sys.argv[2:])
         elif command == 'upload':
             if importlib.util.find_spec('pydrive'):
                 commands.UploadCommand(db_, view_).execute()
