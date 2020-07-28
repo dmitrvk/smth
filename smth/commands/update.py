@@ -1,6 +1,7 @@
 import logging
 import os
 import pathlib
+import shutil
 from typing import List
 
 from smth import db
@@ -46,12 +47,41 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
             return
 
         title = answers['title']
-        type_ = self._db.get_type_by_title(answers['type'])
         path = pathlib.Path(
             os.path.expandvars(answers['path'])).expanduser().resolve()
 
-        print(title)
-        print(type_)
-        print(path)
-        print(answers['first_page_number'])
-        return
+        if title != notebook.title:
+            if self._db.notebook_exists(title):
+                self.exit_with_error(f"Notebook '{title}' already exists.")
+            else:
+                pages_root = pathlib.Path(
+                    '~/.local/share/smth/pages').expanduser()
+                pages_dir = pages_root / notebook.title
+                new_pages_dir = pages_root / title
+                shutil.move(str(pages_dir), str(new_pages_dir))
+
+                notebook.title = title
+
+        if path != notebook.path:
+            if str(path).endswith('.pdf'):
+                if not path.parent.exists():
+                    path.parent.mkdir(parents=True, exist_ok=True)
+            else:
+                if not path.exists():
+                    path.mkdir(parents=True, exist_ok=True)
+
+                path = path / f'{title}.pdf'
+
+                if path.exists():
+                    message = ("Notebook not updated because "
+                               f"'{path}' already exists.")
+                    self.exit_with_error(message)
+
+            if notebook.path.exists():
+                shutil.move(str(notebook.path), str(path))
+
+            notebook.path = path
+
+        self._db.save_notebook(notebook)
+
+        self.view.show_info('Notebook saved.')
