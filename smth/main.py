@@ -4,7 +4,7 @@ import importlib.util
 import logging
 import sys
 
-from smth import commands, const, config, db, view
+from smth import commands, const, db, view
 
 
 def main():
@@ -24,40 +24,30 @@ def main():
     view_ = view.View()
 
     try:
-        conf = config.Config()
         db_ = db.DB(const.DB_PATH)
-    except (config.Error, db.Error) as exception:
+    except db.Error as exception:
         view_.show_error(f'{exception}.')
         log.exception(exception)
         sys.exit(1)
 
-    def execute_command(command: str, conf: config.Config = None) -> None:
+    def execute_command(command: str) -> None:
         command_class = f'{command.capitalize()}Command'
-
-        if conf:
-            command = getattr(commands, command_class)(db_, view_, conf)
-        else:
-            command = getattr(commands, command_class)(db_, view_)
-
+        command = getattr(commands, command_class)(db_, view_)
         command.execute(sys.argv[2:])
 
     if len(sys.argv) == 1:
-        # Default command
-        execute_command('scan', conf)
+        execute_command('scan')  # Default command
     else:
         command = sys.argv[1]
 
-        if command == 'scan':
-            execute_command(command, conf)
-
-        elif command in ('share', 'upload'):
+        if command in ('share', 'upload'):
             if importlib.util.find_spec('pydrive'):
                 execute_command(command)
             else:
                 view_.show_info('PyDrive not found.')
 
         elif command in (
-                'create', 'delete', 'list', 'open', 'types', 'update'):
+                'create', 'delete', 'list', 'open', 'scan', 'types', 'update'):
             execute_command(command)
 
         else:

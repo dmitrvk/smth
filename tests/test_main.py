@@ -69,17 +69,6 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
             for command in self.commands:
                 self.assertIn(command, output)
 
-    def test_config_error(self):
-        with mock.patch('smth.config.Config') as Config:
-            Config.side_effect = config.Error('Fail')
-
-            with mock.patch('smth.view.View') as View:
-                view = mock.MagicMock()
-                View.return_value = view
-
-                self.assertRaises(SystemExit, main.main)
-                view.show_error.assert_called_once_with('Fail.')
-
     def test_db_error(self):
         with mock.patch('smth.db.DB') as DB:
             DB.side_effect = db.Error('Fail')
