@@ -23,6 +23,7 @@ HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
     scan        scan notebook
     share       share notebook uploaded to Google Drive (requires PyDrive)
     types       show all available notebook types
+    update      change notebook's title or path to PDF file
     upload      upload notebook to Google Drive (requires PyDrive)'''
 
 

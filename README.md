@@ -167,6 +167,10 @@ reading to anyone with the link.
 Create a new notebook with specified title, type, path to PDF and the 1st page
 number.
 
+#### delete
+
+Delete a notebook.
+
 #### list
 
 Show a list of available notebooks.
@@ -221,6 +225,10 @@ Optional arguments:
 * `--create` - create a new notebook type.
 
 The type of A4 format in portrait orientation is created by default.
+
+#### update
+
+Change notebook's title or path to PDF file.
 
 #### upload
 
