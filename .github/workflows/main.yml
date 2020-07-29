@@ -36,4 +36,3 @@ jobs:
       with:
         file: ./coverage.xml
         name: codecov-smth
-
