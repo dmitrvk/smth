@@ -110,6 +110,12 @@ class TestDB(unittest.TestCase):
         self.db.delete_notebook_by_id(id)
         self.assertFalse(self.db.notebook_exists(self.notebooks[0].title))
 
+    def test_delete_type_by_title(self):
+        self.assertTrue(self.db.type_exists(self.types[0].title))
+        title = self.db.get_type_by_title(self.types[0].title).title
+        self.db.delete_type_by_title(title)
+        self.assertFalse(self.db.type_exists(self.types[0].title))
+
     def test_save_type(self):
         self.types[0].id = 1
         self.types[0].title = 'New Title'

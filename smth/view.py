@@ -190,6 +190,24 @@ class View:
 
         return ''
 
+    def ask_for_type(self, types: List[str]) -> str:
+        """Ask for notebook type and return its title."""
+        questions = [
+            {
+                'type': 'list',
+                'name': 'type',
+                'message': 'Choose type',
+                'choices': types,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            return answers['type'].strip()
+
+        return ''
+
     def ask_for_pages_to_append(
             self, validator: validators.ScanPreferencesValidator) -> int:
         """Ask user for number of pages user wants to append to a notebook.

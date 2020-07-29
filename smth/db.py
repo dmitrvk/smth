@@ -39,6 +39,9 @@ SQL_GET_NOTEBOOK_TITLES = '''SELECT title FROM notebook ORDER BY title'''
 
 SQL_NOTEBOOK_COUNT = '''SELECT COUNT(*) FROM notebook WHERE title=?'''
 
+SQL_NOTEBOOK_WITH_TYPE_COUNT = '''SELECT COUNT(*) FROM notebook, notebook_type
+    WHERE notebook.type_id=notebook_type.id AND notebook_type.title=?'''
+
 SQL_CREATE_NOTEBOOK = '''INSERT INTO
     notebook(title, type_id, path, total_pages, first_page_number)
     VALUES(?,
@@ -52,6 +55,8 @@ SQL_UPDATE_NOTEBOOK = '''UPDATE notebook
     WHERE id=?'''
 
 SQL_DELETE_NOTEBOOK = '''DELETE FROM notebook WHERE id=?'''
+
+SQL_DELETE_TYPE_BY_TITLE = '''DELETE FROM notebook_type WHERE title=?'''
 
 SQL_CREATE_TYPE = '''INSERT INTO
     notebook_type(title, page_width, page_height, pages_paired)
@@ -365,7 +370,23 @@ class DB:
             connection.commit()
 
         except sqlite3.Error as exception:
-            self._handle_error('Failed to save notebook type', exception)
+            self._handle_error('Failed to delete notebook', exception)
+
+        finally:
+            if connection:
+                connection.close()
+
+    def delete_type_by_title(self, title: str) -> None:
+        """Delete type with the given title from the database."""
+        connection = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            connection.execute(SQL_DELETE_TYPE_BY_TITLE, (title,))
+            connection.commit()
+
+        except sqlite3.Error as exception:
+            self._handle_error('Failed to delete notebook type', exception)
 
         finally:
             if connection:
@@ -396,6 +417,28 @@ class DB:
         finally:
             if connection:
                 connection.close()
+
+    def notebooks_of_type_exist(self, type_title: str) -> None:
+        """Return true if there is one or more notebooks of the type."""
+        exists = False
+        connection = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+
+            cursor = connection.execute(
+                SQL_NOTEBOOK_WITH_TYPE_COUNT, (type_title,))
+            exists = cursor.fetchone()[0] > 0
+
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to check if notebooks of the type exist', exception)
+
+        finally:
+            if connection:
+                connection.close()
+
+        return exists
 
     def _connect(self) -> sqlite3.Connection:
         """Connect to the database and return the connection object.

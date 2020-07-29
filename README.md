@@ -223,6 +223,7 @@ If run without arguments, show the list of available notebook types.
 
 Optional arguments:
 * `--create` - create a new notebook type.
+* `--delete` - delete a notebook type.
 
 The type of A4 format in portrait orientation is created by default.
 
