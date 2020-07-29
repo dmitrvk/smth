@@ -10,8 +10,8 @@ from smth import commands, const, config, db, view
 def main():
     """Create needed files, initialize logs, database, view.
 
-    Parse arguments and run command that user specified.
-    Show help if no command provided or specified command is invalid."""
+    Parse arguments and run command.
+    Show help message if no command provided or command is invalid."""
     if not const.DATA_ROOT_PATH.exists():
         const.DATA_ROOT_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -25,51 +25,45 @@ def main():
 
     try:
         conf = config.Config()
-    except config.Error as exception:
-        view_.show_error(f'{exception}.')
-        log.exception(exception)
-        sys.exit(1)
-
-    try:
         db_ = db.DB(const.DB_PATH)
-    except db.Error as exception:
+    except (config.Error, db.Error) as exception:
         view_.show_error(f'{exception}.')
         log.exception(exception)
         sys.exit(1)
 
-    if len(sys.argv) > 1:
+    def execute_command(command: str, conf: config.Config = None) -> None:
+        command_class = f'{command.capitalize()}Command'
+
+        if conf:
+            command = getattr(commands, command_class)(db_, view_, conf)
+        else:
+            command = getattr(commands, command_class)(db_, view_)
+
+        command.execute(sys.argv[2:])
+
+    if len(sys.argv) == 1:
+        # Default command
+        execute_command('scan', conf)
+    else:
         command = sys.argv[1]
 
-        if command == 'create':
-            commands.CreateCommand(db_, view_).execute()
-        elif command == 'delete':
-            commands.DeleteCommand(db_, view_).execute()
-        elif command == 'list':
-            commands.ListCommand(db_, view_).execute()
-        elif command == 'open':
-            commands.OpenCommand(db_, view_).execute()
-        elif command == 'scan':
-            commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
-        elif command == 'share':
+        if command == 'scan':
+            execute_command(command, conf)
+
+        elif command in ('share', 'upload'):
             if importlib.util.find_spec('pydrive'):
-                commands.ShareCommand(db_, view_).execute()
+                execute_command(command)
             else:
                 view_.show_info('PyDrive not found.')
-        elif command == 'types':
-            commands.TypesCommand(db_, view_).execute(sys.argv[2:])
-        elif command == 'update':
-            commands.UpdateCommand(db_, view_).execute(sys.argv[2:])
-        elif command == 'upload':
-            if importlib.util.find_spec('pydrive'):
-                commands.UploadCommand(db_, view_).execute()
-            else:
-                view_.show_info('PyDrive not found.')
+
+        elif command in (
+                'create', 'delete', 'list', 'open', 'types', 'update'):
+            execute_command(command)
+
         else:
             view_.show_info(f"Unknown command '{command}'.")
             view_.show_info(const.HELP_MESSAGE)
             log.info("Unknown command '%s'", command)
-    else:
-        commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
 
 
 def setup_logging(log_level=logging.DEBUG) -> None:
