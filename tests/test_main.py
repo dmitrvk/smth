@@ -4,7 +4,7 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import config, db, main
+from smth import config, const, db, main
 from tests import testutils
 
 
@@ -12,7 +12,7 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
     """Test program's entry point."""
 
     def setUp(self):
-        self.setUpPyfakefs(modules_to_reload=[main, config])
+        self.setUpPyfakefs(modules_to_reload=[main, config, const])
         logging.disable()
 
         db_patcher = mock.patch('smth.db.DB')

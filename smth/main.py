@@ -2,29 +2,9 @@
 
 import importlib.util
 import logging
-import pathlib
 import sys
 
-from smth import commands, config, db, view
-
-DATA_ROOT = pathlib.Path('~/.local/share/smth').expanduser()
-
-DB_PATH = DATA_ROOT / 'smth.db'
-
-LOG_PATH = DATA_ROOT / 'smth.log'
-
-PAGES_ROOT = DATA_ROOT / 'pages/'
-
-HELP_MESSAGE = '''Syntax: `smth <command>`. Available commands:
-    create      create new notebook
-    delete      delete notebook
-    list        show all available notebooks
-    open        open notebook in default PDF viewer
-    scan        scan notebook
-    share       share notebook uploaded to Google Drive (requires PyDrive)
-    types       show all available notebook types
-    update      change notebook's title or path to PDF file
-    upload      upload notebook to Google Drive (requires PyDrive)'''
+from smth import commands, const, config, db, view
 
 
 def main():
@@ -32,11 +12,11 @@ def main():
 
     Parse arguments and run command that user specified.
     Show help if no command provided or specified command is invalid."""
-    if not DATA_ROOT.exists():
-        DATA_ROOT.mkdir(parents=True, exist_ok=True)
+    if not const.DATA_ROOT_PATH.exists():
+        const.DATA_ROOT_PATH.mkdir(parents=True, exist_ok=True)
 
-    if not PAGES_ROOT.exists():
-        PAGES_ROOT.mkdir(parents=True, exist_ok=True)
+    if not const.PAGES_ROOT_PATH.exists():
+        const.PAGES_ROOT_PATH.mkdir(parents=True, exist_ok=True)
 
     setup_logging()
     log = logging.getLogger(__name__)
@@ -51,7 +31,7 @@ def main():
         sys.exit(1)
 
     try:
-        db_ = db.DB(DB_PATH)
+        db_ = db.DB(const.DB_PATH)
     except db.Error as exception:
         view_.show_error(f'{exception}.')
         log.exception(exception)
@@ -86,7 +66,7 @@ def main():
                 view_.show_info('PyDrive not found.')
         else:
             view_.show_info(f"Unknown command '{command}'.")
-            view_.show_info(HELP_MESSAGE)
+            view_.show_info(const.HELP_MESSAGE)
             log.info("Unknown command '%s'", command)
     else:
         commands.ScanCommand(db_, view_, conf).execute(sys.argv[2:])
@@ -100,7 +80,7 @@ def setup_logging(log_level=logging.DEBUG) -> None:
     format_ = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
     formatter = logging.Formatter(format_)
 
-    handler = logging.FileHandler(str(LOG_PATH))
+    handler = logging.FileHandler(str(const.LOG_PATH))
     handler.setLevel(log_level)
     handler.setFormatter(formatter)
 

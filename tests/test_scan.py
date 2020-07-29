@@ -6,7 +6,7 @@ import _sane
 import sane
 from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import commands, config, db, models, scanner
+from smth import db, commands, config, const, models, scanner
 
 
 class ScanCommandTestCase(unittest.TestCase):
@@ -162,13 +162,13 @@ class ScanCommandTestCase(unittest.TestCase):
 
     @fakefs_unittest.patchfs
     def test_execute_set_device_config_error(self, fs):
-        fs.create_file(str(config.Config.CONFIG_PATH))
+        fs.create_file(str(const.CONFIG_PATH))
 
         config_file_contents = '''[scanner]
             device = scanner
             delay = 3'''
 
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+        with open(str(const.CONFIG_PATH), 'w') as config_file:
             config_file.write(config_file_contents)
 
         args = ['--set-device']

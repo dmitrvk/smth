@@ -4,12 +4,12 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import commands, db, models
+from smth import db, commands, const, models
 
 
 class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
     def setUp(self):
-        self.setUpPyfakefs(modules_to_reload=[commands])
+        self.setUpPyfakefs(modules_to_reload=[commands, const])
         logging.disable()
 
         path = pathlib.Path('/test/path.pdf')
