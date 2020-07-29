@@ -248,7 +248,7 @@ resolution = 150
 ask_upload = True
 ```
 
-### device
+#### device
 
 Device name which *sane* uses for scanning.
 
@@ -259,22 +259,22 @@ You can change it manually or run `scan` command with `--set-device` option:
 $ smth scan --set-device
 ```
 
-### delay
+#### delay
 
 Time in seconds which should pass before scanning of the next page starts.
 
 Set this option to a higher value if you need extra time to put next sheet on
 scanner's glass.
 
-### mode
+#### mode
 
 Selects the scan mode (e.g., Gray or Color)
 
-### resolution
+#### resolution
 
 Sets the resolution of the scanned images (e.g., 75, 150, 300 etc.).
 
-### ask_upload
+#### ask_upload
 
 If `True` (and [PyDrive] is installed),
 you will be asked whether you want to upload a
