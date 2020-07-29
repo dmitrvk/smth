@@ -80,6 +80,27 @@ class NotebookValidator:
         return True
 
 
+class NotebookUpdateValidator:
+    """Validate user input when updating a notebook."""
+    def validate_title(self, title: str) -> bool:
+        """Check if title is not empty."""
+        title = title.strip()
+
+        if len(title) == 0:
+            raise ValidationError(message='Title must not be empty.')
+
+        return True
+
+    def validate_path(self, path: str) -> bool:
+        """Check if path is not empty."""
+        path = path.strip()
+
+        if len(path) == 0:
+            raise ValidationError(message='Path must not be empty')
+
+        return True
+
+
 class TypeValidator:
     """Validate user input when manipulating types."""
     def __init__(self, db_: db.DB):

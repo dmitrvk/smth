@@ -118,6 +118,32 @@ class NotebookValidatorTestCase(unittest.TestCase):
             self.validator.validate_first_page_number, 'test')
 
 
+class NotebookUpdateValidatorTestCase(unittest.TestCase):
+    """Test user input validation when updating a notebook."""
+
+    def setUp(self):
+        self.validator = validators.NotebookUpdateValidator()
+
+    def test_validate_title(self):
+        self.assertTrue(self.validator.validate_title('Test'))
+        self.assertRaises(
+            ValidationError, self.validator.validate_title, '')
+        self.assertRaises(
+            ValidationError, self.validator.validate_title, '   ')
+
+    def test_validate_path(self):
+        self.assertTrue(
+            self.validator.validate_path('/home/test/notebook.pdf'))
+        self.assertTrue(
+            self.validator.validate_path('~/notebook.pdf'))
+        self.assertTrue(
+            self.validator.validate_path('$HOME/notebook.pdf'))
+        self.assertRaises(
+            ValidationError, self.validator.validate_path, '')
+        self.assertRaises(
+            ValidationError, self.validator.validate_path, '   ')
+
+
 class TypeValidatorTestCase(unittest.TestCase):
     def setUp(self):
         self.db = mock.MagicMock(**{

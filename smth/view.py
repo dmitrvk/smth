@@ -62,7 +62,8 @@ class View:
         return {}
 
     def ask_for_updated_notebook_properties(
-            self, notebook: models.Notebook, types: List[str]) -> Answers:
+            self, notebook: models.Notebook, types: List[str],
+            validator: validators.NotebookUpdateValidator) -> Answers:
         """Ask user for updated notebook parameters and return answers.
 
         Validate answers with given validator."""
@@ -72,14 +73,14 @@ class View:
                 'name': 'title',
                 'message': 'Enter title:',
                 'default': notebook.title,
-                # 'validate': validator.validate_title,
+                'validate': validator.validate_title,
             },
             {
                 'type': 'input',
                 'name': 'path',
                 'message': 'Enter path to PDF:',
                 'default': str(notebook.path),
-                # 'validate': validator.validate_path,
+                'validate': validator.validate_path,
             },
         ]
 
