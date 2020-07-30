@@ -1,4 +1,17 @@
-"""This module provides an interface to sqlite database."""
+# License: GNU GPL Version 3
+"""This module provides an interface to sqlite database.
+
+The module contains raw SQL queries which are executed
+in the corresponding public methods of the DB class.
+
+    Typical usage example:
+
+    try:
+        db_ = db.DB('/path/to/sqlite.db')
+        notebooks = db_.get_notebooks()
+    except db.Error:
+        pass
+"""
 
 import logging
 import pathlib
@@ -140,7 +153,7 @@ class DB:
 
         return notebooks
 
-    def get_notebook_by_title(self, title: int) -> models.Notebook:
+    def get_notebook_by_title(self, title: str) -> models.Notebook:
         """Return notebook with specific title from database."""
         notebook = models.Notebook('', None, '')
 
@@ -205,6 +218,93 @@ class DB:
                 connection.close()
 
         return titles
+
+    def notebook_exists(self, title: str) -> bool:
+        """Check if notebook with the given title exists in the database."""
+        exists = False
+        connection = None
+
+        try:
+            connection = self._connect()
+            cursor = connection.execute(SQL_NOTEBOOK_COUNT, (title,))
+            exists = cursor.fetchone()[0] > 0
+
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to check if notebook exists', exception)
+
+        finally:
+            if connection:
+                connection.close()
+
+        return exists
+
+    def notebooks_of_type_exist(self, type_title: str) -> None:
+        """Return true if there is one or more notebooks of the type."""
+        exists = False
+        connection = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+
+            cursor = connection.execute(
+                SQL_NOTEBOOK_WITH_TYPE_COUNT, (type_title,))
+            exists = cursor.fetchone()[0] > 0
+
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to check if notebooks of the type exist', exception)
+
+        finally:
+            if connection:
+                connection.close()
+
+        return exists
+
+    def save_notebook(self, notebook: models.Notebook) -> None:
+        """Create or update notebook."""
+        connection = None
+
+        try:
+            connection = self._connect()
+
+            if notebook.id < 0:
+                values = (
+                    notebook.title, notebook.type.title, str(notebook.path),
+                    notebook.total_pages, notebook.first_page_number)
+                connection.execute(SQL_CREATE_NOTEBOOK, values)
+            else:
+                values = (
+                    notebook.title, notebook.type.title, str(notebook.path),
+                    notebook.total_pages, notebook.first_page_number,
+                    notebook.id)
+                connection.execute(SQL_UPDATE_NOTEBOOK, values)
+
+            connection.commit()
+
+        except sqlite3.Error as exception:
+            self._handle_error(
+                'Failed to save notebook', exception)
+
+        finally:
+            if connection:
+                connection.close()
+
+    def delete_notebook_by_id(self, id_: int) -> None:
+        """Delete notebook with the given id from the database."""
+        connection = None
+
+        try:
+            connection = sqlite3.connect(self._path)
+            connection.execute(SQL_DELETE_NOTEBOOK, (id_,))
+            connection.commit()
+
+        except sqlite3.Error as exception:
+            self._handle_error('Failed to delete notebook', exception)
+
+        finally:
+            if connection:
+                connection.close()
 
     def get_types(self) -> List[models.NotebookType]:
         """Return list of types from database."""
@@ -290,26 +390,6 @@ class DB:
 
         return type_
 
-    def notebook_exists(self, title: str) -> bool:
-        """Check if notebook with the given title exists in the database."""
-        exists = False
-        connection = None
-
-        try:
-            connection = self._connect()
-            cursor = connection.execute(SQL_NOTEBOOK_COUNT, (title,))
-            exists = cursor.fetchone()[0] > 0
-
-        except sqlite3.Error as exception:
-            self._handle_error(
-                'Failed to check if notebook exists', exception)
-
-        finally:
-            if connection:
-                connection.close()
-
-        return exists
-
     def type_exists(self, title: str) -> bool:
         """Check if type with the given title exists in the database."""
         exists = False
@@ -330,67 +410,6 @@ class DB:
                 connection.close()
 
         return exists
-
-    def save_notebook(self, notebook: models.Notebook) -> None:
-        """Create or update notebook."""
-        connection = None
-
-        try:
-            connection = self._connect()
-
-            if notebook.id < 0:
-                values = (
-                    notebook.title, notebook.type.title, str(notebook.path),
-                    notebook.total_pages, notebook.first_page_number)
-                connection.execute(SQL_CREATE_NOTEBOOK, values)
-            else:
-                values = (
-                    notebook.title, notebook.type.title, str(notebook.path),
-                    notebook.total_pages, notebook.first_page_number,
-                    notebook.id)
-                connection.execute(SQL_UPDATE_NOTEBOOK, values)
-
-            connection.commit()
-
-        except sqlite3.Error as exception:
-            self._handle_error(
-                'Failed to save notebook', exception)
-
-        finally:
-            if connection:
-                connection.close()
-
-    def delete_notebook_by_id(self, id: int) -> None:
-        """Delete notebook with the given id from the database."""
-        connection = None
-
-        try:
-            connection = sqlite3.connect(self._path)
-            connection.execute(SQL_DELETE_NOTEBOOK, (id,))
-            connection.commit()
-
-        except sqlite3.Error as exception:
-            self._handle_error('Failed to delete notebook', exception)
-
-        finally:
-            if connection:
-                connection.close()
-
-    def delete_type_by_title(self, title: str) -> None:
-        """Delete type with the given title from the database."""
-        connection = None
-
-        try:
-            connection = sqlite3.connect(self._path)
-            connection.execute(SQL_DELETE_TYPE_BY_TITLE, (title,))
-            connection.commit()
-
-        except sqlite3.Error as exception:
-            self._handle_error('Failed to delete notebook type', exception)
-
-        finally:
-            if connection:
-                connection.close()
 
     def save_type(self, type_: models.NotebookType) -> None:
         """Create or update notebook type."""
@@ -418,27 +437,21 @@ class DB:
             if connection:
                 connection.close()
 
-    def notebooks_of_type_exist(self, type_title: str) -> None:
-        """Return true if there is one or more notebooks of the type."""
-        exists = False
+    def delete_type_by_title(self, title: str) -> None:
+        """Delete type with the given title from the database."""
         connection = None
 
         try:
             connection = sqlite3.connect(self._path)
-
-            cursor = connection.execute(
-                SQL_NOTEBOOK_WITH_TYPE_COUNT, (type_title,))
-            exists = cursor.fetchone()[0] > 0
+            connection.execute(SQL_DELETE_TYPE_BY_TITLE, (title,))
+            connection.commit()
 
         except sqlite3.Error as exception:
-            self._handle_error(
-                'Failed to check if notebooks of the type exist', exception)
+            self._handle_error('Failed to delete notebook type', exception)
 
         finally:
             if connection:
                 connection.close()
-
-        return exists
 
     def _connect(self) -> sqlite3.Connection:
         """Connect to the database and return the connection object.
