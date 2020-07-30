@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module contains some constants that are used across other modules."""
+
 import pathlib
 
 CONFIG_PATH = pathlib.Path('~/.config/smth/smth.conf').expanduser()

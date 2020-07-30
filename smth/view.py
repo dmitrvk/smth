@@ -1,3 +1,16 @@
+# License: GNU GPL Version 3
+
+"""This module contains the View class which is used to interact with user.
+
+PyInquirer library is used to create the user interface.
+
+    Typical usage example:
+
+    notebooks_titles = ['notebook1', 'notebook2']
+    view_ = view.View()
+    chosen_notebook = view_.ask_for_notebook(notebooks)
+"""
+
 import operator
 import sys
 from typing import Any, Dict, List
@@ -62,7 +75,7 @@ class View:
         return {}
 
     def ask_for_updated_notebook_properties(
-            self, notebook: models.Notebook, types: List[str],
+            self, notebook: models.Notebook,
             validator: validators.NotebookUpdateValidator) -> Answers:
         """Ask user for updated notebook parameters and return answers.
 

@@ -1,3 +1,29 @@
+# License: GNU GPL Version 3
+
+"""The module provides the Config class to work with app configuration.
+
+Config file is named 'smth.conf' and located at '~/.config/smth/'.
+It has the following structure:
+
+    ```
+    [scanner]
+    device = pixma:04A9176D_3EBCC9
+    delay = 0
+    mode = Gray
+    resolution = 150
+    ask_upload = True
+    ```
+
+    Typical usage example:
+
+    try:
+        conf = config.Config()
+        print(conf.scanner_resolution)
+        conf.scanner_device = 'new device'
+    except config.Error:
+        pass
+"""
+
 import configparser
 import logging
 
@@ -107,4 +133,4 @@ class Config:
 
 
 class Error(Exception):
-    pass
+    """An error which may occur when reading or writing configuration."""

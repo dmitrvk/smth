@@ -1,4 +1,5 @@
 # License: GNU GPL Version 3
+
 """This module provides an interface to sqlite database.
 
 The module contains raw SQL queries which are executed

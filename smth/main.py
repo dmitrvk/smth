@@ -1,3 +1,5 @@
+# License: GNU GPL Version 3
+
 """smth main module."""
 
 import importlib.util
