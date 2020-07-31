@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides the Notebook model."""
+
 import math
 import pathlib
 
