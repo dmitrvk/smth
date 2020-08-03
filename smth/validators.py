@@ -1,3 +1,27 @@
+# License: GNU GPL Version 3
+
+"""The module contains validators that are used to validate the user input.
+
+Validators methonds should be used when constructing questions with
+PyInquirer library.
+
+    Typical usage example:
+
+    database = db.DB('/path/to/smth.db')
+    validator = NotebookValidator(database)
+
+    questions = [
+        {
+            'type': 'input',
+            'name': 'title',
+            'message': 'Enter title:',
+            'validate': validator.validate_title,
+        },
+    ]
+
+    answers = inquirer.prompt(questions)
+"""
+
 import operator
 import os
 import pathlib
@@ -76,6 +100,27 @@ class NotebookValidator:
         if int(number) > 100:
             raise ValidationError(
                 message='Please, enter a number from 0 to 100')
+
+        return True
+
+
+class NotebookUpdateValidator:
+    """Validate user input when updating a notebook."""
+    def validate_title(self, title: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
+        """Check if title is not empty."""
+        title = title.strip()
+
+        if len(title) == 0:
+            raise ValidationError(message='Title must not be empty.')
+
+        return True
+
+    def validate_path(self, path: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
+        """Check if path is not empty."""
+        path = path.strip()
+
+        if len(path) == 0:
+            raise ValidationError(message='Path must not be empty')
 
         return True
 

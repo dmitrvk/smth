@@ -46,7 +46,13 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
             else:
                 if not path.exists():
                     path.mkdir(parents=True, exist_ok=True)
+
                 path = path / f'{title}.pdf'
+
+                if path.exists():
+                    message = ("Notebook not created because "
+                               f"'{path}' already exists.")
+                    self.exit_with_error(message)
 
             notebook = models.Notebook(title, type_, path)
             notebook.first_page_number = answers['first_page_number']

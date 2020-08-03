@@ -5,11 +5,10 @@ help:
 	@echo '  test    run unit tests and linter'
 
 isort:
-	isort --recursive --atomic smth tests
+	isort --atomic smth tests
 
 test:
 	@coverage run --source smth -m unittest
 	@coverage html
 	@coverage xml
 	@flake8 smth tests
-

@@ -1,3 +1,8 @@
+# License: GNU GPL Version 3
+
+"""The module provides the Notebook Type model."""
+
+
 class NotebookType:  # pylint: disable=too-many-instance-attributes
     """Contains information about notebook like its page size."""
 

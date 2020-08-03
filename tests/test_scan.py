@@ -4,9 +4,8 @@ from unittest import mock
 
 import _sane
 import sane
-from pyfakefs import fake_filesystem_unittest as fakefs_unittest
 
-from smth import commands, config, db, models, scanner
+from smth import db, commands, models, scanner
 
 
 class ScanCommandTestCase(unittest.TestCase):
@@ -38,6 +37,10 @@ class ScanCommandTestCase(unittest.TestCase):
             'scanner_delay': 0,
         })
 
+        config_patcher = mock.patch('smth.config.Config')
+        config_patcher.start().return_value = self.conf
+        self.addCleanup(config_patcher.stop)
+
         self.pdf = mock.MagicMock()
         fpdf_patcher = mock.patch('fpdf.FPDF')
         fpdf_patcher.start().return_value = self.pdf
@@ -58,7 +61,7 @@ class ScanCommandTestCase(unittest.TestCase):
 
     def test_execute_no_devices(self):
         sane.get_devices.return_value = []
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
         self.assertRaises(SystemExit, command.execute)
         self.view.show_error.assert_called()
 
@@ -67,7 +70,7 @@ class ScanCommandTestCase(unittest.TestCase):
 
         sane.open.side_effect = _sane.error
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
@@ -76,7 +79,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_keyboard_interrupt_when_searching_for_devices(self):
         sane.get_devices.side_effect = KeyboardInterrupt
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         sane.open.assert_not_called()
@@ -85,7 +88,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_cannot_open_device(self):
         sane.open.side_effect = _sane.error
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
@@ -94,7 +97,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_db_error_notebook_titles(self):
         self.db.get_notebook_titles.side_effect = db.Error
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         self.view.ask_for_notebook.assert_not_called()
@@ -106,7 +109,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_db_error_notebook_by_title(self):
         self.db.get_notebook_by_title.side_effect = db.Error
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         self.view.ask_for_pages_to_append.assert_not_called()
@@ -117,7 +120,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_keyboard_interrupt_during_scanning(self):
         self.scanner.scan.side_effect = KeyboardInterrupt
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
@@ -125,7 +128,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_sane_error(self):
         self.scanner.scan.side_effect = _sane.error
 
-        command = commands.ScanCommand(self.db, self.view, self.conf)
+        command = commands.ScanCommand(self.db, self.view)
 
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
@@ -137,7 +140,7 @@ class ScanCommandTestCase(unittest.TestCase):
                 'scan.side_effect': scanner.Error,
             })
 
-            command = commands.ScanCommand(self.db, self.view, self.conf)
+            command = commands.ScanCommand(self.db, self.view)
 
             self.assertRaises(SystemExit, command.execute)
 
@@ -147,7 +150,7 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []
 
-        commands.ScanCommand(self.db, self.view, self.conf).execute()
+        commands.ScanCommand(self.db, self.view).execute()
 
         self.view.ask_for_notebook.assert_not_called()
         self.view.ask_for_pages_to_append.assert_not_called()
@@ -157,35 +160,11 @@ class ScanCommandTestCase(unittest.TestCase):
     def test_execute_with_set_device_option(self):
         args = ['--set-device']
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
-            commands.ScanCommand(self.db, self.view, self.conf).execute(args)
+            commands.ScanCommand(self.db, self.view).execute(args)
         self.assertEqual(self.conf.scanner_device, '')
-
-    @fakefs_unittest.patchfs
-    def test_execute_set_device_config_error(self, fs):
-        fs.create_file(str(config.Config.CONFIG_PATH))
-
-        config_file_contents = '''[scanner]
-            device = scanner
-            delay = 3'''
-
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
-
-        args = ['--set-device']
-
-        with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
-            with mock.patch(
-                    'smth.config.Config.scanner_device',
-                    new_callable=mock.PropertyMock) as scanner_device:
-
-                scanner_device.side_effect = config.Error
-
-                conf = config.Config()
-                command = commands.ScanCommand(self.db, self.view, conf)
-                self.assertRaises(SystemExit, command.execute, args)
 
     def test_execute_no_notebook_chosen(self):
         self.view.ask_for_notebook.return_value = ''
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
-            command = commands.ScanCommand(self.db, self.view, self.conf)
+            command = commands.ScanCommand(self.db, self.view)
             self.assertRaises(SystemExit, command.execute)

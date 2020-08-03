@@ -1,14 +1,39 @@
+# License: GNU GPL Version 3
+
+"""The module provides the Config class to work with app configuration.
+
+Config file is named 'smth.conf' and located at '~/.config/smth/'.
+It has the following structure:
+
+    ```
+    [scanner]
+    device = pixma:04A9176D_3EBCC9
+    delay = 0
+    mode = Gray
+    resolution = 150
+    ask_upload = True
+    ```
+
+    Typical usage example:
+
+    try:
+        conf = config.Config()
+        print(conf.scanner_resolution)
+        conf.scanner_device = 'new device'
+    except config.Error:
+        pass
+"""
+
 import configparser
 import logging
-import pathlib
+
+from smth import const
 
 log = logging.getLogger(__name__)
 
 
 class Config:
     """App configuration."""
-
-    CONFIG_PATH = pathlib.Path('~/.config/smth/smth.conf').expanduser()
 
     def __init__(self):
         self.config = configparser.ConfigParser()
@@ -22,25 +47,25 @@ class Config:
         self.default_config['scanner']['resolution'] = '150'
         self.default_config['scanner']['ask_upload'] = 'True'
 
-        if self.CONFIG_PATH.exists():
+        if const.CONFIG_PATH.exists():
             try:
-                self.config.read(str(self.CONFIG_PATH))
+                self.config.read(str(const.CONFIG_PATH))
             except configparser.Error as exception:
                 log.exception(exception)
                 raise Error(f'Cannot load config: {exception}')
 
             if not self.config.sections():
-                message = f"Cannot load config from '{str(self.CONFIG_PATH)}'"
+                message = f"Cannot load config from '{str(const.CONFIG_PATH)}'"
                 log.error(message)
                 raise Error(message)
 
-            log.debug('Loaded config from %s', {str(self.CONFIG_PATH)})
+            log.debug('Loaded config from %s', {str(const.CONFIG_PATH)})
         else:
-            self.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+            const.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
             self.config = self.default_config
             self._write_config()
 
-            log.debug('Created default config at %s', {str(self.CONFIG_PATH)})
+            log.debug('Created default config at %s', {str(const.CONFIG_PATH)})
 
     @property
     def scanner_device(self) -> str:
@@ -101,11 +126,11 @@ class Config:
 
     def _write_config(self):
         try:
-            with open(str(self.CONFIG_PATH), 'w') as config_file:
+            with open(str(const.CONFIG_PATH), 'w') as config_file:
                 self.config.write(config_file)
         except (OSError, configparser.Error) as exception:
             raise Error(f'Cannot write config: {exception}')
 
 
 class Error(Exception):
-    pass
+    """An error which may occur when reading or writing configuration."""

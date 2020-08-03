@@ -122,6 +122,26 @@ class ViewTestCase(unittest.TestCase):
 
         self.assertEqual(notebook, '')
 
+    def test_ask_for_type(self):
+        types = ['type 1', 'type 2', 'type 3']
+
+        answers = {
+            'type': 'type 1',
+        }
+
+        with mock.patch('PyInquirer.prompt', return_value=answers):
+            type = self.view.ask_for_type(types)
+
+        self.assertEqual(type, answers['type'])
+
+    def test_ask_for_type_no_answer(self):
+        types = ['type 1', 'type 2', 'type 3']
+
+        with mock.patch('PyInquirer.prompt', return_value=None):
+            type = self.view.ask_for_type(types)
+
+        self.assertEqual(type, '')
+
     def test_ask_for_pages_to_append(self):
         answers = {
             'append': '3',

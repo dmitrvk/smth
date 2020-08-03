@@ -15,9 +15,13 @@ log = logging.getLogger(__name__)
 class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Allows to scan a notebook."""
 
-    def __init__(self, db_: db.DB, view_: view.View, conf: config.Config):
+    def __init__(self, db_: db.DB, view_: view.View):
         super().__init__(db_, view_)
-        self.conf = conf
+
+        try:
+            self.conf = config.Config()
+        except config.Error as exception:
+            self.exit_with_error(exception)
 
     def execute(self, args: List[str] = None) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""

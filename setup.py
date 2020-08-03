@@ -5,14 +5,15 @@ with open('README.md', 'r') as readme:
 
 setuptools.setup(
     name='smth',
-    version='0.5.0',
+    version='0.6.0',
     keywords='scan sane cli',
     description='Scan books and handwriting in batch mode from console',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/dmitrvk/smth',
     packages=(
-        'smth', 'smth.cloud', 'smth.commands', 'smth.models', 'smth.scanner'),
+        'smth', 'smth.cloud', 'smth.commands', 'smth.models', 'smth.scanner'
+    ),
     classifiers=[
         'Environment :: Console',
         'Intended Audience :: End Users/Desktop',
@@ -26,7 +27,7 @@ setuptools.setup(
     install_requires=[
         'fpdf>=1.7',
         'PyInquirer>=1.0',
-        'Pillow>=4.0',
+        'Pillow>=7.2',
         'python-sane>=2.8',
     ],
     entry_points={

@@ -3,130 +3,82 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import config
+from smth import config, const
 
 
 class ConfigTestCase(fake_filesystem_unittest.TestCase):
     """Test app configuration."""
 
     def setUp(self):
-        self.setUpPyfakefs(modules_to_reload=[config])
-        self.fs.create_file(str(config.Config.CONFIG_PATH))
+        self.setUpPyfakefs(modules_to_reload=[config, const])
+        self.fs.create_file(str(const.CONFIG_PATH))
 
         logging.disable()
 
-    def test_read_existing_config(self):
-        config_file_contents = '''[scanner]
-            device = scanner
-            delay = 3'''
+        # Provide two possible values for each parameter
+        self.conf = {
+            'device': ('scanner', 'new_scanner'),
+            'delay': (1, 3),
+            'resolution': (150, 300),
+            'mode': ('Gray', 'Color'),
+            'ask_upload': (True, False),
+        }
 
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
+    def test_read_scanner_config(self):
+        for param in self.conf:
+            value = self.conf[param][0]
 
-        conf = config.Config()
+            file_contents = f'[scanner]\n {param} = {value}'
+            self._write_config_file(file_contents)
 
-        self.assertEqual(conf.scanner_device, 'scanner')
-        self.assertEqual(conf.scanner_delay, 3)
+            conf = config.Config()
 
-    def test_read_config_error(self):
-        bad_config = '''badsection]
-            badconfig!'''
+            self.assertEqual(getattr(conf, f'scanner_{param}'), value)
 
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(bad_config)
+    def test_write_scanner_config(self):
+        for param in self.conf:
+            value = self.conf[param][0]
+            new_value = self.conf[param][1]
 
-        self.assertRaises(config.Error, config.Config)
+            file_contents = f'[scanner]\n {param} = {value}'
+            self._write_config_file(file_contents)
 
-        # Empty config
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
+            conf = config.Config()
+            setattr(conf, f'scanner_{param}', new_value)
+
+            self._assert_config_file_contains(f'{param} = {new_value}')
+
+    def test_scanner_config_value_error(self):
+        wrong_conf = {
+            'resolution': 'not integer',
+            'ask_upload': 'not boolean',
+        }
+
+        for param in wrong_conf:
+            value = wrong_conf[param][0]
+
+            file_contents = f'[scanner]\n {param} = {value}'
+            self._write_config_file(file_contents)
+
+            conf = config.Config()
+
+            with self.assertRaises(config.Error):
+                getattr(conf, f'scanner_{param}')
+
+    def test_read_empty_config(self):
+        with open(str(const.CONFIG_PATH), 'w') as config_file:
             config_file.write('')
 
         self.assertRaises(config.Error, config.Config)
 
-    def test_scanner_device(self):
-        config_file_contents = '''[scanner]
-            device = scanner'''
+    def test_read_bad_config(self):
+        bad_config = '''badsection]
+            badconfig!'''
 
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
+        with open(str(const.CONFIG_PATH), 'w') as config_file:
+            config_file.write(bad_config)
 
-        conf = config.Config()
-
-        self.assertEqual(conf.scanner_device, 'scanner')
-
-        conf.scanner_device = 'newscanner'
-        self.assertEqual(conf.scanner_device, 'newscanner')
-
-        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
-            self.assertIn('device = newscanner', config_file.read())
-
-    def test_scanner_delay(self):
-        config_file_contents = '''[scanner]
-            delay = 1'''
-
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
-
-        conf = config.Config()
-
-        self.assertEqual(conf.scanner_delay, 1)
-
-        conf.scanner_delay = 3
-        self.assertEqual(conf.scanner_delay, 3)
-
-        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
-            self.assertIn('delay = 3', config_file.read())
-
-    def test_scanner_resolution(self):
-        config_file_contents = '''[scanner]
-            resolution = 150'''
-
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
-
-        conf = config.Config()
-
-        self.assertEqual(conf.scanner_resolution, 150)
-
-        conf.scanner_resolution = 300
-        self.assertEqual(conf.scanner_resolution, 300)
-
-        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
-            self.assertIn('resolution = 300', config_file.read())
-
-    def test_scanner_mode(self):
-        config_file_contents = '''[scanner]
-            mode = Gray'''
-
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
-
-        conf = config.Config()
-
-        self.assertEqual(conf.scanner_mode, 'Gray')
-
-        conf.scanner_mode = 'Color'
-        self.assertEqual(conf.scanner_mode, 'Color')
-
-        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
-            self.assertIn('mode = Color', config_file.read())
-
-    def test_scanner_ask_upload(self):
-        config_file_contents = '''[scanner]
-            ask_upload = True'''
-
-        with open(str(config.Config.CONFIG_PATH), 'w') as config_file:
-            config_file.write(config_file_contents)
-
-        conf = config.Config()
-
-        self.assertEqual(conf.scanner_ask_upload, True)
-
-        conf.scanner_ask_upload = False
-        self.assertEqual(conf.scanner_ask_upload, False)
-
-        with open(str(config.Config.CONFIG_PATH), 'r') as config_file:
-            self.assertIn('ask_upload = False', config_file.read())
+        self.assertRaises(config.Error, config.Config)
 
     def test_os_error_when_writing(self):
         with mock.patch('configparser.ConfigParser') as ConfigParser:
@@ -138,3 +90,11 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
 
             with self.assertRaises(config.Error):
                 conf.scanner_device = 'device'
+
+    def _write_config_file(self, file_contents: str) -> None:
+        with open(str(const.CONFIG_PATH), 'w') as config_file:
+            config_file.write(file_contents)
+
+    def _assert_config_file_contains(self, string: str) -> None:
+        with open(str(const.CONFIG_PATH), 'r') as config_file:
+            self.assertIn(string, config_file.read())

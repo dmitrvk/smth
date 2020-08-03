@@ -1,3 +1,16 @@
+# License: GNU GPL Version 3
+
+"""This module contains the View class which is used to interact with user.
+
+PyInquirer library is used to create the user interface.
+
+    Typical usage example:
+
+    notebooks_titles = ['notebook1', 'notebook2']
+    view_ = view.View()
+    chosen_notebook = view_.ask_for_notebook(notebooks)
+"""
+
 import operator
 import sys
 from typing import Any, Dict, List
@@ -57,6 +70,38 @@ class View:
             answers['type'] = answers['type'].strip()
             answers['path'] = answers['path'].strip()
             answers['first_page_number'] = int(answers['first_page_number'])
+            return answers
+
+        return {}
+
+    def ask_for_updated_notebook_properties(
+            self, notebook: models.Notebook,
+            validator: validators.NotebookUpdateValidator) -> Answers:
+        """Ask user for updated notebook parameters and return answers.
+
+        Validate answers with given validator."""
+        questions = [
+            {
+                'type': 'input',
+                'name': 'title',
+                'message': 'Enter title:',
+                'default': notebook.title,
+                'validate': validator.validate_title,
+            },
+            {
+                'type': 'input',
+                'name': 'path',
+                'message': 'Enter path to PDF:',
+                'default': str(notebook.path),
+                'validate': validator.validate_path,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            answers['title'] = answers['title'].strip()
+            answers['path'] = answers['path'].strip()
             return answers
 
         return {}
@@ -155,6 +200,24 @@ class View:
 
         if answers:
             return answers['notebook'].strip()
+
+        return ''
+
+    def ask_for_type(self, types: List[str]) -> str:
+        """Ask for notebook type and return its title."""
+        questions = [
+            {
+                'type': 'list',
+                'name': 'type',
+                'message': 'Choose type',
+                'choices': types,
+            },
+        ]
+
+        answers = self._prompt(questions)
+
+        if answers:
+            return answers['type'].strip()
 
         return ''
 

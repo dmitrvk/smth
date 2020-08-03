@@ -104,6 +104,18 @@ class TestDB(unittest.TestCase):
         self.db.save_notebook(self.notebooks[0])
         self.assertTrue(self.db.notebook_exists('New Title'))
 
+    def test_delete_notebook_by_id(self):
+        self.assertTrue(self.db.notebook_exists(self.notebooks[0].title))
+        id = self.db.get_notebook_by_title(self.notebooks[0].title).id
+        self.db.delete_notebook_by_id(id)
+        self.assertFalse(self.db.notebook_exists(self.notebooks[0].title))
+
+    def test_delete_type_by_title(self):
+        self.assertTrue(self.db.type_exists(self.types[0].title))
+        title = self.db.get_type_by_title(self.types[0].title).title
+        self.db.delete_type_by_title(title)
+        self.assertFalse(self.db.type_exists(self.types[0].title))
+
     def test_save_type(self):
         self.types[0].id = 1
         self.types[0].title = 'New Title'
@@ -126,6 +138,7 @@ class TestDB(unittest.TestCase):
         self.assertRaises(db.Error, self.db.notebook_exists, '')
         self.assertRaises(db.Error, self.db.type_exists, '')
         self.assertRaises(db.Error, self.db.save_notebook, self.notebooks[0])
+        self.assertRaises(db.Error, self.db.delete_notebook_by_id, 0)
         self.assertRaises(db.Error, self.db.save_type, self.types[0])
 
     def tearDown(self):

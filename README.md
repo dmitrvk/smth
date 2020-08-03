@@ -167,6 +167,10 @@ reading to anyone with the link.
 Create a new notebook with specified title, type, path to PDF and the 1st page
 number.
 
+#### delete
+
+Delete a notebook.
+
 #### list
 
 Show a list of available notebooks.
@@ -219,8 +223,13 @@ If run without arguments, show the list of available notebook types.
 
 Optional arguments:
 * `--create` - create a new notebook type.
+* `--delete` - delete a notebook type.
 
 The type of A4 format in portrait orientation is created by default.
+
+#### update
+
+Change notebook's title or path to PDF file.
 
 #### upload
 
@@ -239,7 +248,7 @@ resolution = 150
 ask_upload = True
 ```
 
-### device
+#### device
 
 Device name which *sane* uses for scanning.
 
@@ -250,22 +259,22 @@ You can change it manually or run `scan` command with `--set-device` option:
 $ smth scan --set-device
 ```
 
-### delay
+#### delay
 
 Time in seconds which should pass before scanning of the next page starts.
 
 Set this option to a higher value if you need extra time to put next sheet on
 scanner's glass.
 
-### mode
+#### mode
 
 Selects the scan mode (e.g., Gray or Color)
 
-### resolution
+#### resolution
 
 Sets the resolution of the scanned images (e.g., 75, 150, 300 etc.).
 
-### ask_upload
+#### ask_upload
 
 If `True` (and [PyDrive] is installed),
 you will be asked whether you want to upload a
