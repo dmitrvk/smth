@@ -1,3 +1,13 @@
+# License: GNU GPL Version 3
+
+"""The module provides the Cloud class for uploading and sharing files.
+
+    Typical usage example:
+
+    cloud_ = cloud.Cloud(callback)
+    cloud_.upload_file(path)
+"""
+
 import json
 import pathlib
 

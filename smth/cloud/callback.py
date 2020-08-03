@@ -1,8 +1,29 @@
+# License: GNU GPL Version 3
+
+"""The module provides two callbacks to subscribe to the Cloud's events.
+
+    Typical usage example:
+
+    class CloudCallback(cloud.UploadingCallback):
+        def __init__(...):
+            super().__init__()
+            ...
+
+        def on_start_uploading_file(self, path):
+            ...
+
+        # Override all methods...
+
+   cloud_ = cloud.Cloud(CloudCallback(...))
+   cloud_.upload_file(path)
+"""
+
+
 import abc
 import pathlib
 
 
-class Callback(abc.ABC):
+class Callback(abc.ABC):  # pylint: disable=too-few-public-methods
     """Used to notify about cloud's events. Must be subclassed."""
 
     @abc.abstractmethod
@@ -11,6 +32,7 @@ class Callback(abc.ABC):
 
 
 class UploadingCallback(Callback):
+    """Used to notify about uploading events. Must be subclassed."""
     @abc.abstractmethod
     def on_start_uploading_file(self, path: pathlib.Path) -> None:
         """Called when file is about to be uploaded to Google Drive."""
@@ -29,7 +51,7 @@ class UploadingCallback(Callback):
 
 
 class SharingCallback(abc.ABC):
-    """Used to notify about cloud's events. Must be subclassed."""
+    """Used to notify about sharing events. Must be subclassed."""
 
     @abc.abstractmethod
     def on_start_sharing_file(self, filename: str) -> None:
