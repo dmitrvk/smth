@@ -1,3 +1,5 @@
+# License: GNU GPL Version 3
+
 """The module provides `types` command for managing notebook types."""
 
 import logging

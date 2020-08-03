@@ -1,8 +1,10 @@
+# License: GNU GPL Version 3
+
+"""The module provides `open` command for openning notebook in PDF viewer."""
+
 import logging
 import subprocess
 from typing import List
-
-from smth import db
 
 from . import command
 
@@ -14,16 +16,13 @@ class OpenCommand(command.Command):  # pylint: disable=too-few-public-methods
 
     def execute(self, args: List[str] = None):
         """Open notebook's PDF file in default viewer."""
-        try:
-            notebooks = self._db.get_notebook_titles()
-        except db.Error as exception:
-            self.exit_with_error(exception)
+        notebook_titles = self.get_notebook_titles_from_db()
 
-        if notebooks:
-            notebook = self.view.ask_for_notebook(notebooks)
+        if not notebook_titles:
+            self.view.show_info('No notebooks found.')
+        else:
+            notebook = self.view.ask_for_notebook(notebook_titles)
 
             if notebook:
                 path = self._db.get_notebook_by_title(notebook).path
                 subprocess.Popen(['xdg-open', str(path)])
-        else:
-            self.view.show_info('No notebooks found.')

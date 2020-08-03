@@ -130,17 +130,17 @@ class ViewTestCase(unittest.TestCase):
         }
 
         with mock.patch('PyInquirer.prompt', return_value=answers):
-            type = self.view.ask_for_type(types)
+            type_ = self.view.ask_for_type(types)
 
-        self.assertEqual(type, answers['type'])
+        self.assertEqual(type_, answers['type'])
 
     def test_ask_for_type_no_answer(self):
         types = ['type 1', 'type 2', 'type 3']
 
         with mock.patch('PyInquirer.prompt', return_value=None):
-            type = self.view.ask_for_type(types)
+            type_ = self.view.ask_for_type(types)
 
-        self.assertEqual(type, '')
+        self.assertEqual(type_, '')
 
     def test_ask_for_pages_to_append(self):
         answers = {
@@ -229,11 +229,11 @@ class ViewTestCase(unittest.TestCase):
         types = []
 
         for i in range(3):
-            type = mock.MagicMock()
-            type.title = f'Test{i}'
-            type.page_width = i ** 2 * 100
-            type.page_height = i ** 3 * 100
-            types.append(type)
+            type_ = mock.MagicMock()
+            type_.title = f'Test{i}'
+            type_.page_width = i ** 2 * 100
+            type_.page_height = i ** 3 * 100
+            types.append(type_)
 
         output = testutils.capture_stdout(self.view.show_types, types)
 

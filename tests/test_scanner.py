@@ -36,9 +36,9 @@ class ScannerTestCase(unittest.TestCase):
             'resolution': self.conf.scanner_resolution,
             'get_options.return_value': [
                 (1, 'mode', None, None, None, None, None, None,
-                    ['Gray', 'Color']),
+                 ['Gray', 'Color']),
                 (2, 'resolution', None, None, None, None, None, None,
-                    [75, 150, 300, 600]),
+                 [75, 150, 300, 600]),
             ],
         })
 

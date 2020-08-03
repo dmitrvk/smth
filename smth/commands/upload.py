@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `upload` command for uploading notebooks to cloud."""
+
 import logging
 import pathlib
 from typing import List
@@ -18,18 +22,15 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
 
     def execute(self, args: List[str] = None):
         """Upload notebook's PDF file to Google Drive."""
-        try:
-            notebooks = self._db.get_notebook_titles()
-        except db.Error as exception:
-            self.exit_with_error(exception)
+        notebook_titles = self.get_notebook_titles_from_db()
 
-        if notebooks:
+        if notebook_titles:
             path = None
 
             if args:
                 notebook_title = args[0]
 
-                for title in notebooks:
+                for title in notebook_titles:
                     if title == notebook_title:
                         try:
                             path = self._db.get_notebook_by_title(title).path
@@ -39,7 +40,7 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
                             self.exit_with_error(exception)
 
             if not path:
-                notebook = self.view.ask_for_notebook(notebooks)
+                notebook = self.view.ask_for_notebook(notebook_titles)
 
                 if notebook:
                     path = self._db.get_notebook_by_title(notebook).path
@@ -48,6 +49,8 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
             self.view.show_info('No notebooks found.')
 
     class CloudCallback(cloud.UploadingCallback):
+        """Callback implementation to subscribe on cloud's events."""
+
         def __init__(self, command_: command.Command, view_: view.View):
             super().__init__()
             self._command = command_

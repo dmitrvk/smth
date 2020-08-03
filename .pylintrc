@@ -1,0 +1,8 @@
+[MASTER]
+extension-pkg-whitelist=_sane
+
+[BASIC]
+good-names=db,i,fs
+
+[SIMILARITIES]
+min-similarity-lines=8

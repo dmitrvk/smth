@@ -24,42 +24,38 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
             'update', 'upload',
         ]
 
-    @mock.patch('smth.main')
-    def test__main__(self, mock):
-        from smth import __main__  # noqa: F401  # Cover __main__.py with tests
-
     def test_commands_execution(self):
         for command in self.commands:
             with mock.patch.object(sys, 'argv', ['', command]):
                 command_class = f'smth.commands.{command.capitalize()}Command'
 
-                with mock.patch(command_class) as Command:
-                    command = mock.MagicMock()
-                    Command.return_value = command
+                with mock.patch(command_class) as command_class_constructor:
+                    command_mock = mock.MagicMock()
+                    command_class_constructor.return_value = command_mock
                     main.main()
-                    command.execute.assert_called_once()
+                    command_mock.execute.assert_called_once()
 
     def test_pydrive_not_found(self):
         for command in ['share', 'upload']:
             with mock.patch.object(sys, 'argv', ['', command]):
                 command_class = f'smth.commands.{command.capitalize()}Command'
 
-                with mock.patch(command_class) as Command:
-                    command = mock.MagicMock()
-                    Command.return_value = command
+                with mock.patch(command_class) as command_class:
+                    command_mock = mock.MagicMock()
+                    command_class.return_value = command_mock
 
                     with mock.patch('importlib.util.find_spec') as find_spec:
                         find_spec.return_value = None
 
                         testutils.capture_stdout(main.main)
 
-                        command.execute.assert_not_called()
+                        command_mock.execute.assert_not_called()
 
     def test_default_command(self):
         with mock.patch.object(sys, 'argv', ['__main__.py']):
-            with mock.patch('smth.commands.ScanCommand') as Command:
+            with mock.patch('smth.commands.ScanCommand') as command_class:
                 command = mock.MagicMock()
-                Command.return_value = command
+                command_class.return_value = command
                 main.main()
                 command.execute.assert_called_once()
 
@@ -70,12 +66,12 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                 self.assertIn(command, output)
 
     def test_db_error(self):
-        with mock.patch('smth.db.DB') as DB:
-            DB.side_effect = db.Error('Fail')
+        with mock.patch('smth.db.DB') as db_class_constructor:
+            db_class_constructor.side_effect = db.Error('Fail')
 
-            with mock.patch('smth.view.View') as View:
+            with mock.patch('smth.view.View') as view_class_constructor:
                 view = mock.MagicMock()
-                View.return_value = view
+                view_class_constructor.return_value = view
 
                 self.assertRaises(SystemExit, main.main)
                 view.show_error.assert_called_once_with('Fail.')

@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `scan` command to perform scanning operations."""
+
 import importlib.util
 import logging
 from typing import List
@@ -25,14 +29,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
     def execute(self, args: List[str] = None) -> None:
         """Ask user for scanning preferences, scan notebook and make PDF."""
-        notebooks = []
+        notebook_titles = self.get_notebook_titles_from_db()
 
-        try:
-            notebooks = self._db.get_notebook_titles()
-        except db.Error as exception:
-            self.exit_with_error(exception)
-
-        if not notebooks:
+        if not notebook_titles:
             message = 'No notebooks found. Create one with `smth create`.'
             self.view.show_info(message)
             return
@@ -49,7 +48,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                     self.exit_with_error(exception)
 
             if '--pdf-only' in args:
-                title = self.view.ask_for_notebook(notebooks)
+                title = self.view.ask_for_notebook(notebook_titles)
 
                 if title:
                     try:
@@ -64,7 +63,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         scanner_ = scanner.Scanner(self.conf)
         scanner_.register(callback)
 
-        prefs = self._make_scan_prefs(notebooks)
+        prefs = self._make_scan_prefs(notebook_titles)
 
         try:
             scanner_.scan(prefs)

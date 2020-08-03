@@ -81,8 +81,8 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
         self.assertRaises(config.Error, config.Config)
 
     def test_os_error_when_writing(self):
-        with mock.patch('configparser.ConfigParser') as ConfigParser:
-            ConfigParser.return_value = mock.MagicMock(**{
+        with mock.patch('configparser.ConfigParser') as parser_class:
+            parser_class.return_value = mock.MagicMock(**{
                 'write.side_effect': OSError,
             })
 

@@ -23,8 +23,8 @@ class TestDB(unittest.TestCase):
         type2.pages_paired = True
         self.types.append(type1)
         self.types.append(type2)
-        for type in self.types:
-            self.db.save_type(type)
+        for type_ in self.types:
+            self.db.save_type(type_)
 
         # Notebooks for tests
         notebook1 = models.Notebook('Notebook 1', type1, '/test/notebook1.pdf')
@@ -75,27 +75,27 @@ class TestDB(unittest.TestCase):
 
     def test_get_type_by_id(self):
         expected = self.types[0]
-        type = self.db.get_type_by_id(1)
-        self.assertEqual(type.title, expected.title)
-        self.assertEqual(type.page_width, expected.page_width)
-        self.assertEqual(type.page_height, expected.page_height)
-        self.assertEqual(type.pages_paired, expected.pages_paired)
+        type_ = self.db.get_type_by_id(1)
+        self.assertEqual(type_.title, expected.title)
+        self.assertEqual(type_.page_width, expected.page_width)
+        self.assertEqual(type_.page_height, expected.page_height)
+        self.assertEqual(type_.pages_paired, expected.pages_paired)
 
     def test_get_type_by_title(self):
         expected = self.types[0]
-        type = self.db.get_type_by_title(expected.title)
-        self.assertEqual(type.title, expected.title)
-        self.assertEqual(type.page_width, expected.page_width)
-        self.assertEqual(type.page_height, expected.page_height)
-        self.assertEqual(type.pages_paired, expected.pages_paired)
+        type_ = self.db.get_type_by_title(expected.title)
+        self.assertEqual(type_.title, expected.title)
+        self.assertEqual(type_.page_width, expected.page_width)
+        self.assertEqual(type_.page_height, expected.page_height)
+        self.assertEqual(type_.pages_paired, expected.pages_paired)
 
     def test_notebook_exists(self):
         for notebook in self.notebooks:
             self.assertTrue(self.db.notebook_exists(notebook.title))
 
     def test_type_exists(self):
-        for type in self.types:
-            self.assertTrue(self.db.type_exists(type.title))
+        for type_ in self.types:
+            self.assertTrue(self.db.type_exists(type_.title))
 
     def test_save_notebook(self):
         self.notebooks[0].id = 1

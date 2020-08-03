@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `create` command for creating notebooks."""
+
 import logging
 import os
 import pathlib

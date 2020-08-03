@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `delete` command for deleting notebooks."""
+
 import logging
 import pathlib
 import shutil
@@ -16,7 +20,7 @@ class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
     def execute(self, args: List[str] = None) -> None:
         """Ask for notebook, remove it from db, leave PDF untouched."""
         try:
-            notebook_titles = self._db.get_notebook_titles()
+            notebook_titles = self.get_notebook_titles_from_db()
 
             if not notebook_titles:
                 self.view.show_info('No notebooks found.')

@@ -19,7 +19,7 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
             self.command, self.db, self.view, self.conf)
 
         self.pdf = mock.MagicMock()
-        self.pdf.output = lambda path: self.fs.create_file(path)
+        self.pdf.output = self.fs.create_file
         fpdf_patcher = mock.patch('fpdf.FPDF')
         fpdf_patcher.start().return_value = self.pdf
         self.addCleanup(fpdf_patcher.stop)
@@ -80,9 +80,10 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
         with mock.patch('importlib.util.find_spec') as find_spec:
             find_spec.return_value = 'spec'
 
-            with mock.patch('smth.commands.upload.UploadCommand') as Command:
+            with mock.patch(
+                    'smth.commands.upload.UploadCommand') as command_class:
                 command = mock.MagicMock()
-                Command.return_value = command
+                command_class.return_value = command
 
                 self.callback.on_finish(notebook)
 

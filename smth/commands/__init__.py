@@ -1,3 +1,18 @@
+# License: GNU GPL Version 3
+
+"""The package contains classes that replesent different commands.
+
+Each command is inherited from the abstract Command class and
+can be executed with the execute() method like this:
+
+    class NewCommand(commands.Command):
+        def execute(self, args):
+            ...
+
+    command = NewCommand(db, view)
+    command.execute(args)
+"""
+
 from .command import Command
 from .create import CreateCommand
 from .delete import DeleteCommand

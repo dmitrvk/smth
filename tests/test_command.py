@@ -14,7 +14,7 @@ class CommandTestCase(unittest.TestCase):
 
     def test_execute(self):
         class ConcreteCommand(commands.Command):
-            def execute(self):
+            def execute(self, args=None):
                 super().execute()
 
         ConcreteCommand(None, None).execute()

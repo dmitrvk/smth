@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `share` command to share notebooks uploaded to cloud."""
+
 import logging
 from typing import List
 
@@ -17,13 +21,12 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
 
     def execute(self, args: List[str] = None):
         """Share notebook and show a link."""
-        try:
-            notebooks = self._db.get_notebook_titles()
-        except db.Error as exception:
-            self.exit_with_error(exception)
+        notebook_titles = self.get_notebook_titles_from_db()
 
-        if notebooks:
-            notebook = self.view.ask_for_notebook(notebooks)
+        if not notebook_titles:
+            self.view.show_info('No notebooks found.')
+        else:
+            notebook = self.view.ask_for_notebook(notebook_titles)
 
             if notebook:
                 path = None
@@ -35,10 +38,10 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
 
                 if path:
                     self._cloud.share_file(path.name)
-        else:
-            self.view.show_info('No notebooks found.')
 
     class CloudCallback(cloud.SharingCallback):
+        """Callback implementation to subscribe on cloud's events."""
+
         def __init__(self, command_: command.Command, view_: view.View):
             super().__init__()
             self._command = command_

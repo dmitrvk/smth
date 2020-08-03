@@ -22,7 +22,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.view = mock.MagicMock()
 
         self.pdf = mock.MagicMock()
-        self.pdf.output = lambda path: self.fs.create_file(path)
+        self.pdf.output = self.fs.create_file
         fpdf_patcher = mock.patch('fpdf.FPDF')
         fpdf_patcher.start().return_value = self.pdf
         self.addCleanup(fpdf_patcher.stop)

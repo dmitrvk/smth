@@ -19,11 +19,11 @@ class TestNotebook(unittest.TestCase):
         self.assertEqual(models.Notebook('', None, 'path').title, 'Untitled')
 
     def test_type(self):
-        type = mock.MagicMock()
-        notebook = models.Notebook('title', type, 'path')
-        self.assertIs(notebook.type, type)
+        type_ = mock.MagicMock()
+        notebook = models.Notebook('title', type_, 'path')
+        self.assertIs(notebook.type, type_)
         with self.assertRaises(AttributeError):
-            notebook.type = type
+            notebook.type = type_
 
     def test_path(self):
         path = models.Notebook('', None, '/path.pdf').path
@@ -64,9 +64,9 @@ class TestNotebook(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test__repr__(self):
-        type = mock.MagicMock()
-        type.title = 'Test Type'
-        notebook = models.Notebook('Test', type, 'path')
+        type_ = mock.MagicMock()
+        type_.title = 'Test Type'
+        notebook = models.Notebook('Test', type_, 'path')
         expected = "<Notebook 'Test' of type 'Test Type'>"
         self.assertEqual(notebook.__repr__(), expected)
 

@@ -1,3 +1,20 @@
+# License: GNU GPL Version 3
+
+"""The module provides scanner callback to subscribe on scanner's events.
+
+    Typical usage example:
+
+    class ScannerCallback(scanner.Callback):
+        def __init__(self, ...):
+            ...
+        def on_set_device(self):
+            ...
+        # Overrride all methods
+
+    scanner_ = scanner.Scanner(conf)
+    scanner_.register(ScannerCallback(...))
+"""
+
 import abc
 from typing import List
 

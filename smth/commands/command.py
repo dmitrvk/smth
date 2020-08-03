@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides the abstract Command class."""
+
 import abc
 import logging
 import sys
@@ -29,3 +33,10 @@ class Command(abc.ABC):  # pylint: disable=too-few-public-methods
             log.error(error)
 
         sys.exit(1)
+
+    def get_notebook_titles_from_db(self) -> List[str]:
+        """Return the list of titles of all notebooks in the database."""
+        try:
+            return self._db.get_notebook_titles()
+        except db.Error as exception:
+            self.exit_with_error(exception)

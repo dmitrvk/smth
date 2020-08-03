@@ -1,3 +1,20 @@
+# License: GNU GPL Version 3
+
+"""The module provides ScanPreferences class for scanning setup.
+
+    Typical usage example:
+
+    pages_to_replace = [2, 5, 7]
+    pages_to_append = [8, 9, 10]
+
+    prefs = ScanPreferences()
+    prefs.notebook = notebook
+    prefs.pages_queue.extend(pages_to_replace)
+    prefs.pages_queue.extend(pages_to_append)
+
+    scanner_.scan(prefs)
+"""
+
 import collections
 
 from smth import models

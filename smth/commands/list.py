@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `list` command for displaying available notebooks."""
+
 import logging
 from typing import List
 

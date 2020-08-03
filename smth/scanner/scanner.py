@@ -1,3 +1,18 @@
+# License: GNU GPL Version 3
+
+"""The module provides the Scanner class which is used to perform scanning.
+
+    Typical usage example:
+
+    scanner_ = scanner.Scanner(conf)
+    scanner_.register(callback)
+
+    try:
+        scanner_.scan(prefs)
+    except scanner.Error:
+        pass
+"""
+
 import collections
 import itertools
 import logging
@@ -86,7 +101,7 @@ class Scanner:
 
         config_options = {}
 
-        try:
+        try:  # pylint: disable=too-many-nested-blocks
             config_options = {
                 'mode': self.conf.scanner_mode,
                 'resolution': self.conf.scanner_resolution,

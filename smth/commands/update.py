@@ -1,3 +1,7 @@
+# License: GNU GPL Version 3
+
+"""The module provides `update` command for changing notebook's properties."""
+
 import logging
 import os
 import pathlib
@@ -14,14 +18,11 @@ log = logging.getLogger(__name__)
 class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Update a notebook."""
 
-    def execute(self, args: List[str] = None) -> None:
+    def execute(self, args: List[str] = None) -> None:  # pylint: disable=too-many-branches  # noqa: E501
         """Ask user for notebook properties, save notebook in the database.
 
         Works similar to `create` command but changes the existing notebook."""
-        try:
-            notebook_titles = self._db.get_notebook_titles()
-        except db.Error as exception:
-            self.exit_with_error(exception)
+        notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:
             self.view.show_info('No notebooks found.')
