@@ -34,14 +34,13 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         try:
             notebook = self._db.get_notebook_by_title(notebook_title)
-            types = self._db.get_type_titles()
         except db.Error as exception:
             self.exit_with_error(exception)
 
         validator = validators.NotebookUpdateValidator()
 
         answers = self.view.ask_for_updated_notebook_properties(
-            notebook, types, validator)
+            notebook, validator)
 
         if not answers:
             log.info('Update stopped due to keyboard interrupt')
