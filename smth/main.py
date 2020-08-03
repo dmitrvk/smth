@@ -20,6 +20,9 @@ def main():
     if not const.PAGES_ROOT_PATH.exists():
         const.PAGES_ROOT_PATH.mkdir(parents=True, exist_ok=True)
 
+    if not const.CONFIG_PATH.parent.exists():
+        const.CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+
     setup_logging()
     log = logging.getLogger(__name__)
 
