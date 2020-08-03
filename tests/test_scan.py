@@ -12,7 +12,8 @@ class ScanCommandTestCase(unittest.TestCase):
     def setUp(self):
         logging.disable()
 
-        self.notebook = models.Notebook('Notebook', None, '/test/path.pdf')
+        type_ = models.NotebookType('A4', 210, 297)
+        self.notebook = models.Notebook('Notebook', type_, '/test/path.pdf')
         self.notebook.total_pages = 3
 
         self.db = mock.MagicMock(**{
@@ -162,6 +163,20 @@ class ScanCommandTestCase(unittest.TestCase):
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
             commands.ScanCommand(self.db, self.view).execute(args)
         self.assertEqual(self.conf.scanner_device, '')
+
+    def test_execute_with_pdf_only_option(self):
+        args = ['--pdf-only']
+        scanner_ = mock.MagicMock()
+        callback = mock.MagicMock()
+
+        with mock.patch('smth.scanner.Scanner', return_value=scanner_):
+            with mock.patch(
+                    'smth.commands.ScanCommand.ScannerCallback',
+                    return_value=callback):
+                commands.ScanCommand(self.db, self.view).execute(args)
+
+        scanner_.scan.assert_not_called()
+        callback.on_finish.assert_called_once()
 
     def test_execute_no_notebook_chosen(self):
         self.view.ask_for_notebook.return_value = ''

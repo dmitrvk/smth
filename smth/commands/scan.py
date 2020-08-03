@@ -37,15 +37,31 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.view.show_info(message)
             return
 
-        if args and '--set-device' in args:
-            try:
-                self.conf.scanner_device = ''
-            except config.Error as exception:
-                self.exit_with_error(exception)
+        callback = ScanCommand.ScannerCallback(
+            self, self._db, self.view, self.conf)
+        callback.on_error = self.exit_with_error
+
+        if args:
+            if '--set-device' in args:
+                try:
+                    self.conf.scanner_device = ''
+                except config.Error as exception:
+                    self.exit_with_error(exception)
+
+            if '--pdf-only' in args:
+                title = self.view.ask_for_notebook(notebooks)
+
+                if title:
+                    try:
+                        notebook = self._db.get_notebook_by_title(title)
+                        callback.on_finish(notebook)
+                        return
+                    except db.Error as exception:
+                        self.exit_with_error(exception)
+                else:
+                    return
 
         scanner_ = scanner.Scanner(self.conf)
-        callback = self.ScannerCallback(self, self._db, self.view, self.conf)
-        callback.on_error = self.exit_with_error
         scanner_.register(callback)
 
         prefs = self._make_scan_prefs(notebooks)
