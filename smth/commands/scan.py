@@ -92,6 +92,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.view.show_info(
                 f"The following pages will be scanned: {pages_to_scan}.")
 
+            if not self.view.confirm('Continue?', default_yes=True):
+                self.on_error('Scanning cancelled.')
+
         def on_start_scan_page(self, page: int) -> None:
             self.view.show_info(f'Scanning page {page}...')
 

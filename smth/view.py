@@ -297,14 +297,14 @@ class View:
         else:
             print('No types found.')
 
-    def confirm(self, question: str) -> bool:  # pylint: disable=no-self-use
+    def confirm(self, question: str, default_yes: bool = False) -> bool:  # pylint: disable=no-self-use  # noqa: E501
         """Ask for confirmation and return the answer (yes/no question)."""
         questions = [
             {
                 'type': 'confirm',
                 'name': 'answer',
                 'message': question,
-                'default': False,
+                'default': default_yes,
             },
         ]
 
