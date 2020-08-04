@@ -27,6 +27,10 @@ class Callback(abc.ABC):  # pylint: disable=too-few-public-methods
     """Used to notify about cloud's events. Must be subclassed."""
 
     @abc.abstractmethod
+    def on_create_smth_folder(self) -> None:
+        """Called when 'smth' folder created on Google Drive."""
+
+    @abc.abstractmethod
     def on_error(self, message: str) -> None:
         """Called when error occurs while working with cloud."""
 
@@ -45,10 +49,6 @@ class UploadingCallback(Callback):
     def on_finish_uploading_file(self, path: pathlib.Path) -> None:
         """Called when file is uploaded to Google Drive."""
 
-    @abc.abstractmethod
-    def on_create_smth_folder(self) -> None:
-        """Called when 'smth' folder created on Google Drive."""
-
 
 class SharingCallback(abc.ABC):
     """Used to notify about sharing events. Must be subclassed."""
@@ -60,7 +60,3 @@ class SharingCallback(abc.ABC):
     @abc.abstractmethod
     def on_finish_sharing_file(self, filename: str, link: str) -> None:
         """Called when file is shared and link is provided."""
-
-    @abc.abstractmethod
-    def on_error(self, message: str) -> None:
-        """Called when error occurs while working with cloud."""

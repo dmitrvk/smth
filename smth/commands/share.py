@@ -56,5 +56,8 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
             else:
                 self._view.show_error(f"Could not share '{filename}'.")
 
+        def on_create_smth_folder(self) -> None:
+            self._view.show_info("Folder 'smth' created on Google Drive.")
+
         def on_error(self, message: str) -> None:
             self._command.exit_with_error(message)
