@@ -17,6 +17,7 @@ try:
     import httplib2
     import pydrive.auth
     import pydrive.drive
+    import pydrive.files
     import oauth2client.file
 except ImportError:
     pass
@@ -136,9 +137,9 @@ class Cloud:
             file_on_drive.SetContentFile(str(path))
             file_on_drive.Upload()
             self._callback.on_finish_uploading_file(path)
-        except OSError as exception:
-            self._callback.on_error(str(exception))
-        except httplib2.ServerNotFoundError as exception:
+        except (OSError,
+                httplib2.ServerNotFoundError,
+                pydrive.files.ApiRequestError) as exception:
             self._callback.on_error(str(exception))
         except KeyboardInterrupt:
             message = 'Keyboard interrupt while uploading file.'
@@ -161,7 +162,8 @@ class Cloud:
                         filename, file['alternateLink'])
 
                     return
-                except httplib2.ServerNotFoundError as exception:
+                except (httplib2.ServerNotFoundError,
+                        pydrive.files.ApiRequestError) as exception:
                     self._callback.on_error(str(exception))
                 except KeyboardInterrupt:
                     message = 'Keyboard interrupt while sharing file.'
