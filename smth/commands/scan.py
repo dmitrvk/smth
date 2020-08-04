@@ -60,14 +60,11 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 else:
                     return
 
-        scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(callback)
-
+        scanner_ = scanner.Scanner(self.conf, callback)
         prefs = self._make_scan_prefs(notebook_titles)
 
         try:
             scanner_.scan(prefs)
-
         except scanner.Error as exception:
             self.exit_with_error(exception)
 
@@ -182,10 +179,10 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             pass
 
     def _make_scan_prefs(
-            self, notebooks: models.Notebook) -> scanner.ScanPreferences():
+            self, notebook_titles: List[str]) -> scanner.ScanPreferences():
         prefs = scanner.ScanPreferences()
 
-        notebook_title = self.view.ask_for_notebook(notebooks)
+        notebook_title = self.view.ask_for_notebook(notebook_titles)
 
         if not notebook_title:
             self.exit_with_error('No notebook chosen.')

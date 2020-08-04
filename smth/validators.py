@@ -65,14 +65,15 @@ class NotebookValidator:
 
         return True
 
-    def validate_path(self, path: str) -> bool:
+    def validate_path(self, path_str: str) -> bool:
         """Check if path is not empty and not already taken."""
-        path = path.strip()
+        path_str = path_str.strip()
 
-        if len(path) == 0:
+        if len(path_str) == 0:
             raise ValidationError(message='Path must not be empty')
 
-        path = pathlib.Path(os.path.expandvars(path)).expanduser().resolve()
+        path = pathlib.Path(os.path.expandvars(path_str))
+        path = path.expanduser().resolve()
 
         if not path.is_dir() and path.exists():
             raise ValidationError(message=f"'{path}' already exists")
@@ -210,11 +211,12 @@ class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
                         item, f'page must be from {min_page} to {max_page}')
             else:
                 if item.count('-') == 1:
-                    range_start, range_end = item.split('-')
+                    range_start_str, range_end_str = item.split('-')
 
-                    if range_start.isnumeric() and range_end.isnumeric():
-                        range_start = int(range_start)
-                        range_end = int(range_end)
+                    if (range_start_str.isnumeric() and
+                            range_end_str.isnumeric()):
+                        range_start = int(range_start_str)
+                        range_end = int(range_end_str)
 
                         if range_start > range_end:
                             raise_error(item, 'range start > end')

@@ -42,6 +42,8 @@ class ScannerTestCase(unittest.TestCase):
             ],
         })
 
+        self.callback = mock.MagicMock()
+
         sane.open = mock.MagicMock(return_value=self.device)
         sane.exit = mock.MagicMock()
 
@@ -64,31 +66,16 @@ class ScannerTestCase(unittest.TestCase):
         self.assertRaises(scanner.Error, scanner.Scanner.get_devices)
         sane.exit.assert_called_once()
 
-    def test_scan_error_without_callback(self):
-        """If no callback provided, scanner should raise `scanner.Error`."""
-        sane.init.side_effect = _sane.error
-
-        scanner_ = scanner.Scanner(self.conf)
-
-        prefs = scanner.ScanPreferences()
-        prefs.pages_queue.extend([1, 2, 3])
-
-        self.assertRaises(scanner.Error, scanner_.scan, prefs)
-
     def test_scan_keyboard_interrupt(self):
         sane.open.side_effect = KeyboardInterrupt
 
-        scanner_ = scanner.Scanner(self.conf)
-
-        callback = mock.MagicMock()
-        scanner_.register(callback)
+        scanner_ = scanner.Scanner(self.conf, self.callback)
 
         prefs = scanner.ScanPreferences()
         scanner_.scan(prefs)
 
         sane.scan.assert_not_called()
-        callback.on_error.assert_called_once()
-
+        self.callback.on_error.assert_called_once()
         sane.exit.assert_called_once()
 
     def test_scan(self):
@@ -99,16 +86,11 @@ class ScannerTestCase(unittest.TestCase):
         prefs.notebook = notebook
         prefs.pages_queue.extend([1, 2, 3])
 
-        callback = mock.MagicMock()
-
-        scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(callback)
-
+        scanner_ = scanner.Scanner(self.conf, self.callback)
         scanner_.scan(prefs)
 
-        callback.on_start.assert_called_once_with('device', [1, 2, 3])
-
-        callback.on_start_scan_page.assert_has_calls([
+        self.callback.on_start.assert_called_once_with('device', [1, 2, 3])
+        self.callback.on_start_scan_page.assert_has_calls([
             mock.call(1),
             mock.call(2),
             mock.call(3),
@@ -119,7 +101,7 @@ class ScannerTestCase(unittest.TestCase):
 
         self.image = self.image.crop((0, 0, page_width_pt, page_height_pt))
 
-        callback.on_finish_scan_page.assert_has_calls([
+        self.callback.on_finish_scan_page.assert_has_calls([
             mock.call(notebook, 1, self.image),
             mock.call(notebook, 2, self.image),
             mock.call(notebook, 3, self.image),
@@ -136,16 +118,11 @@ class ScannerTestCase(unittest.TestCase):
         prefs.notebook = notebook
         prefs.pages_queue.extend([1, 2, 3])
 
-        callback = mock.MagicMock()
-
-        scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(callback)
-
+        scanner_ = scanner.Scanner(self.conf, self.callback)
         scanner_.scan(prefs)
 
-        callback.on_start.assert_called_once_with('device', [1, 2, 3])
-
-        callback.on_start_scan_page.assert_has_calls([
+        self.callback.on_start.assert_called_once_with('device', [1, 2, 3])
+        self.callback.on_start_scan_page.assert_has_calls([
             mock.call(1),
             mock.call(2),
             mock.call(3),
@@ -156,7 +133,7 @@ class ScannerTestCase(unittest.TestCase):
 
         self.image = self.image.crop((0, 0, page_width_pt, page_height_pt))
 
-        callback.on_finish_scan_page.assert_has_calls([
+        self.callback.on_finish_scan_page.assert_has_calls([
             mock.call(notebook, 1, self.image),
             mock.call(notebook, 2, self.image),
             mock.call(notebook, 3, self.image),
@@ -173,16 +150,12 @@ class ScannerTestCase(unittest.TestCase):
         prefs.notebook = notebook
         prefs.pages_queue.extend([1, 2, 3])
 
-        callback = mock.MagicMock()
-
-        scanner_ = scanner.Scanner(self.conf)
-        scanner_.register(callback)
-
+        scanner_ = scanner.Scanner(self.conf, self.callback)
         scanner_.scan(prefs)
 
-        callback.on_start.assert_called_once_with('device', [1, 2, 3])
+        self.callback.on_start.assert_called_once_with('device', [1, 2, 3])
 
-        callback.on_start_scan_page.assert_has_calls([
+        self.callback.on_start_scan_page.assert_has_calls([
             mock.call(1),
             mock.call(3),
         ])
@@ -192,7 +165,7 @@ class ScannerTestCase(unittest.TestCase):
 
         self.image = self.image.crop((0, 0, page_width_pt, page_height_pt))
 
-        callback.on_finish_scan_page.assert_has_calls([
+        self.callback.on_finish_scan_page.assert_has_calls([
             mock.call(notebook, 1, self.image),
             mock.call(notebook, 2, self.image),
             mock.call(notebook, 3, self.image),
@@ -202,13 +175,9 @@ class ScannerTestCase(unittest.TestCase):
         self.assertEqual(notebook.total_pages, 4)
 
     def test_scan_nothing_to_scan(self):
-        scanner_ = scanner.Scanner(self.conf)
-
-        callback = mock.MagicMock()
-        scanner_.register(callback)
-
+        scanner_ = scanner.Scanner(self.conf, self.callback)
         prefs = scanner.ScanPreferences()
         scanner_.scan(prefs)
 
         sane.scan.assert_not_called()
-        callback.on_error.assert_called_once()
+        self.callback.on_error.assert_called_once()

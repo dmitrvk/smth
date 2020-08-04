@@ -36,9 +36,9 @@ Device = collections.namedtuple('Device', 'name vendor model type')
 class Scanner:
     """Represents a scanner device which can scan notebooks."""
 
-    def __init__(self, conf: config.Config):
-        self.callback = None
+    def __init__(self, conf: config.Config, callback_: callback.Callback):
         self.conf = conf
+        self._callback = callback_
 
     @staticmethod
     def get_devices() -> List[Device]:
@@ -59,18 +59,13 @@ class Scanner:
         finally:
             sane.exit()
 
-    def register(self, callback_: callback.Callback) -> None:
-        """Provide callback implementation to subscribe on scanner's events."""
-        self.callback = callback_
-
     def scan(self, prefs: preferences.ScanPreferences) -> None:
         """Perform scanning with given preferences."""
         if not self.conf.scanner_device:
-            if self.callback:
-                self.callback.on_set_device()
+            self._callback.on_set_device()
 
         if not self.conf.scanner_device:
-            self._handle_error('Device is not set.')
+            self._callback.on_error('Device is not set.')
         else:
             device = None
 
@@ -81,11 +76,11 @@ class Scanner:
 
             except _sane.error as exception:
                 log.exception(exception)
-                self._handle_error(str(exception))
+                self._callback.on_error(str(exception))
 
             except KeyboardInterrupt:
                 log.error('Scan failed due to keyboard interrupt')
-                self._handle_error('Keyboard interrupt')
+                self._callback.on_error('Keyboard interrupt')
 
             finally:
                 if device:
@@ -122,13 +117,13 @@ class Scanner:
                                            f"'{conf_option}' "
                                            "in config file.\n"
                                            f"Allowed values: {allowed_values}")
-                                self._handle_error(message)
+                                self._callback.on_error(message)
                 else:
                     message = "Scanner '{conf_option}' option cannot be set."
-                    self._handle_error(message)
+                    self._callback.on_error(message)
 
         except config.Error as exception:
-            self._handle_error(str(exception))
+            self._callback.on_error(str(exception))
 
         return device
 
@@ -138,17 +133,15 @@ class Scanner:
             prefs: preferences.ScanPreferences) -> None:
         """Perform actual scanning."""
         if len(prefs.pages_queue) == 0:
-            self.callback.on_error('Nothing to scan')
+            self._callback.on_error('Nothing to scan')
             return
 
-        if self.callback:
-            self.callback.on_start(device.devname, list(prefs.pages_queue))
+        self._callback.on_start(device.devname, list(prefs.pages_queue))
 
         while len(prefs.pages_queue) > 0:
             page = prefs.pages_queue.popleft()
 
-            if self.callback:
-                self.callback.on_start_scan_page(page)
+            self._callback.on_start_scan_page(page)
 
             image = device.scan()
 
@@ -179,8 +172,7 @@ class Scanner:
             if prefs.pages_queue:
                 time.sleep(self.conf.scanner_delay)
 
-        if self.callback:
-            self.callback.on_finish(prefs.notebook)
+        self._callback.on_finish(prefs.notebook)
 
     def _process_scanned_page(
             self, page: int, notebook: models.Notebook, image: pillow.Image,
@@ -192,13 +184,4 @@ class Scanner:
                    notebook.first_page_number - 1):
             notebook.total_pages += 1
 
-        if self.callback:
-            self.callback.on_finish_scan_page(
-                notebook, page, image)
-
-    def _handle_error(self, message: str) -> None:
-        """Call `on_error()` callback or raise an exception."""
-        if self.callback:
-            self.callback.on_error(message)
-        else:
-            raise error.Error(message)
+        self._callback.on_finish_scan_page(notebook, page, image)

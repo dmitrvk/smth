@@ -51,7 +51,7 @@ class Cloud:
         self._gdrive = pydrive.drive.GoogleDrive(self._auth())
         self._smth_folder_id = self._create_smth_folder_if_not_exists()
 
-    def _auth(self) -> None:
+    def _auth(self) -> pydrive.auth.GoogleAuth:
         """Ask user to visit a link and paste a verification code."""
         gauth = pydrive.auth.GoogleAuth()
         gauth.settings['client_config_file'] = str(Cloud.SECRETS_PATH)

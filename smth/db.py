@@ -156,7 +156,8 @@ class DB:
 
     def get_notebook_by_title(self, title: str) -> models.Notebook:
         """Return notebook with specific title from database."""
-        notebook = models.Notebook('', None, '')
+        notebook = models.Notebook(
+            '', models.NotebookType('', 0, 0), pathlib.Path())
 
         connection = None
 
@@ -179,7 +180,8 @@ class DB:
 
     def get_notebook_by_path(self, path: str) -> models.Notebook:
         """Return notebook with specific path from database."""
-        notebook = models.Notebook('', None, '')
+        notebook = models.Notebook(
+            '', models.NotebookType('', 0, 0), pathlib.Path())
 
         connection = None
 
@@ -240,7 +242,7 @@ class DB:
 
         return exists
 
-    def notebooks_of_type_exist(self, type_title: str) -> None:
+    def notebooks_of_type_exist(self, type_title: str) -> bool:
         """Return true if there is one or more notebooks of the type."""
         exists = False
         connection = None
@@ -462,7 +464,7 @@ class DB:
         connection.row_factory = sqlite3.Row
         return connection
 
-    def _handle_error(self, message: str, error: sqlite3.Error) -> None:  # pylint: disable=no-self-use  # noqa: E501
+    def _handle_error(self, message: str, error: Exception) -> None:  # pylint: disable=no-self-use  # noqa: E501
         """Log error message and propagate db.Error."""
         log.exception(message)
         raise Error(f'{message}: {error}.') from None

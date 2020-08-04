@@ -35,15 +35,15 @@ def main():
         log.exception(exception)
         sys.exit(1)
 
-    def execute_command(command: str) -> None:
-        command_class = f'{command.capitalize()}Command'
+    def execute_command(command_name: str) -> None:
+        command_class = f'{command_name.capitalize()}Command'
         command = getattr(commands, command_class)(db_, view_)
         command.execute(sys.argv[2:])
 
     if len(sys.argv) == 1:
         execute_command('scan')  # Default command
     else:
-        command = sys.argv[1]
+        command: str = sys.argv[1]
 
         if command in ('share', 'upload'):
             if importlib.util.find_spec('pydrive'):
@@ -61,16 +61,16 @@ def main():
             log.info("Unknown command '%s'", command)
 
 
-def setup_logging(log_level=logging.DEBUG) -> None:
+def setup_logging() -> None:
     """Set logging file, level, format."""
     log = logging.getLogger()
-    log.setLevel(log_level)
+    log.setLevel(logging.DEBUG)
 
     format_ = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
     formatter = logging.Formatter(format_)
 
     handler = logging.FileHandler(str(const.LOG_PATH))
-    handler.setLevel(log_level)
+    handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
 
     log.addHandler(handler)
