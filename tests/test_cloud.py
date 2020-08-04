@@ -133,7 +133,7 @@ class CloudTestCase(unittest.TestCase):
 
             cloud.Cloud(self.callback).upload_file(self.path)
 
-        self.assertEqual(self.callback.on_error.call_count, 2)
+        self.callback.on_error.assert_called()
 
     def test_upload_errors(self):
         self.gdrive.CreateFile.return_value = self.file
@@ -145,7 +145,7 @@ class CloudTestCase(unittest.TestCase):
             self.file.Upload.side_effect = error
             cloud.Cloud(self.callback).upload_file(self.path)
 
-        self.assertEqual(self.callback.on_error.call_count, 3)
+        self.callback.on_error.assert_called()
 
     def test_get_list_errors(self):
         get_list_errors = (httplib2.ServerNotFoundError, KeyboardInterrupt)
@@ -157,7 +157,7 @@ class CloudTestCase(unittest.TestCase):
 
             cloud.Cloud(self.callback).upload_file(self.path)
 
-        self.assertEqual(self.callback.on_error.call_count, 4)
+        self.callback.on_error.assert_called()
 
     def test_share_file(self):
         self.gdrive.ListFile.return_value = mock.MagicMock(**{

@@ -17,6 +17,7 @@ try:
     import httplib2
     import pydrive.auth
     import pydrive.drive
+    import oauth2client.file
 except ImportError:
     pass
 
@@ -54,22 +55,62 @@ class Cloud:
         gauth = pydrive.auth.GoogleAuth()
         gauth.settings['client_config_file'] = str(Cloud.SECRETS_PATH)
 
-        if not Cloud.SECRETS_PATH.exists():
-            with open(str(Cloud.SECRETS_PATH), 'w') as secrets_file:
-                json.dump(Cloud.SECRETS, secrets_file)
+        self._prepare_secrets_file()
 
         if Cloud.CREDENTIALS_PATH.exists():
-            gauth.LoadCredentialsFile(str(Cloud.CREDENTIALS_PATH))
+            storage = oauth2client.file.Storage(str(Cloud.CREDENTIALS_PATH))
+            credentials = storage.get()
+
+            if not credentials:
+                message = ("Invalid credentials file "
+                           f"'{str(Cloud.CREDENTIALS_PATH)}'.\n"
+                           "Check if the file is readable. "
+                           "You may want to delete it to perform auth again.")
+                self._callback.on_error(message)
+
+            try:
+                gauth.LoadCredentialsFile(str(Cloud.CREDENTIALS_PATH))
+            except (OSError,
+                    pydrive.auth.InvalidCredentialsError) as exception:
+                self._callback.on_error(str(exception))
         else:
             try:
+                with open(str(Cloud.CREDENTIALS_PATH), 'a') as creds_file:
+                    creds_file.write('')  # Check if writable
+
                 gauth.CommandLineAuth()
                 gauth.SaveCredentialsFile(str(Cloud.CREDENTIALS_PATH))
-            except httplib2.ServerNotFoundError as exception:
+            except (OSError,
+                    httplib2.ServerNotFoundError,
+                    pydrive.auth.InvalidCredentialsError) as exception:
                 self._callback.on_error(str(exception))
             except KeyboardInterrupt:
                 self._callback.on_error('Keyboard interrupt during auth.')
 
         return gauth
+
+    def _prepare_secrets_file(self) -> None:
+        def read_secrets():
+            try:
+                with open(str(Cloud.SECRETS_PATH), 'r') as secrets_file:
+                    return json.loads(secrets_file.read())
+            except json.JSONDecodeError:
+                return {}
+            except OSError as exception:
+                self._callback.on_error(str(exception))
+
+        def write_secrets():
+            try:
+                with open(str(Cloud.SECRETS_PATH), 'w') as sec_file:
+                    json.dump(Cloud.SECRETS, sec_file)
+            except OSError as exception:
+                self._callback.on_error(str(exception))
+
+        if Cloud.SECRETS_PATH.exists():
+            if read_secrets() != Cloud.SECRETS:
+                write_secrets()
+        else:
+            write_secrets()
 
     def upload_file(self, path: pathlib.Path) -> None:
         """Upload file to 'smth' folder on Google Drive."""
