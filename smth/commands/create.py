@@ -32,11 +32,11 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
             types = self._db.get_type_titles()
             validator = validators.NotebookValidator(self._db)
 
-            answers = self.view.ask_for_new_notebook_info(types, validator)
+            answers = self._view.ask_for_new_notebook_info(types, validator)
 
             if not answers:
                 log.info('Creation stopped due to keyboard interrupt')
-                self.view.show_info('Nothing created.')
+                self._view.show_info('Nothing created.')
                 return
 
             title = answers['title']
@@ -75,6 +75,6 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
             message = (f"Create notebook '{notebook.title}' "
                        f"of type '{notebook.type.title}' at '{notebook.path}'")
             log.info(message)
-            self.view.show_info(message)
+            self._view.show_info(message)
         except db.Error as exception:
             self.exit_with_error(exception)

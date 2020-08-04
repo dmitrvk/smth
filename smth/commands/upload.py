@@ -40,13 +40,13 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
                             self.exit_with_error(exception)
 
             if not path:
-                notebook = self.view.ask_for_notebook(notebook_titles)
+                notebook = self._view.ask_for_notebook(notebook_titles)
 
                 if notebook:
                     path = self._db.get_notebook_by_title(notebook).path
                     self._cloud.upload_file(path)
         else:
-            self.view.show_info('No notebooks found.')
+            self._view.show_info('No notebooks found.')
 
     class CloudCallback(cloud.UploadingCallback):
         """Callback implementation to subscribe on cloud's events."""

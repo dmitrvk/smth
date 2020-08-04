@@ -11,7 +11,7 @@ class NotebookType:  # pylint: disable=too-many-instance-attributes
         self.title = title
         self.page_width = page_width
         self.page_height = page_height
-        self._pages_paired = False
+        self.pages_paired = False
 
     @property
     def id(self):  # pylint: disable=invalid-name

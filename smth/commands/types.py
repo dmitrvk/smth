@@ -27,17 +27,17 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
         else:
             try:
                 types = self._db.get_types()
-                self.view.show_types(types)
+                self._view.show_types(types)
             except db.Error as exception:
                 self.exit_with_error(exception)
 
     def _create_type(self):
         validator = validators.TypeValidator(self._db)
-        answers = self.view.ask_for_new_type_info(validator)
+        answers = self._view.ask_for_new_type_info(validator)
 
         if not answers:
             log.info('Type creation stopped due to keyboard interrupt')
-            self.view.show_info('Nothing created.')
+            self._view.show_info('Nothing created.')
             return
 
         type_ = models.NotebookType(
@@ -57,7 +57,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
         if type_.pages_paired:
             message += " with paired pages"
 
-        self.view.show_info(f'{message}.')
+        self._view.show_info(f'{message}.')
         log.info(message)
 
     def _delete_type(self):
@@ -66,19 +66,19 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
         except db.Error as exception:
             self.exit_with_error(exception)
 
-        type_title = self.view.ask_for_type(type_titles)
+        type_title = self._view.ask_for_type(type_titles)
 
         if not type_title:
             return
 
         try:
             if self._db.notebooks_of_type_exist(type_title):
-                self.view.show_info(
+                self._view.show_info(
                     f"Can not delete type '{type_title}' because notebooks "
                     "of this type exist.")
             else:
                 self._db.delete_type_by_title(type_title)
-                self.view.show_info(f"Type '{type_title}' deleted.")
+                self._view.show_info(f"Type '{type_title}' deleted.")
 
         except db.Error as exception:
             self.exit_with_error(exception)

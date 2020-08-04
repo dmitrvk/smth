@@ -37,7 +37,7 @@ class Scanner:
     """Represents a scanner device which can scan notebooks."""
 
     def __init__(self, conf: config.Config, callback_: callback.Callback):
-        self.conf = conf
+        self._conf = conf
         self._callback = callback_
 
     @staticmethod
@@ -61,17 +61,17 @@ class Scanner:
 
     def scan(self, prefs: preferences.ScanPreferences) -> None:
         """Perform scanning with given preferences."""
-        if not self.conf.scanner_device:
+        if not self._conf.scanner_device:
             self._callback.on_set_device()
 
-        if not self.conf.scanner_device:
+        if not self._conf.scanner_device:
             self._callback.on_error('Device is not set.')
         else:
             device = None
 
             try:
                 sane.init()
-                device = self._get_device(self.conf.scanner_device)
+                device = self._get_device(self._conf.scanner_device)
                 self._scan_with_prefs(device, prefs)
 
             except _sane.error as exception:
@@ -98,8 +98,8 @@ class Scanner:
 
         try:  # pylint: disable=too-many-nested-blocks
             config_options = {
-                'mode': self.conf.scanner_mode,
-                'resolution': self.conf.scanner_resolution,
+                'mode': self._conf.scanner_mode,
+                'resolution': self._conf.scanner_resolution,
             }
 
             for conf_option in config_options:
@@ -170,7 +170,7 @@ class Scanner:
                     page, prefs.notebook, image, device.resolution)
 
             if prefs.pages_queue:
-                time.sleep(self.conf.scanner_delay)
+                time.sleep(self._conf.scanner_delay)
 
         self._callback.on_finish(prefs.notebook)
 

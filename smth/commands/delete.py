@@ -23,10 +23,10 @@ class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
             notebook_titles = self.get_notebook_titles_from_db()
 
             if not notebook_titles:
-                self.view.show_info('No notebooks found.')
+                self._view.show_info('No notebooks found.')
                 return
 
-            chosen_notebook = self.view.ask_for_notebook(notebook_titles)
+            chosen_notebook = self._view.ask_for_notebook(notebook_titles)
 
             if not chosen_notebook:
                 log.info('Deletion stopped due to keyboard interrupt')
@@ -40,9 +40,9 @@ class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
             message = (f"All scanned images in '{pages_dir_path}' will be "
                        f"removed.\n"
                        f"File'{notebook.path}' will not be deleted.")
-            self.view.show_info(message)
+            self._view.show_info(message)
 
-            if self.view.confirm('Continue?'):
+            if self._view.confirm('Continue?'):
                 self._db.delete_notebook_by_id(notebook.id)
 
                 if pages_dir_path.exists():
@@ -50,6 +50,6 @@ class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
 
                 message = (f"Notebook '{notebook.title}' deleted.")
                 log.info(message)
-                self.view.show_info(message)
+                self._view.show_info(message)
         except db.Error as exception:
             self.exit_with_error(exception)

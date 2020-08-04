@@ -33,11 +33,11 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         if not notebook_titles:
             message = 'No notebooks found. Create one with `smth create`.'
-            self.view.show_info(message)
+            self._view.show_info(message)
             return
 
         callback = ScanCommand.ScannerCallback(
-            self, self._db, self.view, self.conf)
+            self, self._db, self._view, self.conf)
         callback.on_error = self.exit_with_error
 
         if args:
@@ -48,7 +48,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                     self.exit_with_error(exception)
 
             if '--pdf-only' in args:
-                title = self.view.ask_for_notebook(notebook_titles)
+                title = self._view.ask_for_notebook(notebook_titles)
 
                 if title:
                     try:
@@ -76,39 +76,39 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 db_: db.DB, view_: view.View, conf: config.Config):
             self._command = command_
             self._db = db_
-            self.view = view_
+            self._view = view_
             self.conf = conf
 
         def on_set_device(self):
-            self.view.show_info('Searching for available devices...')
+            self._view.show_info('Searching for available devices...')
 
             try:
                 devices = scanner.Scanner.get_devices()
 
                 if devices:
-                    device_name = self.view.ask_for_device(devices)
+                    device_name = self._view.ask_for_device(devices)
                     self.conf.scanner_device = device_name
                 else:
-                    self.view.show_error('No devices found.')
+                    self._view.show_error('No devices found.')
 
             except scanner.Error as exception:
                 self.on_error(str(exception))
 
         def on_start(self, device_name: str, pages_queue: List[int]) -> None:
-            self.view.show_separator()
-            self.view.show_info(f"Using device '{device_name}'.")
+            self._view.show_separator()
+            self._view.show_info(f"Using device '{device_name}'.")
 
-            self.view.show_separator()
+            self._view.show_separator()
 
             pages_to_scan = ', '.join(list(map(str, pages_queue)))
-            self.view.show_info(
+            self._view.show_info(
                 f"The following pages will be scanned: {pages_to_scan}.")
 
-            if not self.view.confirm('Continue?', default_yes=True):
+            if not self._view.confirm('Continue?', default_yes=True):
                 self.on_error('Scanning cancelled.')
 
         def on_start_scan_page(self, page: int) -> None:
-            self.view.show_info(f'Scanning page {page}...')
+            self._view.show_info(f'Scanning page {page}...')
 
         def on_finish_scan_page(
                 self, notebook: models.Notebook, page: int,
@@ -116,14 +116,14 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             page_path = notebook.get_page_path(page)
             image.save(str(page_path))
 
-            self.view.show_info(f'Page {page} saved at {page_path}')
+            self._view.show_info(f'Page {page} saved at {page_path}')
             log.info("Scanned page %s of '%s'", page, notebook.title)
 
         def on_finish(self, notebook: models.Notebook):
             self._db.save_notebook(notebook)
 
-            self.view.show_separator()
-            self.view.show_info('Creating PDF...')
+            self._view.show_separator()
+            self._view.show_info('Creating PDF...')
 
             pdf_page_size = [
                 int(notebook.type.page_width * 150 / 25.4),
@@ -161,19 +161,20 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
             pdf.output(notebook.path)
 
-            self.view.show_info(f"PDF saved at '{notebook.path}'.")
-            self.view.show_separator()
+            self._view.show_info(f"PDF saved at '{notebook.path}'.")
+            self._view.show_separator()
 
             try:
                 if (importlib.util.find_spec('pydrive') and
                         self.conf.scanner_ask_upload):
-                    if self.view.confirm('Upload notebook to Google Drive?'):
+                    if self._view.confirm('Upload notebook to Google Drive?'):
+                        command = upload.UploadCommand(self._db, self._view)
                         args = [notebook.title]
-                        upload.UploadCommand(self._db, self.view).execute(args)
+                        command.execute(args)
             except config.Error as exception:
-                self.view.show_error(f'Config file error: {str(exception)}')
+                self._view.show_error(f'Config file error: {str(exception)}')
 
-            self.view.show_info('Done.')
+            self._view.show_info('Done.')
 
         def on_error(self, message):
             pass
@@ -182,7 +183,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self, notebook_titles: List[str]) -> scanner.ScanPreferences():
         prefs = scanner.ScanPreferences()
 
-        notebook_title = self.view.ask_for_notebook(notebook_titles)
+        notebook_title = self._view.ask_for_notebook(notebook_titles)
 
         if not notebook_title:
             self.exit_with_error('No notebook chosen.')
@@ -194,10 +195,10 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.exit_with_error(exception)
 
         validator = validators.ScanPreferencesValidator(prefs.notebook)
-        append = self.view.ask_for_pages_to_append(validator)
+        append = self._view.ask_for_pages_to_append(validator)
 
         if prefs.notebook.total_pages > 0:
-            replace_answer = self.view.ask_for_pages_to_replace(validator)
+            replace_answer = self._view.ask_for_pages_to_replace(validator)
 
             replace = []
             for item in replace_answer:

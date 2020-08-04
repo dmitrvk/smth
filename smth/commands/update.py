@@ -25,10 +25,10 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:
-            self.view.show_info('No notebooks found.')
+            self._view.show_info('No notebooks found.')
             return
 
-        notebook_title = self.view.ask_for_notebook(notebook_titles)
+        notebook_title = self._view.ask_for_notebook(notebook_titles)
 
         if not notebook_title:
             return
@@ -40,12 +40,12 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         validator = validators.NotebookUpdateValidator()
 
-        answers = self.view.ask_for_updated_notebook_properties(
+        answers = self._view.ask_for_updated_notebook_properties(
             notebook, validator)
 
         if not answers:
             log.info('Update stopped due to keyboard interrupt')
-            self.view.show_info('Nothing updated.')
+            self._view.show_info('Nothing updated.')
             return
 
         title = answers['title']
@@ -95,4 +95,4 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         self._db.save_notebook(notebook)
 
-        self.view.show_info('Notebook saved.')
+        self._view.show_info('Notebook saved.')

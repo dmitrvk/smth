@@ -24,9 +24,9 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:
-            self.view.show_info('No notebooks found.')
+            self._view.show_info('No notebooks found.')
         else:
-            notebook = self.view.ask_for_notebook(notebook_titles)
+            notebook = self._view.ask_for_notebook(notebook_titles)
 
             if notebook:
                 path = None

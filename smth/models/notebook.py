@@ -17,12 +17,12 @@ class Notebook:  # pylint: disable=too-many-instance-attributes
 
     def __init__(
             self, title: str, notebook_type: NotebookType, path: pathlib.Path):
-        self._id = -1
+        self.id = -1
         self.title = title
         self._type = notebook_type
-        self._path = path
-        self._first_page_number = 1
-        self._total_pages = 0
+        self.path = path
+        self.total_pages = 0
+        self.first_page_number = 1
 
     @property
     def id(self) -> int:  # pylint: disable=invalid-name
