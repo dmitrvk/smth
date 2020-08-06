@@ -42,10 +42,14 @@ class Scanner:
 
     @staticmethod
     def get_devices() -> List[Device]:
-        """Load the list of available devices.
+        """Loads the list of available devices.
 
         Equivalent to call `scanimage -L`.
-        Return the list with devices' names."""
+
+        Returns:
+            A list of devices.  Each device is represented by a tuple that
+            contains the device's name, vendor, model and type.
+        """
         try:
             sane.init()
             return list(itertools.starmap(Device, sane.get_devices()))
@@ -60,7 +64,13 @@ class Scanner:
             sane.exit()
 
     def scan(self, prefs: preferences.ScanPreferences) -> None:
-        """Perform scanning with given preferences."""
+        """Performs scanning with the given preferences.
+
+        Args:
+            prefs:
+                ScanPreferences objects with the information about the notebook
+                and pages to scan.
+        """
         if not self._conf.scanner_device:
             self._callback.on_set_device()
 
@@ -89,6 +99,15 @@ class Scanner:
                 sane.exit()
 
     def _get_device(self, device_name: str) -> sane.SaneDev:
+        """Opens the device and sets the parameters according to config.
+
+        Args:
+            device_name:
+                Name of a scanner device.
+
+        Returns:
+            A sane.SaneDev object representing a SANE device.
+        """
         device = sane.open(device_name)
         device.format = 'jpeg'
 
@@ -131,7 +150,15 @@ class Scanner:
             self,
             device: sane.SaneDev,
             prefs: preferences.ScanPreferences) -> None:
-        """Perform actual scanning."""
+        """Performs the actual scanning.
+
+        Args:
+            device:
+                A sane.SaneDev object representing a SANE device.
+            prefs:
+                A ScanPreferences object containing the information about the
+                notebook and pages which should be scanned.
+        """
         if len(prefs.pages_queue) == 0:
             self._callback.on_error('Nothing to scan')
             return
@@ -177,6 +204,17 @@ class Scanner:
     def _process_scanned_page(
             self, page: int, notebook: models.Notebook, image: pillow.Image,
             resolution: int) -> None:
+        """Crops an image with page, increases total number of pages if needed.
+
+        Args:
+            page:
+                Number of page which has been scanned.
+            notebook:
+                A notebook to which the page belongs.
+            image:
+                An image with the scanned page.  This image will be cropped and
+                rotated as needed and saved to a file.
+        """
         image = notebook.crop_image(
             page, image, resolution)
 

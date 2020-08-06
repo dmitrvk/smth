@@ -10,10 +10,10 @@ from smth import commands, const, db, view
 
 
 def main():
-    """Create needed files, initialize logs, database, view.
+    """Creates needed files and initializes logs, database and view.
 
-    Parse arguments and run command.
-    Show help message if no command provided or command is invalid."""
+    Parses arguments and runs a command.
+    Shows help message if no command provided or command is invalid."""
     if not const.DATA_ROOT_PATH.exists():
         const.DATA_ROOT_PATH.mkdir(parents=True, exist_ok=True)
 

@@ -13,13 +13,14 @@ log = logging.getLogger(__name__)
 
 
 class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
-    """Displays list of existing notebooks."""
+    """Displays the list of all notebooks."""
 
     def execute(self, args: List[str] = None) -> None:
-        """Get notebook types from database and show them to user.
+        """Gets notebook types from database and shows them to user.
 
-        If `--create` option is passed, ask user for new type info and
-        save new type in the database."""
+        If `--create` option is passed, asks user for new type info and
+        saves new type in the database.
+        """
         if args and '--create' in args:
             self._create_type()
         elif args and '--delete' in args:
@@ -32,6 +33,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
                 self.exit_with_error(exception)
 
     def _create_type(self):
+        """Asks for the information about new type and saves it in database."""
         validator = validators.TypeValidator(self._db)
         answers = self._view.ask_for_new_type_info(validator)
 
@@ -61,6 +63,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
         log.info(message)
 
     def _delete_type(self):
+        """Asks for type and deletes it from the database."""
         try:
             type_titles = self._db.get_type_titles()
         except db.Error as exception:

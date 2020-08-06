@@ -52,7 +52,21 @@ class Cloud:
         self._smth_folder_id = self._create_smth_folder_if_not_exists()
 
     def _auth(self) -> pydrive.auth.GoogleAuth:
-        """Ask user to visit a link and paste a verification code."""
+        """Performs the authentication and authorization.
+
+        Asks user to visit a link and paste a verification code.
+
+        Two files are involved in the authentication and authorization
+        processes:
+            ~/.config/smth/client_secrets.json
+            ~/.config/smth/credentials.json
+        The first file contains the information about this command-line
+        application as a client to the Google Cloud application.  The second
+        file contains credentials for accessing the user's Google Drive.
+
+        Returns:
+            GoogleAuth object after successful auth.
+        """
         gauth = pydrive.auth.GoogleAuth()
         gauth.settings['client_config_file'] = str(Cloud.SECRETS_PATH)
 
@@ -114,7 +128,12 @@ class Cloud:
             write_secrets()
 
     def upload_file(self, path: pathlib.Path) -> None:
-        """Upload file to 'smth' folder on Google Drive."""
+        """Uploads file to 'smth' folder on Google Drive.
+
+        Args:
+            path:
+                Path to file which should be uploaded.
+        """
         self._callback.on_start_uploading_file(path)
 
         for file_on_drive in self._get_list_of_pdf_files_in_smth_dir():
@@ -146,7 +165,12 @@ class Cloud:
             self._callback.on_error(message)
 
     def share_file(self, filename: str) -> None:
-        """Share file in 'smth' folder on Google Drive and return a link."""
+        """Shares file in 'smth' folder on Google Drive and returns a link.
+
+        Args:
+            filename:
+                Name of file which should be shared.
+        """
         self._callback.on_start_sharing_file(filename)
 
         for file in self._get_list_of_pdf_files_in_smth_dir():

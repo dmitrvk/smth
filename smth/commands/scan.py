@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 
 
 class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
-    """Allows to scan a notebook."""
+    """Scans a notebook."""
 
     def __init__(self, db_: db.DB, view_: view.View):
         super().__init__(db_, view_)
@@ -28,7 +28,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.exit_with_error(exception)
 
     def execute(self, args: List[str] = None) -> None:
-        """Ask user for scanning preferences, scan notebook and make PDF."""
+        """Asks user for scanning preferences, scans notebook and makes PDF."""
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:
@@ -80,6 +80,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self.conf = conf
 
         def on_set_device(self):
+            """Asks for device name and sets `scanner_device` config option.
+
+            See the base class."""
             self._view.show_info('Searching for available devices...')
 
             try:
@@ -95,6 +98,10 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 self.on_error(str(exception))
 
         def on_start(self, device_name: str, pages_queue: List[int]) -> None:
+            """Shows the pages that will be scanned and asks for confirmation.
+
+            See the base class.
+            """
             self._view.show_separator()
             self._view.show_info(f"Using device '{device_name}'.")
 
@@ -108,11 +115,15 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 self.on_error('Scanning cancelled.')
 
         def on_start_scan_page(self, page: int) -> None:
+            """See the base class."""
             self._view.show_info(f'Scanning page {page}...')
 
         def on_finish_scan_page(
                 self, notebook: models.Notebook, page: int,
                 image: pillow.Image) -> None:
+            """Saves scanned page to notebook's pages directory.
+
+            See the base class."""
             page_path = notebook.get_page_path(page)
             image.save(str(page_path))
 
@@ -120,6 +131,13 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             log.info("Scanned page %s of '%s'", page, notebook.title)
 
         def on_finish(self, notebook: models.Notebook):
+            """Saves the notebook in the databasee and creates PDF file.
+
+            If PyDrive is installed and `ask_upload` config parameter is True,
+            asks whether the user wants to upload the notebook to Google Drive.
+
+            See the base class.
+            """
             self._db.save_notebook(notebook)
 
             self._view.show_separator()
@@ -177,10 +195,20 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self._view.show_info('Done.')
 
         def on_error(self, message):
-            pass
+            """See the base class."""
 
     def _make_scan_prefs(
             self, notebook_titles: List[str]) -> scanner.ScanPreferences():
+        """Asks for scan preferenses: notebook, pages to append and to replace.
+
+        Args:
+            notebook_titles:
+                A list of all notebooks' titles to choose from.
+
+        Returns:
+            ScanPreferences object with all the information needed to perform
+            the scanning process.
+        """
         prefs = scanner.ScanPreferences()
 
         notebook_title = self._view.ask_for_notebook(notebook_titles)

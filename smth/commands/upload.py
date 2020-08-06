@@ -21,7 +21,7 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
         self._cloud = cloud.Cloud(UploadCommand.CloudCallback(self, view_))
 
     def execute(self, args: List[str] = None):
-        """Upload notebook's PDF file to Google Drive."""
+        """Uploads a notebook's PDF file to Google Drive."""
         notebook_titles = self.get_notebook_titles_from_db()
 
         if notebook_titles:
@@ -57,19 +57,24 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
             self._view = view_
 
         def on_start_uploading_file(self, path: pathlib.Path) -> None:
+            """See the base class."""
             message = "Uploading '{}' to Google Drive...".format(str(path))
             self._view.show_info(message)
 
         def on_confirm_override_file(self, filename: str) -> bool:
+            """See the base class."""
             question = f"File '{filename}' exists on Google Drive. Override?"
             return self._view.confirm(question)
 
         def on_finish_uploading_file(self, path: pathlib.Path) -> None:
+            """See the base class."""
             message = f"File '{path.name}' uploaded to Google Drive."
             self._view.show_info(message)
 
         def on_create_smth_folder(self) -> None:
+            """See the base class."""
             self._view.show_info("Folder 'smth' created on Google Drive.")
 
         def on_error(self, message: str) -> None:
+            """See the base class."""
             self._command.exit_with_error(message)

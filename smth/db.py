@@ -135,7 +135,12 @@ class DB:
                 connection.close()
 
     def get_notebooks(self) -> List[models.Notebook]:
-        """Return all notebooks from the database."""
+        """Return all notebooks from the database.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         notebooks = []
         connection = None
 
@@ -155,7 +160,15 @@ class DB:
         return notebooks
 
     def get_notebook_by_title(self, title: str) -> models.Notebook:
-        """Return notebook with specific title from database."""
+        """Return notebook with specific title from database.
+
+        Args:
+            title:
+                A title of a notebook.
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         notebook = models.Notebook(
             '', models.NotebookType('', 0, 0), pathlib.Path())
 
@@ -179,7 +192,15 @@ class DB:
         return notebook
 
     def get_notebook_by_path(self, path: str) -> models.Notebook:
-        """Return notebook with specific path from database."""
+        """Return notebook with specific path from database.
+
+        Args:
+            path:
+                A path to notebook's PDF file.
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         notebook = models.Notebook(
             '', models.NotebookType('', 0, 0), pathlib.Path())
 
@@ -203,7 +224,12 @@ class DB:
         return notebook
 
     def get_notebook_titles(self) -> List[str]:
-        """Return list of notebook titles from database."""
+        """Return list of notebook titles from database.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         titles = []
         connection = None
 
@@ -223,7 +249,16 @@ class DB:
         return titles
 
     def notebook_exists(self, title: str) -> bool:
-        """Check if notebook with the given title exists in the database."""
+        """Check if notebook with the given title exists in the database.
+
+        Args:
+            title:
+                A title of a notebook.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         exists = False
         connection = None
 
@@ -243,7 +278,16 @@ class DB:
         return exists
 
     def notebooks_of_type_exist(self, type_title: str) -> bool:
-        """Return true if there is one or more notebooks of the type."""
+        """Return true if there is one or more notebooks of the type.
+
+        Args:
+            type_title:
+                A title of notebook's type.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         exists = False
         connection = None
 
@@ -265,7 +309,16 @@ class DB:
         return exists
 
     def save_notebook(self, notebook: models.Notebook) -> None:
-        """Create or update notebook."""
+        """Create or update notebook.
+
+        Args:
+            notebook:
+                A notebook to create or update.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         connection = None
 
         try:
@@ -294,7 +347,16 @@ class DB:
                 connection.close()
 
     def delete_notebook_by_id(self, id_: int) -> None:
-        """Delete notebook with the given id from the database."""
+        """Delete notebook with the given id from the database.
+
+        Args:
+            id_:
+                ID of notebook to delete.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         connection = None
 
         try:
@@ -310,7 +372,12 @@ class DB:
                 connection.close()
 
     def get_types(self) -> List[models.NotebookType]:
-        """Return list of types from database."""
+        """Return list of types from database.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         types = []
         connection = None
 
@@ -330,7 +397,12 @@ class DB:
         return types
 
     def get_type_titles(self) -> List[str]:
-        """Return list of notebook types' titles from database."""
+        """Return list of notebook types' titles from database.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         titles = []
         connection = None
 
@@ -350,7 +422,16 @@ class DB:
         return titles
 
     def get_type_by_id(self, id_: int) -> models.NotebookType:
-        """Return notebook type with specified id from database."""
+        """Return notebook type with specified id from database.
+
+        Args:
+            id_:
+                A notebook type's ID.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         type_ = models.NotebookType('', 0, 0)
         connection = None
 
@@ -372,7 +453,16 @@ class DB:
         return type_
 
     def get_type_by_title(self, title: str) -> models.NotebookType:
-        """Return type with given title from the database."""
+        """Return type with given title from the database.
+
+        Args:
+            title:
+                A notebook type's title.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         type_ = models.NotebookType('', 0, 0)
         connection = None
 
@@ -394,7 +484,16 @@ class DB:
         return type_
 
     def type_exists(self, title: str) -> bool:
-        """Check if type with the given title exists in the database."""
+        """Check if type with the given title exists in the database.
+
+        Args:
+            title:
+                A notebook type's title.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         exists = False
 
         connection = None
@@ -415,7 +514,16 @@ class DB:
         return exists
 
     def save_type(self, type_: models.NotebookType) -> None:
-        """Create or update notebook type."""
+        """Create or update notebook type.
+
+        Args:
+            type_:
+                A notebook type to create or update.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         connection = None
 
         try:
@@ -441,7 +549,16 @@ class DB:
                 connection.close()
 
     def delete_type_by_title(self, title: str) -> None:
-        """Delete type with the given title from the database."""
+        """Delete type with the given title from the database.
+
+        Args:
+            title:
+                A notebook type's title.
+
+        Raises:
+            db.Error:
+                An error occured executing the query.
+        """
         connection = None
 
         try:
@@ -459,7 +576,10 @@ class DB:
     def _connect(self) -> sqlite3.Connection:
         """Connect to the database and return the connection object.
 
-        Raises sqlite3.Error if connection failed."""
+        Raises:
+            sqlite3.Error:
+                Error when connection failed.
+        """
         connection = sqlite3.connect(self._path)
         connection.row_factory = sqlite3.Row
         return connection

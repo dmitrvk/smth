@@ -21,10 +21,21 @@ class Command(abc.ABC):  # pylint: disable=too-few-public-methods
 
     @abc.abstractmethod
     def execute(self, args: List[str] = None):
-        """Run command with the given arguments."""
+        """Runs command with the given arguments.
+
+        Args:
+            args:
+                A list of arguments passed to the command.
+        """
 
     def exit_with_error(self, error: Union[Exception, str]) -> NoReturn:
-        """Show error to user, log error message and exit with code 1."""
+        """Show error to user, log error message and exit with code 1.
+
+        Args:
+            error:
+                An error that occured.  It can be an Exception object or a
+                string with an error message.
+        """
         if isinstance(error, Exception):
             self._view.show_error(str(error))
             log.exception(error)
@@ -35,7 +46,11 @@ class Command(abc.ABC):  # pylint: disable=too-few-public-methods
         sys.exit(1)
 
     def get_notebook_titles_from_db(self) -> List[str]:
-        """Return the list of titles of all notebooks in the database."""
+        """Return the list of titles of all notebooks in the database.
+
+        Returns:
+            A list of notebooks' titles.
+        """
         try:
             return self._db.get_notebook_titles()
         except db.Error as exception:

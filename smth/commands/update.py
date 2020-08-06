@@ -19,9 +19,10 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Update a notebook."""
 
     def execute(self, args: List[str] = None) -> None:  # pylint: disable=too-many-branches  # noqa: E501
-        """Ask user for notebook properties, save notebook in the database.
+        """Asks user for notebook properties, saves notebook in the database.
 
-        Works similar to `create` command but changes the existing notebook."""
+        Works similar to `create` command but changes the existing notebook.
+        """
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:

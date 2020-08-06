@@ -16,7 +16,7 @@ class ListCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Displays list of existing notebooks."""
 
     def execute(self, args: List[str] = None) -> None:
-        """Get notebooks from database and show them to user."""
+        """Gets the notebooks from database and shows them to user."""
         try:
             notebooks = self._db.get_notebooks()
             self._view.show_notebooks(notebooks)

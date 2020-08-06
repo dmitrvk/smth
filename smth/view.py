@@ -30,10 +30,17 @@ class View:
     def ask_for_new_notebook_info(
             self, types: List[str],
             validator: validators.NotebookValidator) -> Answers:
-        """Ask user for notebook parameters and return answers.
+        """Asks user for notebook parameters and returns answers.
 
-        Validate answers with given validator.
-        `types` should be only titles, not actual NotebookType objects."""
+        Args:
+            types:
+                Notebook types' titles to choose from.
+            validator:
+                Validator for user input.
+
+        Returns:
+            A dict mapping questions' names to corresponding answers.
+        """
         questions = [
             {
                 'type': 'input',
@@ -79,7 +86,16 @@ class View:
             validator: validators.NotebookUpdateValidator) -> Answers:
         """Ask user for updated notebook parameters and return answers.
 
-        Validate answers with given validator."""
+        Args:
+            notebook:
+                Notebook to update.  Used here to display current notebook's
+                properties.
+            validator:
+                Validator for user input.
+
+        Returns:
+            A dict mapping questions' names to corresponding answers.
+        """
         questions = [
             {
                 'type': 'input',
@@ -110,7 +126,13 @@ class View:
             self, validator: validators.TypeValidator) -> Answers:
         """Ask user for notebook parameters and return answers.
 
-        Validate answers with given validator."""
+        Args:
+            validator:
+                Validator for user input.
+
+        Returns:
+            A dict mapping questions' names to corresponding answers.
+        """
         questions = [
             {
                 'type': 'input',
@@ -149,9 +171,19 @@ class View:
         return {}
 
     def ask_for_device(self, devices: List[scanner.Device]) -> str:
-        """Show list of devices and let user choose one. Return device name."""
+        """Shows list of devices to choose one from.
+
+        Args:
+            devices:
+                A list of scanner devices.  Each device is represented as a
+                named tuple of strings with device's name, vendor, model and
+                type.
+
+        Returns:
+            A string with chosen device name.
+        """
         def prepare_choices(devices: List[scanner.Device]) -> List[str]:
-            """Prepare device choices for user."""
+            """Forms strings from named tuples representing devices."""
             choices = []
 
             for dev in devices:
@@ -162,7 +194,7 @@ class View:
             return choices
 
         def extract_device_name_from_choice(choice: str) -> str:
-            """Return only device name from formatted string."""
+            """Returns only device's name from formatted string."""
             return choice.split('(')[0].rstrip()
 
         devices.sort(key=operator.attrgetter('name'))
@@ -186,7 +218,12 @@ class View:
         return ''
 
     def ask_for_notebook(self, notebooks: List[str]) -> str:
-        """Ask for notebook and return its title."""
+        """Asks for notebook and returns its title.
+
+        Args:
+            notebooks:
+                A list of notebooks' titles.
+        """
         questions = [
             {
                 'type': 'list',
@@ -204,7 +241,12 @@ class View:
         return ''
 
     def ask_for_type(self, types: List[str]) -> str:
-        """Ask for notebook type and return its title."""
+        """Asks for notebook type and returns its title.
+
+        Args:
+            types:
+                A list of notebook types' titles.
+        """
         questions = [
             {
                 'type': 'list',
@@ -223,9 +265,15 @@ class View:
 
     def ask_for_pages_to_append(
             self, validator: validators.ScanPreferencesValidator) -> int:
-        """Ask user for number of pages user wants to append to a notebook.
+        """Asks for a number of pages the user wants to append to a notebook.
 
-        Validate answers with given validator."""
+        Args:
+            validator:
+                Validator for user input.
+
+        Returns:
+            A number of pages.
+        """
         questions = [
             {
                 'type': 'input',
@@ -249,9 +297,16 @@ class View:
 
     def ask_for_pages_to_replace(
             self, validator: validators.ScanPreferencesValidator) -> List[str]:
-        """Ask user for notebook parameters and return dict with answers.
+        """Asks for pages the user wants to replace in a notebook.
 
-        Validate answers with given validator."""
+        Args:
+            validator:
+                Validator for user input.
+
+        Returns:
+            A splitted string the user typed.  It should contain page numbers
+            or ranges of pages.
+        """
         questions = [
             {
                 'type': 'input',
@@ -272,7 +327,15 @@ class View:
         return []
 
     def show_notebooks(self, notebooks: List[models.Notebook]) -> None:  # pylint: disable=no-self-use  # noqa: E501
-        """Show list of notebooks or message if no notebooks found."""
+        """Shows the list of notebooks or a message if no notebooks found.
+
+        Args:
+            notebooks:
+                A list of notebooks to show.  For each notebook the function
+                prints its title, total number of pages and the information
+                about its type - the type's title and the page size in
+                millimeters.
+        """
         if notebooks and len(notebooks) > 0:
             print('All notebooks:')
             for notebook in notebooks:
@@ -288,7 +351,13 @@ class View:
             print('No notebooks found.')
 
     def show_types(self, types: List[models.NotebookType]) -> None:  # pylint: disable=no-self-use  # noqa: E501
-        """Show list of notebook types or message if no types found."""
+        """Shows the list of notebook types or a message if no types found.
+
+        Args:
+            types:
+                A list of types to show.  For each type the function prints its
+                title and the page size in millimeters.
+        """
         if types and len(types) > 0:
             print('All notebook types:')
             for type_ in types:
@@ -298,7 +367,23 @@ class View:
             print('No types found.')
 
     def confirm(self, question: str, default_yes: bool = False) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Ask for confirmation and return the answer (yes/no question)."""
+        """Asks for confirmation and returns the answer (yes/no question).
+
+        To answer `Yes`, the user should press `y`.  To answer `No`, the user
+        should press `n`.  If the user hits Enter, the default answer is
+        accepted (`No` by default, but set to `Yes` if the `default_yes`
+        argument is True).
+
+        Args:
+            question:
+                A string with question.
+            default_yes:
+                Optional; If True, `Yes` is the default answer.  The default
+                answer is `No` otherwise.
+
+        Returns:
+            True, if answered `Yes`; False, if answered `No`.
+        """
         questions = [
             {
                 'type': 'confirm',
@@ -316,15 +401,15 @@ class View:
         return False
 
     def show_info(self, message: str) -> None:  # pylint: disable=no-self-use
-        """Print message to stdout."""
+        """Prints a string to stdout."""
         print(message)
 
     def show_error(self, message: str) -> None:  # pylint: disable=no-self-use
-        """Print message to stderr."""
+        """Prints a string to stderr."""
         print(message, file=sys.stderr)
 
     def show_separator(self) -> None:  # pylint: disable=no-self-use
-        """Print long line that divides sections of output."""
+        """Prints a long line that visually divides sections of output text."""
         print('----------------------------------------')
 
     def _prompt(self, questions: List[dict]) -> dict:

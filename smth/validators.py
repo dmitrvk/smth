@@ -3,7 +3,10 @@
 """The module contains validators that are used to validate the user input.
 
 Validators methonds should be used when constructing questions with
-PyInquirer library.
+PyInquirer library.  The methods are not intended to be called explicitly.
+They should be passed to the corresponding questions instead.  Each method
+raises ValidationError if the validation failed or returns True if the
+validation succeeded.
 
     Typical usage example:
 
@@ -33,12 +36,25 @@ from smth import db, models
 
 
 class NotebookValidator:
-    """Validate user input when manipulating notebooks."""
+    """Validates user input when creating notebooks."""
+
     def __init__(self, db_: db.DB):
         self._db = db_
 
     def validate_title(self, title: str) -> bool:
-        """Check if title is not empty and not already taken."""
+        """Checks if title is not empty and not already taken.
+
+        Args:
+            title:
+                A title of a new notebook.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         title = title.strip()
 
         if len(title) == 0:
@@ -54,7 +70,19 @@ class NotebookValidator:
         return True
 
     def validate_type(self, type_: str) -> bool:
-        """Check if type is not empty and exists."""
+        """Checks if type is not empty and exists.
+
+        Args:
+            type_:
+                A title of notebook type.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         type_ = type_.strip()
 
         if len(type_.strip()) == 0:
@@ -66,7 +94,19 @@ class NotebookValidator:
         return True
 
     def validate_path(self, path_str: str) -> bool:
-        """Check if path is not empty and not already taken."""
+        """Checks if path is not empty and not already taken.
+
+        Args:
+            path_str:
+                A path to PDF file for a new notebook.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         path_str = path_str.strip()
 
         if len(path_str) == 0:
@@ -87,7 +127,19 @@ class NotebookValidator:
         return True
 
     def validate_first_page_number(self, number: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Check if number is an integer from 0 to 100."""
+        """Checks if number is an integer from 0 to 100.
+
+        Args:
+            number:
+                The 1st page number of a new notebook.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         number = number.strip()
 
         if not number.isnumeric():
@@ -106,9 +158,21 @@ class NotebookValidator:
 
 
 class NotebookUpdateValidator:
-    """Validate user input when updating a notebook."""
+    """Validates user input when updating a notebook."""
     def validate_title(self, title: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Check if title is not empty."""
+        """Checks if title is not empty.
+
+        Args:
+            title:
+                A new title for notebook.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         title = title.strip()
 
         if len(title) == 0:
@@ -117,7 +181,19 @@ class NotebookUpdateValidator:
         return True
 
     def validate_path(self, path: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Check if path is not empty."""
+        """Checks if path is not empty.
+
+        Args:
+            path:
+                A new path for notebook.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         path = path.strip()
 
         if len(path) == 0:
@@ -127,12 +203,24 @@ class NotebookUpdateValidator:
 
 
 class TypeValidator:
-    """Validate user input when manipulating types."""
+    """Validates user input when creating types."""
     def __init__(self, db_: db.DB):
         self._db = db_
 
     def validate_title(self, title: str) -> bool:
-        """Check if title is not empty and not already taken."""
+        """Checks if title is not empty and not already taken.
+
+        Args:
+            title:
+                A title for a new type.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         title = title.strip()
 
         if len(title) == 0:
@@ -144,7 +232,19 @@ class TypeValidator:
         return True
 
     def validate_page_size(self, size: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Check if given input is an integer from 10 to 1000."""
+        """Checks if given input is an integer from 10 to 1000.
+
+        Args:
+            size:
+                A page width or height in millimeters.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         size = size.strip()
 
         if not size.isnumeric():
@@ -159,15 +259,26 @@ class TypeValidator:
 
 
 class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
-    """Validator for user input when choosing scan preferences."""
+    """Validates user input when choosing scan preferences."""
 
     def __init__(self, notebook: models.Notebook):
         self._notebook = notebook
 
     def validate_number_of_pages_to_append(self, number: str) -> bool:  # pylint: disable=no-self-use  # noqa: E501
-        """Check if number is an integer from 0 to 100.
+        """Checks if number is an integer from 0 to 100.
 
-        Allow empty value."""
+        Args:
+            number:
+                A number of pages to append to a notebook.  An empty value is
+                allowed.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         if len(number.strip()) == 0:
             return True
 
@@ -186,11 +297,21 @@ class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
         return True
 
     def validate_pages_to_replace(self, pages: str) -> bool:
-        """Check if given string with pages is correct.
+        """Checks if a string with pages is correct.
 
-        Given string must contain integers with page numbers separated with a
-        space.  Ranges (e.g. 3-5) are allowed.  Pages must exist in a
-        notebook."""
+        Args:
+            pages:
+                A string that should contain integers with page numbers
+                separated with a space.  Ranges (e.g. `3-5`) are allowed.
+                Pages must exist in a notebook.
+
+        Returns:
+            True, if validation succeeded.  Never returns False.
+
+        Raises:
+            PyInquirer.ValidationError:
+                An error when validation failed.
+        """
         def raise_error(item: str, reason: str) -> NoReturn:
             raise ValidationError(
                 message=f"'{item}' is invalid: {reason}.")

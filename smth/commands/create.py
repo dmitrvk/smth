@@ -20,8 +20,7 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Creates a new notebook."""
 
     def execute(self, args: List[str] = None) -> None:
-        """Ask user for new notebook info, save notebook in the database.
-
+        """Asks user for new notebook info, saves notebook in the database.
 
         If path to PDF ends with '.pdf', it is treated as a file.  That allows
         user to specify custom name for notebook's file.  Otherwise, treat the

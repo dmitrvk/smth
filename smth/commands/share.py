@@ -20,7 +20,7 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
         self._cloud = cloud.Cloud(ShareCommand.CloudCallback(self, view_))
 
     def execute(self, args: List[str] = None):
-        """Share notebook and show a link."""
+        """Shares a notebook and shows a link."""
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:
@@ -48,16 +48,20 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
             self._view = view_
 
         def on_start_sharing_file(self, filename: str) -> None:
+            """See the base class."""
             self._view.show_info(f"Sharing file '{filename}'...")
 
         def on_finish_sharing_file(self, filename: str, link: str) -> None:
+            """See the base class."""
             if link:
                 self._view.show_info(f"Link to '{filename}': {link}")
             else:
                 self._view.show_error(f"Could not share '{filename}'.")
 
         def on_create_smth_folder(self) -> None:
+            """See the base class."""
             self._view.show_info("Folder 'smth' created on Google Drive.")
 
         def on_error(self, message: str) -> None:
+            """See the base class."""
             self._command.exit_with_error(message)

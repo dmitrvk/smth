@@ -12,10 +12,10 @@ log = logging.getLogger(__name__)
 
 
 class OpenCommand(command.Command):  # pylint: disable=too-few-public-methods
-    """A command which can be executed with arguments."""
+    """Opens a notebook's PDF file in the default viewer."""
 
     def execute(self, args: List[str] = None):
-        """Open notebook's PDF file in default viewer."""
+        """See the base class."""
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:

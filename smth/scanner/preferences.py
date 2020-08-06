@@ -21,7 +21,7 @@ from smth import models
 
 
 class ScanPreferences:
-    """Used to specify what scanner should do."""
+    """Used to specify what notebook and what pages the scanner should scan."""
 
     def __init__(self):
         self._notebook = None

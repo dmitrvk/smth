@@ -18,7 +18,7 @@ class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Deletes a notebook."""
 
     def execute(self, args: List[str] = None) -> None:
-        """Ask for notebook, remove it from db, leave PDF untouched."""
+        """Asks for notebook, removes it from db, but leaves PDF untouched."""
         try:
             notebook_titles = self.get_notebook_titles_from_db()
 
