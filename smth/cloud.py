@@ -1,17 +1,28 @@
 # License: GNU GPL Version 3
 
-"""The module provides the Cloud class for uploading and sharing files.
+"""The module provides the Cloud class with callbacks.
+
+It is used to upload and share files on Google Drive.
 
     Typical usage example:
 
-    cloud_ = cloud.Cloud(callback)
+    class CloudCallback(cloud.UploadingCallback):
+        def __init__(...):
+            super().__init__()
+            ...
+
+        def on_start_uploading_file(self, path):
+            ...
+
+        # Override all methods...
+
+    cloud_ = cloud.Cloud(CloudCallback(...))
     cloud_.upload_file(path)
 """
 
+import abc
 import json
 import pathlib
-
-from . import callback
 
 try:
     import httplib2
@@ -21,6 +32,83 @@ try:
     import oauth2client.file
 except ImportError:
     pass
+
+
+class Callback(abc.ABC):  # pylint: disable=too-few-public-methods
+    """Used to notify about cloud's events. Must be subclassed."""
+
+    @abc.abstractmethod
+    def on_create_smth_folder(self) -> None:
+        """Called when 'smth' folder created on Google Drive."""
+
+    @abc.abstractmethod
+    def on_error(self, message: str) -> None:
+        """Called when error occurs while working with cloud.
+
+        Args:
+            message:
+                A string with error message.
+        """
+
+
+class UploadingCallback(Callback):
+    """Used to notify about uploading events. Must be subclassed."""
+    @abc.abstractmethod
+    def on_start_uploading_file(self, path: pathlib.Path) -> None:
+        """Called when file is about to be uploaded to Google Drive.
+
+        Args:
+            path:
+                Path to file which is about to be uploaded.
+        """
+
+    @abc.abstractmethod
+    def on_confirm_overwrite_file(self, filename: str) -> bool:
+        """Called when the user confirmation needed before uploading a file.
+
+        The method should return True if the user allowed to overwrite the
+        file.
+
+        Args:
+            filename:
+                Name of file on Google Drive which will be overwritten.
+
+        Returns:
+            True, if the user confirmed the overwriting.  False otherwise.
+        """
+
+    @abc.abstractmethod
+    def on_finish_uploading_file(self, path: pathlib.Path) -> None:
+        """Called when file is uploaded to Google Drive.
+
+        Args:
+            path:
+                Path to file which was uploaded to Google Drive.
+        """
+
+
+class SharingCallback(abc.ABC):
+    """Used to notify about sharing events. Must be subclassed."""
+
+    @abc.abstractmethod
+    def on_start_sharing_file(self, filename: str) -> None:
+        """Called when file is about to be shared.
+
+        Args:
+            filename:
+                Name of file which will be shared.
+        """
+
+    @abc.abstractmethod
+    def on_finish_sharing_file(self, filename: str, link: str) -> None:
+        """Called when file is shared and link is provided.
+
+        Args:
+            filename:
+                Name of shared file.
+            link:
+                File URL on the Google Drive.
+        """
 
 
 class Cloud:
@@ -46,7 +134,7 @@ class Cloud:
     CREDENTIALS_PATH = pathlib.Path(
         '~/.config/smth/credentials.json').expanduser()
 
-    def __init__(self, callback_: callback.Callback):
+    def __init__(self, callback_: Callback):
         self._callback = callback_
         self._gdrive = pydrive.drive.GoogleDrive(self._auth())
         self._smth_folder_id = self._create_smth_folder_if_not_exists()

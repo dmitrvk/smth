@@ -1,23 +1,27 @@
 # License: GNU GPL Version 3
 
-"""The module provides the Scanner class which is used to perform scanning.
+"""The module provides the Scanner class with callback to perform scanning.
 
     Typical usage example:
 
-    scanner_ = scanner.Scanner(conf)
-    scanner_.register(callback)
+    class ScannerCallback(scanner.Callback):
+        def __init__(self, ...):
+            ...
+        def on_searching_for_devices(self):
+            ...
+        # Overrride all methods
 
-    try:
-        scanner_.scan(prefs)
-    except scanner.Error:
-        pass
+    scanner_ = scanner.Scanner(conf, ScannerCallback(...))
+    scanner_.scan(notebook, pages_queue)
 """
 
+import abc
 import collections
 import itertools
 import logging
 import math
 import time
+from typing import List
 
 import _sane
 import PIL.Image as pillow
@@ -25,17 +29,83 @@ import sane
 
 from smth import config, models
 
-from . import callback
-
 log = logging.getLogger(__name__)
 
 Device = collections.namedtuple('Device', 'name vendor model type')
 
 
+class Callback(abc.ABC):
+    """Used to notify about scanner's events. Must be subclassed."""
+
+    @abc.abstractmethod
+    def on_searching_for_devices(self):
+        """Called just before the searching starts."""
+
+    @abc.abstractmethod
+    def on_set_device(self) -> None:
+        """Called when no device is set.
+
+        A proper device should be set in the app config inside this method.
+        """
+
+    @abc.abstractmethod
+    def on_start(self, device_name: str, pages_queue: List[int]) -> None:
+        """Called when scanning process starts.
+
+        Args:
+            device_name:
+                Name of the device which is used to perform scanning process.
+            pages_queue:
+                A list of pages the scanner is going to scan.
+        """
+
+    @abc.abstractmethod
+    def on_start_scan_page(self, page: int) -> None:
+        """Called when scanning of a page starts.
+
+        Args:
+            page:
+                A number of page the scanner is going to scan.
+        """
+
+    @abc.abstractmethod
+    def on_finish_scan_page(
+            self, notebook: models.Notebook, page: int,
+            image: pillow.Image) -> None:
+        """Called when scanning of a page finishes.
+
+        Args:
+            notebook:
+                A notebook which is being scanned.
+            page:
+                A number of page which the scanner just scanned.
+            image:
+                An image with the scanned page.
+        """
+
+    @abc.abstractmethod
+    def on_finish(self, notebook: models.Notebook) -> None:
+        """Called when the scanning process finishes.
+
+        Args:
+            notebook:
+                A notebook which was scanned.
+        """
+
+    @abc.abstractmethod
+    def on_error(self, message: str) -> None:
+        """Called when error occurs when working with scanner.
+
+        Args:
+            message:
+                An error message.
+        """
+
+
 class Scanner:
     """Represents a scanner device which can scan notebooks."""
 
-    def __init__(self, conf: config.Config, callback_: callback.Callback):
+    def __init__(self, conf: config.Config, callback_: Callback):
         self._conf = conf
         self._callback = callback_
 
