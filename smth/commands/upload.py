@@ -61,7 +61,7 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
             message = "Uploading '{}' to Google Drive...".format(str(path))
             self._view.show_info(message)
 
-        def on_confirm_override_file(self, filename: str) -> bool:
+        def on_confirm_overwrite_file(self, filename: str) -> bool:
             """See the base class."""
             question = f"File '{filename}' exists on Google Drive. Override?"
             return self._view.confirm(question)

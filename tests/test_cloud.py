@@ -86,7 +86,7 @@ class CloudTestCase(unittest.TestCase):
             ],
         })
 
-        self.callback.on_confirm_override_file.return_value = True
+        self.callback.on_confirm_overwrite_file.return_value = True
 
         cloud.Cloud(self.callback).upload_file(self.path)
 

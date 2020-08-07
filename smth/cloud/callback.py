@@ -52,7 +52,7 @@ class UploadingCallback(Callback):
         """
 
     @abc.abstractmethod
-    def on_confirm_override_file(self, filename: str) -> bool:
+    def on_confirm_overwrite_file(self, filename: str) -> bool:
         """Called when the user confirmation needed before uploading a file.
 
         The method should return True if the user allowed to overwrite the

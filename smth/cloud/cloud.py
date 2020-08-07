@@ -138,7 +138,7 @@ class Cloud:
 
         for file_on_drive in self._get_list_of_pdf_files_in_smth_dir():
             if file_on_drive['title'] == path.name:
-                if self._callback.on_confirm_override_file(path.name):
+                if self._callback.on_confirm_overwrite_file(path.name):
                     self._upload(path, file_on_drive)
 
                 return

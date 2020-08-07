@@ -17,8 +17,8 @@ class UploadCallbackTestCase(unittest.TestCase):
         self.callback.on_start_uploading_file(pathlib.Path('/file.pdf'))
         self.view.show_info.assert_called()
 
-    def test_on_confirm_override_file(self):
-        self.callback.on_confirm_override_file('file.pdf')
+    def test_on_confirm_overwrite_file(self):
+        self.callback.on_confirm_overwrite_file('file.pdf')
         self.view.confirm.assert_called_once()
 
     def test_on_finish_uploading_file(self):
