@@ -3,7 +3,6 @@
 """The package provides tools to perform scanning operations."""
 
 from .callback import Callback
-from .preferences import ScanPreferences
 from .scanner import Device, Scanner
 
-__all__ = ['Callback', 'Device', 'Scanner', 'ScanPreferences']
+__all__ = ['Callback', 'Device', 'Scanner']

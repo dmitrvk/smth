@@ -258,7 +258,7 @@ class TypeValidator:
         return True
 
 
-class ScanPreferencesValidator:  # pylint: disable=too-few-public-methods
+class PagesToScanValidator:  # pylint: disable=too-few-public-methods
     """Validates user input when choosing scan preferences."""
 
     def __init__(self, notebook: models.Notebook):

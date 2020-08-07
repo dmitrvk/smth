@@ -25,7 +25,7 @@ import sane
 
 from smth import config, models
 
-from . import callback, preferences
+from . import callback
 
 log = logging.getLogger(__name__)
 
@@ -39,13 +39,16 @@ class Scanner:
         self._conf = conf
         self._callback = callback_
 
-    def scan(self, prefs: preferences.ScanPreferences) -> None:
+    def scan(
+            self, notebook: models.Notebook,
+            pages_queue: collections.deque) -> None:
         """Performs scanning with the given preferences.
 
         Args:
-            prefs:
-                ScanPreferences objects with the information about the notebook
-                and pages to scan.
+            notebook:
+                A notebook which should be scanned.
+            pages_queue:
+                Numbers of pages that should be scanned.
         """
         if not self._conf.scanner_device:
             try:
@@ -82,7 +85,7 @@ class Scanner:
             sane.init()
 
             device = self._get_device(self._conf.scanner_device)
-            self._scan_with_prefs(device, prefs)
+            self._scan(device, notebook, pages_queue)
 
         except _sane.error as exception:
             log.exception(exception)
@@ -146,60 +149,60 @@ class Scanner:
 
         return device
 
-    def _scan_with_prefs(
-            self,
-            device: sane.SaneDev,
-            prefs: preferences.ScanPreferences) -> None:
+    def _scan(
+            self, device: sane.SaneDev, notebook: models.Notebook,
+            pages_queue: collections.deque) -> None:
         """Performs the actual scanning.
 
         Args:
             device:
                 A sane.SaneDev object representing a SANE device.
-            prefs:
-                A ScanPreferences object containing the information about the
-                notebook and pages which should be scanned.
+            notebook:
+                A notebook which should be scanned.
+            pages_queue:
+                Numbers of pages that should be scanned.
         """
-        if len(prefs.pages_queue) == 0:
+        if len(pages_queue) == 0:
             self._callback.on_error('Nothing to scan')
             return
 
-        self._callback.on_start(device.devname, list(prefs.pages_queue))
+        self._callback.on_start(device.devname, list(pages_queue))
 
-        while len(prefs.pages_queue) > 0:
-            page = prefs.pages_queue.popleft()
+        while len(pages_queue) > 0:
+            page = pages_queue.popleft()
 
             self._callback.on_start_scan_page(page)
 
             image = device.scan()
 
-            if prefs.notebook.type.pages_paired:
+            if notebook.type.pages_paired:
                 page_width_pt = math.ceil(
-                    prefs.notebook.type.page_width * device.resolution / 25.4)
+                    notebook.type.page_width * device.resolution / 25.4)
                 orig_width = image.size[1]
 
                 if (page_width_pt * 2 < orig_width and
-                        prefs.notebook.first_page_number % 2 == page % 2):
+                        notebook.first_page_number % 2 == page % 2):
                     # two pages on image, crop both left and right pages
                     self._process_scanned_page(
-                        page, prefs.notebook, image, device.resolution)
+                        page, notebook, image, device.resolution)
 
                     self._process_scanned_page(
-                        page + 1, prefs.notebook, image, device.resolution)
+                        page + 1, notebook, image, device.resolution)
 
-                    if prefs.pages_queue:
-                        if prefs.pages_queue[0] == page + 1:
-                            prefs.pages_queue.popleft()
+                    if pages_queue:
+                        if pages_queue[0] == page + 1:
+                            pages_queue.popleft()
                 else:
                     self._process_scanned_page(
-                        page, prefs.notebook, image, device.resolution)
+                        page, notebook, image, device.resolution)
             else:
                 self._process_scanned_page(
-                    page, prefs.notebook, image, device.resolution)
+                    page, notebook, image, device.resolution)
 
-            if prefs.pages_queue:
+            if pages_queue:
                 time.sleep(self._conf.scanner_delay)
 
-        self._callback.on_finish(prefs.notebook)
+        self._callback.on_finish(notebook)
 
     def _process_scanned_page(
             self, page: int, notebook: models.Notebook, image: pillow.Image,

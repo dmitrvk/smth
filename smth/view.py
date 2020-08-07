@@ -264,7 +264,7 @@ class View:
         return ''
 
     def ask_for_pages_to_append(
-            self, validator: validators.ScanPreferencesValidator) -> int:
+            self, validator: validators.PagesToScanValidator) -> int:
         """Asks for a number of pages the user wants to append to a notebook.
 
         Args:
@@ -296,7 +296,7 @@ class View:
         return 0
 
     def ask_for_pages_to_replace(
-            self, validator: validators.ScanPreferencesValidator) -> List[str]:
+            self, validator: validators.PagesToScanValidator) -> List[str]:
         """Asks for pages the user wants to replace in a notebook.
 
         Args:

@@ -182,14 +182,14 @@ class TypeValidatorTestCase(unittest.TestCase):
             ValidationError, self.validator.validate_page_size, '10000')
 
 
-class ScanPreferencesValidatorTestCase(unittest.TestCase):
+class PagesToScanValidatorTestCase(unittest.TestCase):
     """Test user input validation when choosing scan preferences."""
     def setUp(self):
         self.notebook = mock.MagicMock(**{
             'first_page_number': 1,
             'total_pages': 10,
         })
-        self.validator = validators.ScanPreferencesValidator(self.notebook)
+        self.validator = validators.PagesToScanValidator(self.notebook)
 
     def test_validate_number_of_pages_to_append(self):
         self.assertTrue(

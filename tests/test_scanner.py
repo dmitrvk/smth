@@ -1,3 +1,4 @@
+import collections
 import logging
 import math
 import unittest
@@ -51,8 +52,9 @@ class ScannerTestCase(unittest.TestCase):
 
         scanner_ = scanner.Scanner(self.conf, self.callback)
 
-        prefs = scanner.ScanPreferences()
-        scanner_.scan(prefs)
+        notebook = models.Notebook('', models.NotebookType('', 0, 0), '')
+        pages_queue = collections.deque()
+        scanner_.scan(notebook, pages_queue)
 
         sane.scan.assert_not_called()
         self.callback.on_error.assert_called_once()
@@ -62,12 +64,11 @@ class ScannerTestCase(unittest.TestCase):
         type_ = models.NotebookType('', 210, 297)
         notebook = models.Notebook('', type_, '')
 
-        prefs = scanner.ScanPreferences()
-        prefs.notebook = notebook
-        prefs.pages_queue.extend([1, 2, 3])
+        pages_queue = collections.deque()
+        pages_queue.extend([1, 2, 3])
 
         scanner_ = scanner.Scanner(self.conf, self.callback)
-        scanner_.scan(prefs)
+        scanner_.scan(notebook, pages_queue)
 
         self.callback.on_start.assert_called_once_with('device', [1, 2, 3])
         self.callback.on_start_scan_page.assert_has_calls([
@@ -94,12 +95,11 @@ class ScannerTestCase(unittest.TestCase):
         type_.pages_paired = True
         notebook = models.Notebook('', type_, '')
 
-        prefs = scanner.ScanPreferences()
-        prefs.notebook = notebook
-        prefs.pages_queue.extend([1, 2, 3])
+        pages_queue = collections.deque()
+        pages_queue.extend([1, 2, 3])
 
         scanner_ = scanner.Scanner(self.conf, self.callback)
-        scanner_.scan(prefs)
+        scanner_.scan(notebook, pages_queue)
 
         self.callback.on_start.assert_called_once_with('device', [1, 2, 3])
         self.callback.on_start_scan_page.assert_has_calls([
@@ -126,12 +126,11 @@ class ScannerTestCase(unittest.TestCase):
         type_.pages_paired = True
         notebook = models.Notebook('', type_, '')
 
-        prefs = scanner.ScanPreferences()
-        prefs.notebook = notebook
-        prefs.pages_queue.extend([1, 2, 3])
+        pages_queue = collections.deque()
+        pages_queue.extend([1, 2, 3])
 
         scanner_ = scanner.Scanner(self.conf, self.callback)
-        scanner_.scan(prefs)
+        scanner_.scan(notebook, pages_queue)
 
         self.callback.on_start.assert_called_once_with('device', [1, 2, 3])
 
@@ -156,8 +155,9 @@ class ScannerTestCase(unittest.TestCase):
 
     def test_scan_nothing_to_scan(self):
         scanner_ = scanner.Scanner(self.conf, self.callback)
-        prefs = scanner.ScanPreferences()
-        scanner_.scan(prefs)
+        notebook = models.Notebook('', models.NotebookType('', 0, 0), '')
+        pages_queue = collections.deque()
+        scanner_.scan(notebook, pages_queue)
 
         sane.scan.assert_not_called()
         self.callback.on_error.assert_called_once()

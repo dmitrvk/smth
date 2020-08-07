@@ -2,6 +2,7 @@
 
 """The module provides `scan` command to perform scanning operations."""
 
+import collections
 import importlib.util
 import logging
 from typing import List
@@ -61,8 +62,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                     return
 
         scanner_ = scanner.Scanner(self.conf, callback)
-        prefs = self._make_scan_prefs(notebook_titles)
-        scanner_.scan(prefs)
+        notebook = self._get_notebook_to_scan(notebook_titles)
+        pages_queue = self._get_pages_queue(notebook)
+        scanner_.scan(notebook, pages_queue)
 
     class ScannerCallback(scanner.Callback):
         """Callback implementation defining what to do on scanner events."""
@@ -184,35 +186,32 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         def on_error(self, message):
             """See the base class."""
 
-    def _make_scan_prefs(
-            self, notebook_titles: List[str]) -> scanner.ScanPreferences():
-        """Asks for scan preferenses: notebook, pages to append and to replace.
+    def _get_notebook_to_scan(
+            self, notebook_titles: List[str]) -> models.Notebook:
+        """Asks for notebook and returns the user's choice.
 
         Args:
             notebook_titles:
                 A list of all notebooks' titles to choose from.
-
-        Returns:
-            ScanPreferences object with all the information needed to perform
-            the scanning process.
         """
-        prefs = scanner.ScanPreferences()
-
         notebook_title = self._view.ask_for_notebook(notebook_titles)
 
         if not notebook_title:
             self.exit_with_error('No notebook chosen.')
 
         try:
-            prefs.notebook = self._db.get_notebook_by_title(notebook_title)
-
+            return self._db.get_notebook_by_title(notebook_title)
         except db.Error as exception:
             self.exit_with_error(exception)
 
-        validator = validators.ScanPreferencesValidator(prefs.notebook)
+    def _get_pages_queue(self, notebook: models.Notebook) -> collections.deque:
+        """Asks for pages which should be appended and/or replaced."""
+        pages_queue = collections.deque()
+
+        validator = validators.PagesToScanValidator(notebook)
         append = self._view.ask_for_pages_to_append(validator)
 
-        if prefs.notebook.total_pages > 0:
+        if notebook.total_pages > 0:
             replace_answer = self._view.ask_for_pages_to_replace(validator)
 
             replace = []
@@ -224,12 +223,10 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                     replace.append(int(item))
             replace = list(set(replace))  # Remove duplicates
             replace.sort()
-            prefs.pages_queue.extend(replace)
+            pages_queue.extend(replace)
 
         for i in range(0, append):
-            page = (prefs.notebook.first_page_number +
-                    prefs.notebook.total_pages + i)
+            page = (notebook.first_page_number + notebook.total_pages + i)
+            pages_queue.append(page)
 
-            prefs.pages_queue.append(page)
-
-        return prefs
+        return pages_queue
