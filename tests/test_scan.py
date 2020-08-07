@@ -5,7 +5,7 @@ from unittest import mock
 import _sane
 import sane
 
-from smth import db, commands, models, scanner
+from smth import db, commands, models
 
 
 class ScanCommandTestCase(unittest.TestCase):
@@ -134,19 +134,6 @@ class ScanCommandTestCase(unittest.TestCase):
         self.assertRaises(SystemExit, command.execute)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called()
-
-    def test_execute_scanner_error(self):
-        with mock.patch('smth.scanner.Scanner') as scanner_class:
-            scanner_class.return_value = mock.MagicMock(**{
-                'scan.side_effect': scanner.Error,
-            })
-
-            command = commands.ScanCommand(self.db, self.view)
-
-            self.assertRaises(SystemExit, command.execute)
-
-        self.db.save_notebook.assert_not_called()
-        self.view.show_error.assert_called_once()
 
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []

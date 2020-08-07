@@ -62,11 +62,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         scanner_ = scanner.Scanner(self.conf, callback)
         prefs = self._make_scan_prefs(notebook_titles)
-
-        try:
-            scanner_.scan(prefs)
-        except scanner.Error as exception:
-            self.exit_with_error(exception)
+        scanner_.scan(prefs)
 
     class ScannerCallback(scanner.Callback):
         """Callback implementation defining what to do on scanner events."""
@@ -79,23 +75,14 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self._view = view_
             self.conf = conf
 
-        def on_set_device(self):
-            """Asks for device name and sets `scanner_device` config option.
-
-            See the base class."""
+        def on_searching_for_devices(self):
             self._view.show_info('Searching for available devices...')
 
-            try:
-                devices = scanner.Scanner.get_devices()
+        def on_set_device(self, devices: List[scanner.Device]):
+            """Asks for device and retuns the device name chosen by the user.
 
-                if devices:
-                    device_name = self._view.ask_for_device(devices)
-                    self.conf.scanner_device = device_name
-                else:
-                    self._view.show_error('No devices found.')
-
-            except scanner.Error as exception:
-                self.on_error(str(exception))
+            See the base class."""
+            return self._view.ask_for_device(devices)
 
         def on_start(self, device_name: str, pages_queue: List[int]) -> None:
             """Shows the pages that will be scanned and asks for confirmation.

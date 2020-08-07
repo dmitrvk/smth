@@ -7,7 +7,7 @@
     class ScannerCallback(scanner.Callback):
         def __init__(self, ...):
             ...
-        def on_set_device(self):
+        def on_searching_for_devices(self):
             ...
         # Overrride all methods
 
@@ -25,6 +25,10 @@ from smth import models
 
 class Callback(abc.ABC):
     """Used to notify about scanner's events. Must be subclassed."""
+
+    @abc.abstractmethod
+    def on_searching_for_devices(self):
+        """Called just before the searching starts."""
 
     @abc.abstractmethod
     def on_set_device(self) -> None:

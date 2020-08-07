@@ -18,7 +18,6 @@ import itertools
 import logging
 import math
 import time
-from typing import List
 
 import _sane
 import PIL.Image as pillow
@@ -26,7 +25,7 @@ import sane
 
 from smth import config, models
 
-from . import callback, error, preferences
+from . import callback, preferences
 
 log = logging.getLogger(__name__)
 
@@ -40,29 +39,6 @@ class Scanner:
         self._conf = conf
         self._callback = callback_
 
-    @staticmethod
-    def get_devices() -> List[Device]:
-        """Loads the list of available devices.
-
-        Equivalent to call `scanimage -L`.
-
-        Returns:
-            A list of devices.  Each device is represented by a tuple that
-            contains the device's name, vendor, model and type.
-        """
-        try:
-            sane.init()
-            return list(itertools.starmap(Device, sane.get_devices()))
-        except _sane.error as exception:
-            log.exception(exception)
-            raise error.Error('Failed to load the list of devices')
-        except KeyboardInterrupt as exception:
-            log.exception(exception)
-            raise error.Error(
-                'Keyboard interrupt while loading the list of devices')
-        finally:
-            sane.exit()
-
     def scan(self, prefs: preferences.ScanPreferences) -> None:
         """Performs scanning with the given preferences.
 
@@ -72,31 +48,55 @@ class Scanner:
                 and pages to scan.
         """
         if not self._conf.scanner_device:
-            self._callback.on_set_device()
-
-        if not self._conf.scanner_device:
-            self._callback.on_error('Device is not set.')
-        else:
-            device = None
-
             try:
                 sane.init()
-                device = self._get_device(self._conf.scanner_device)
-                self._scan_with_prefs(device, prefs)
+
+                self._callback.on_searching_for_devices()
+                devices = list(itertools.starmap(Device, sane.get_devices()))
+
+                if devices:
+                    device_name = self._callback.on_set_device(devices)
+
+                    if device_name:
+                        self._conf.scanner_device = device_name
+                    else:
+                        self._callback.on_error('Device is not set.')
+                else:
+                    self._callback.on_error('No devices found.')
 
             except _sane.error as exception:
                 log.exception(exception)
-                self._callback.on_error(str(exception))
+                self._callback.on_error('Failed to load the list of devices')
 
-            except KeyboardInterrupt:
-                log.error('Scan failed due to keyboard interrupt')
-                self._callback.on_error('Keyboard interrupt')
+            except KeyboardInterrupt as exception:
+                log.exception(exception)
+                message = 'Keyboard interrupt while loading list of devices'
+                self._callback.on_error(message)
 
             finally:
-                if device:
-                    device.close()
-
                 sane.exit()
+
+        device = None
+
+        try:
+            sane.init()
+
+            device = self._get_device(self._conf.scanner_device)
+            self._scan_with_prefs(device, prefs)
+
+        except _sane.error as exception:
+            log.exception(exception)
+            self._callback.on_error(str(exception))
+
+        except KeyboardInterrupt:
+            log.error('Scan failed due to keyboard interrupt')
+            self._callback.on_error('Keyboard interrupt')
+
+        finally:
+            if device:
+                device.close()
+
+            sane.exit()
 
     def _get_device(self, device_name: str) -> sane.SaneDev:
         """Opens the device and sets the parameters according to config.
