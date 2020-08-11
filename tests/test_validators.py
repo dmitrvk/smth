@@ -105,13 +105,11 @@ class NotebookValidatorTestCase(unittest.TestCase):
             ValidationError,
             self.validator.validate_first_page_number, '-5')
 
-        # Number > 100
+        # Number > 1000
         self.assertRaises(
-            ValidationError,
-            self.validator.validate_first_page_number, '5000')
+            ValidationError, self.validator.validate_first_page_number, '1001')
         self.assertRaises(
-            ValidationError,
-            self.validator.validate_first_page_number, '500')
+            ValidationError, self.validator.validate_first_page_number, '5000')
 
         # Not a number
         self.assertRaises(

@@ -147,15 +147,15 @@ class NotebookValidator:
 
         if not number.isnumeric():
             raise ValidationError(
-                message='Please, enter a number from 0 to 100.')
+                message='Please, enter a number from 0 to 1000.')
 
-        if len(number) > 3:
+        if len(number) > 4:
             raise ValidationError(
-                message='Please, enter a number from 0 to 100')
+                message='Please, enter a number from 0 to 1000.')
 
-        if int(number) > 100:
+        if int(number) > 1000:
             raise ValidationError(
-                message='Please, enter a number from 0 to 100')
+                message='Please, enter a number from 0 to 1000.')
 
         return True
 
