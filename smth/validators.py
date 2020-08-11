@@ -60,6 +60,9 @@ class NotebookValidator:
         if len(title) == 0:
             raise ValidationError(message='Title must not be empty.')
 
+        if '/' in title:
+            raise ValidationError(message="Please, do not use '/' in title.")
+
         if self._db.notebook_exists(title):
             raise ValidationError(message=f"Notebook '{title}' exists")
 

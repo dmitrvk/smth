@@ -26,12 +26,11 @@ class NotebookValidatorTestCase(unittest.TestCase):
         self.assertTrue(self.validator.validate_title('Test'))
 
         # Empty title
-        self.assertRaises(
-            ValidationError, self.validator.validate_title, '')
-        self.assertRaises(
-            ValidationError, self.validator.validate_title, '   ')
+        self.assertRaises(ValidationError, self.validator.validate_title, '')
+        self.assertRaises(ValidationError, self.validator.validate_title, '  ')
 
-        self.assertTrue(self.validator.validate_title('Test'))
+        # Title contains '/' symbol
+        self.assertRaises(ValidationError, self.validator.validate_title, 'a/')
 
         # Notebook already exists
         with mock.patch.object(self.db, 'notebook_exists', return_value=True):
