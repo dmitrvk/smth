@@ -16,7 +16,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         type_.title = 'Type'
 
         self.db = mock.MagicMock()
-        self.db.get_type_titles.return_value = []
+        self.db.get_type_titles.return_value = ['A4']
         self.db.get_type_by_title.return_value = type_
 
         self.view = mock.MagicMock()
