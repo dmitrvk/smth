@@ -5,7 +5,7 @@ from smth import scanner, view
 from tests import testutils
 
 
-class ViewTestCase(unittest.TestCase):
+class ViewTestCase(unittest.TestCase):  # pylint: disable=too-many-public-methods  # noqa: E501
     def setUp(self):
         self.view = view.View()
 

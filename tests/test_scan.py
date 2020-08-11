@@ -8,7 +8,7 @@ import sane
 from smth import db, commands, models
 
 
-class ScanCommandTestCase(unittest.TestCase):
+class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attributes  # noqa: E501
     def setUp(self):
         logging.disable()
 

@@ -2,7 +2,7 @@
 extension-pkg-whitelist=_sane
 
 [BASIC]
-good-names=db,i,fs
+good-names=db,i,id,fs
 
 [SIMILARITIES]
 min-similarity-lines=8

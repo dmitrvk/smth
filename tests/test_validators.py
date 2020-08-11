@@ -82,6 +82,8 @@ class NotebookValidatorTestCase(unittest.TestCase):
 
     @fakefs_unittest.patchfs
     def test_validate_path_already_taken(self, fs):
+        del fs  # Unused, but need to patch filesystem
+
         notebook = mock.MagicMock(**{
             'title': 'notebook',
         })

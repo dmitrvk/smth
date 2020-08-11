@@ -75,7 +75,7 @@ class CloudTestCase(unittest.TestCase):
         cloud.Cloud(self.callback).upload_file(self.path)
 
         self.file.SetContentFile.assert_called_once_with(str(self.path))
-        self.file.Upload.assert_called_once()
+        self.file.Upload.assert_called_once()  # pylint: disable=no-member
         self.callback.on_finish_uploading_file.assert_called_once()
 
     def test_upload_existing_file(self):
@@ -91,7 +91,7 @@ class CloudTestCase(unittest.TestCase):
         cloud.Cloud(self.callback).upload_file(self.path)
 
         self.file.SetContentFile.assert_called_once_with(str(self.path))
-        self.file.Upload.assert_called_once()
+        self.file.Upload.assert_called_once()  # pylint: disable=no-member
         self.callback.on_finish_uploading_file.assert_called_once()
 
     def test_upload_when_smth_folder_doesnt_exist(self):
@@ -109,29 +109,47 @@ class CloudTestCase(unittest.TestCase):
         expected_call = mock.call(folder_metadata)
         self.assertIn(expected_call, self.gdrive.CreateFile.mock_calls)
 
-    def test_errors_when_creating_smth_folder(self):
+    def test_server_not_found_error_when_creating_smth_folder(self):
         self.gdrive.ListFile.return_value = mock.MagicMock(**{
             'GetList.return_value': [],
         })
-
-        errors = (httplib2.ServerNotFoundError, KeyboardInterrupt)
 
         folder_metadata = {
             'title': 'smth',
             'mimeType': 'application/vnd.google-apps.folder',
         }
 
-        for error in errors:
-            def mock_upload():
-                expected_call = mock.call(folder_metadata)
+        def mock_upload():
+            expected_call = mock.call(folder_metadata)
 
-                if self.gdrive.CreateFile.mock_calls.pop() == expected_call:
-                    raise error
+            if self.gdrive.CreateFile.mock_calls.pop() == expected_call:
+                raise httplib2.ServerNotFoundError
 
-            self.file.Upload = mock_upload
-            self.gdrive.CreateFile.return_value = self.file
+        self.file.Upload = mock_upload
+        self.gdrive.CreateFile.return_value = self.file
+        cloud.Cloud(self.callback).upload_file(self.path)
 
-            cloud.Cloud(self.callback).upload_file(self.path)
+        self.callback.on_error.assert_called()
+
+    def test_keyboard_interrupt_when_creating_smth_folder(self):
+        self.gdrive.ListFile.return_value = mock.MagicMock(**{
+            'GetList.return_value': [],
+        })
+
+        folder_metadata = {
+            'title': 'smth',
+            'mimeType': 'application/vnd.google-apps.folder',
+        }
+
+        def mock_upload():
+            expected_call = mock.call(folder_metadata)
+
+            if self.gdrive.CreateFile.mock_calls.pop() == expected_call:
+                raise KeyboardInterrupt
+
+        self.file.Upload = mock_upload
+        self.gdrive.CreateFile.return_value = self.file
+        cloud.Cloud(self.callback).upload_file(self.path)
 
         self.callback.on_error.assert_called()
 

@@ -106,8 +106,8 @@ class TestDB(unittest.TestCase):
 
     def test_delete_notebook_by_id(self):
         self.assertTrue(self.db.notebook_exists(self.notebooks[0].title))
-        id = self.db.get_notebook_by_title(self.notebooks[0].title).id
-        self.db.delete_notebook_by_id(id)
+        id_ = self.db.get_notebook_by_title(self.notebooks[0].title).id
+        self.db.delete_notebook_by_id(id_)
         self.assertFalse(self.db.notebook_exists(self.notebooks[0].title))
 
     def test_delete_type_by_title(self):
@@ -125,6 +125,7 @@ class TestDB(unittest.TestCase):
 
     @mock.patch.object(sqlite3, 'connect', side_effect=sqlite3.Error)
     def test_errors(self, connect_mock):
+        del connect_mock  # Unused
         logging.disable()
         self.assertRaises(db.Error, db.DB)
         self.assertRaises(db.Error, self.db.get_notebooks)

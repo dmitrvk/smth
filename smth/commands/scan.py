@@ -175,9 +175,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 if (importlib.util.find_spec('pydrive') and
                         self.conf.scanner_ask_upload):
                     if self._view.confirm('Upload notebook to Google Drive?'):
-                        command = upload.UploadCommand(self._db, self._view)
+                        command_ = upload.UploadCommand(self._db, self._view)
                         args = [notebook.title]
-                        command.execute(args)
+                        command_.execute(args)
             except config.Error as exception:
                 self._view.show_error(f'Config file error: {str(exception)}')
 

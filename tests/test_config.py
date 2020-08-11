@@ -91,7 +91,7 @@ class ConfigTestCase(fake_filesystem_unittest.TestCase):
             with self.assertRaises(config.Error):
                 conf.scanner_device = 'device'
 
-    def _write_config_file(self, file_contents: str) -> None:
+    def _write_config_file(self, file_contents: str) -> None:  # pylint: disable=no-self-use  # noqa: E501
         with open(str(const.CONFIG_PATH), 'w') as config_file:
             config_file.write(file_contents)
 

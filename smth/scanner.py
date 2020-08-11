@@ -42,10 +42,14 @@ class Callback(abc.ABC):
         """Called just before the searching starts."""
 
     @abc.abstractmethod
-    def on_set_device(self) -> None:
+    def on_set_device(self, devices: List[Device]) -> None:
         """Called when no device is set.
 
         A proper device should be set in the app config inside this method.
+
+        Args:
+            devices:
+                A list of available devices.
         """
 
     @abc.abstractmethod
@@ -102,14 +106,14 @@ class Callback(abc.ABC):
         """
 
 
-class Scanner:
+class Scanner:  # pylint: disable=too-few-public-methods
     """Represents a scanner device which can scan notebooks."""
 
     def __init__(self, conf: config.Config, callback_: Callback):
         self._conf = conf
         self._callback = callback_
 
-    def scan(
+    def scan(  # pylint: disable=too-many-branches
             self, notebook: models.Notebook,
             pages_queue: collections.deque) -> None:
         """Performs scanning with the given preferences.

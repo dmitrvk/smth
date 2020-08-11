@@ -35,7 +35,7 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
                     main.main()
                     command_mock.execute.assert_called_once()
 
-    def test_pydrive_not_found(self):
+    def test_pydrive_not_found(self):  # pylint: disable=no-self-use
         for command in ['share', 'upload']:
             with mock.patch.object(sys, 'argv', ['', command]):
                 command_class = f'smth.commands.{command.capitalize()}Command'
@@ -51,7 +51,7 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
 
                         command_mock.execute.assert_not_called()
 
-    def test_default_command(self):
+    def test_default_command(self):  # pylint: disable=no-self-use
         with mock.patch.object(sys, 'argv', ['__main__.py']):
             with mock.patch('smth.commands.ScanCommand') as command_class:
                 command = mock.MagicMock()
