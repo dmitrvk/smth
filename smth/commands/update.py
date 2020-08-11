@@ -81,7 +81,10 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
                 path.mkdir(parents=True, exist_ok=True)
 
             if notebook.path.exists():
-                shutil.move(str(notebook.path), str(path))
+                try:
+                    shutil.move(str(notebook.path), str(path))
+                except OSError as exception:
+                    self.exit_with_error(exception)
 
             notebook.path = path
 

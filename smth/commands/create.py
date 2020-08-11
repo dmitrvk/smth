@@ -74,12 +74,13 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         pdf = fpdf.FPDF()
         pdf.add_page()
-        pdf.output(path)
-        log.info("Created empty PDF at '{path}'")
 
         try:
+            pdf.output(path)
+            log.info("Created empty PDF at '{path}'")
+
             self._db.save_notebook(notebook)
-        except db.Error as exception:
+        except (OSError, db.Error) as exception:
             self.exit_with_error(exception)
 
         pages_root = os.path.expanduser('~/.local/share/smth/pages')

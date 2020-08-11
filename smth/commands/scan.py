@@ -166,10 +166,12 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                         0, 0,
                         pdf_page_size[0], pdf_page_size[1])
 
-            pdf.output(notebook.path)
-
-            self._view.show_info(f"PDF saved at '{notebook.path}'.")
-            self._view.show_separator()
+            try:
+                pdf.output(notebook.path)
+                self._view.show_info(f"PDF saved at '{notebook.path}'.")
+                self._view.show_separator()
+            except OSError as exception:
+                self.on_error(f'Failed to save PDF: {exception}.')
 
             try:
                 if (importlib.util.find_spec('pydrive') and
