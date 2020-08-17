@@ -122,7 +122,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self._view.show_info(f'Page {page} saved at {page_path}')
             log.info("Scanned page %s of '%s'", page, notebook.title)
 
-        def on_finish(self, notebook: models.Notebook):
+        def on_finish(self, notebook: models.Notebook):  # pylint: disable=too-many-branches  # noqa: E501
             """Saves the notebook in the databasee and creates PDF file.
 
             If PyDrive is installed and `ask_upload` config parameter is True,
