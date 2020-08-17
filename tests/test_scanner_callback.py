@@ -1,3 +1,4 @@
+import logging
 import pathlib
 from unittest import mock
 
@@ -8,6 +9,8 @@ from smth import commands, models
 
 class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
     def setUp(self):
+        logging.disable()
+
         self.setUpPyfakefs()
 
         self.command = mock.MagicMock()
@@ -52,6 +55,25 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
         self.assertEqual(self.pdf.add_page.call_count, 3)
         self.assertTrue(notebook.path.exists())
 
+    def test_on_finish_missing_images(self):
+        """Should create PDF but show errors."""
+        self.pdf.image.side_effect = RuntimeError
+
+        type_ = models.NotebookType('', 160, 200)
+
+        notebook = models.Notebook('', type_, pathlib.Path('/test/path.pdf'))
+        notebook.total_pages = 3
+
+        with mock.patch('importlib.util.find_spec') as find_spec:
+            find_spec.return_value = None
+
+            self.callback.on_finish(notebook)
+
+        self.db.save_notebook.assert_called_once()
+        self.assertEqual(self.pdf.add_page.call_count, 3)
+        self.assertEqual(self.view.show_error.call_count, 3)
+        self.assertTrue(notebook.path.exists())
+
     def test_on_finish_paired_pages(self):
         type_ = models.NotebookType('', 160, 200)
         type_.pages_paired = True
@@ -66,6 +88,26 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
 
         self.db.save_notebook.assert_called_once()
         self.assertEqual(self.pdf.add_page.call_count, 2)
+        self.assertTrue(notebook.path.exists())
+
+    def test_on_finish_paired_pages_missing_images(self):
+        """Should create PDF but show errors."""
+        self.pdf.image.side_effect = RuntimeError
+
+        type_ = models.NotebookType('', 160, 200)
+        type_.pages_paired = True
+
+        notebook = models.Notebook('', type_, pathlib.Path('/test/path.pdf'))
+        notebook.total_pages = 4
+
+        with mock.patch('importlib.util.find_spec') as find_spec:
+            find_spec.return_value = None
+
+            self.callback.on_finish(notebook)
+
+        self.db.save_notebook.assert_called_once()
+        self.assertEqual(self.pdf.add_page.call_count, 2)
+        self.assertEqual(self.view.show_error.call_count, 4)
         self.assertTrue(notebook.path.exists())
 
     def test_on_error(self):
