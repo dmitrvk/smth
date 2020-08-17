@@ -49,6 +49,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                     self.exit_with_error(exception)
 
             if '--pdf-only' in args:
+                self._view.show_info(
+                    'Nothing will be scanned. '
+                    'Only a PDF file will be created.')
                 title = self._view.ask_for_notebook(notebook_titles)
 
                 if title:
