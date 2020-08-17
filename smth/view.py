@@ -332,9 +332,9 @@ class View:
         Args:
             notebooks:
                 A list of notebooks to show.  For each notebook the function
-                prints its title, total number of pages and the information
-                about its type - the type's title and the page size in
-                millimeters.
+                prints its title, total number of pages, its path and the
+                information about its type - the type's title and the page
+                size in millimeters.
         """
         if notebooks and len(notebooks) > 0:
             print('All notebooks:')
@@ -343,10 +343,12 @@ class View:
 
                 if notebook.total_pages == 1:
                     print(f'  {notebook.title}  '
-                          f'{notebook.total_pages} page  ({type_})')
+                          f'{notebook.total_pages} page  ({type_})  '
+                          f'{notebook.path}')
                 else:
                     print(f'  {notebook.title}  '
-                          f'{notebook.total_pages} pages  ({type_})')
+                          f'{notebook.total_pages} pages  ({type_})  '
+                          f'{notebook.path}')
         else:
             print('No notebooks found.')
 
