@@ -188,6 +188,9 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                         log.exception(exception)
 
             try:
+                if not notebook.path.parent.exists():
+                    notebook.path.parent.mkdir(parents=True, exist_ok=True)
+
                 pdf.output(notebook.path)
                 self._view.show_info(f"PDF saved at '{notebook.path}'.")
                 self._view.show_separator()
