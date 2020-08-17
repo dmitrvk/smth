@@ -12,7 +12,7 @@ import PIL.Image as pillow
 
 from smth import config, db, models, scanner, validators, view
 
-from . import command, upload
+from . import command, create, upload
 
 log = logging.getLogger(__name__)
 
@@ -33,9 +33,20 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         notebook_titles = self.get_notebook_titles_from_db()
 
         if not notebook_titles:
-            message = 'No notebooks found. Create one with `smth create`.'
+            message = 'No notebooks found. Please, create a new one:'
             self._view.show_info(message)
-            return
+            self._view.show_separator()
+
+            create.CreateCommand(self._db, self._view).execute()
+
+            notebook_titles = self.get_notebook_titles_from_db()
+
+            if notebook_titles:
+                self._view.show_separator()
+                self._view.show_info('Scanning a notebook:')
+            else:
+                message = 'No notebooks found. Create one with `smth create`.'
+                self.exit_with_error(message)
 
         callback = ScanCommand.ScannerCallback(
             self, self._db, self._view, self.conf)

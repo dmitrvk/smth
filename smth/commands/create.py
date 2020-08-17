@@ -11,7 +11,7 @@ import fpdf
 
 from smth import db, models, validators
 
-from . import command
+from . import command, types
 
 log = logging.getLogger(__name__)
 
@@ -28,17 +28,27 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
         If the directory does not exist, create it with all parent directories.
         """
         try:
-            types = self._db.get_type_titles()
+            type_titles = self._db.get_type_titles()
         except db.Error as exception:
             self.exit_with_error(exception)
 
-        if not types:
-            self.exit_with_error("No types found. Create one with "
-                                 "'smth types --create'.")
+        if not type_titles:
+            self._view.show_info("No types found. Please, create a new one:")
+            self._view.show_separator()
+            types.TypesCommand(self._db, self._view).execute(['--create'])
+
+            type_titles = self._db.get_type_titles()
+
+            if type_titles:
+                self._view.show_separator()
+                self._view.show_info('Creating a new notebook:')
+            else:
+                self.exit_with_error("No types found. Create one with "
+                                     "'smth types --create'.")
 
         validator = validators.NotebookValidator(self._db)
 
-        answers = self._view.ask_for_new_notebook_info(types, validator)
+        answers = self._view.ask_for_new_notebook_info(type_titles, validator)
 
         if not answers:
             log.info('Creation stopped due to keyboard interrupt')

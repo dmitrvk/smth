@@ -45,13 +45,13 @@ class View:
             {
                 'type': 'input',
                 'name': 'title',
-                'message': 'Enter title:',
+                'message': 'Enter notebook title:',
                 'validate': validator.validate_title,
             },
             {
                 'type': 'list',
                 'name': 'type',
-                'message': 'Choose type',
+                'message': 'Choose notebook type',
                 'choices': types,
                 'validate': validator.validate_type,
             },
@@ -137,7 +137,7 @@ class View:
             {
                 'type': 'input',
                 'name': 'title',
-                'message': 'Enter title:',
+                'message': 'Enter type title:',
                 'validate': validator.validate_title,
             },
             {

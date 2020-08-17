@@ -138,12 +138,19 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []
 
-        commands.ScanCommand(self.db, self.view).execute()
+        with mock.patch(
+                'smth.commands.create.CreateCommand') as command_constructor:
+            command_ = mock.MagicMock()
+            command_constructor.return_value = command_
 
-        self.view.ask_for_notebook.assert_not_called()
-        self.view.ask_for_pages_to_append.assert_not_called()
-        self.view.ask_for_pages_to_replace.assert_not_called()
-        self.scanner.scan.assert_not_called()
+            with self.assertRaises(SystemExit):
+                commands.ScanCommand(self.db, self.view).execute()
+
+            self.view.ask_for_notebook.assert_not_called()
+            self.view.ask_for_pages_to_append.assert_not_called()
+            self.view.ask_for_pages_to_replace.assert_not_called()
+            command_.execute.assert_called()
+            self.scanner.scan.assert_not_called()
 
     def test_execute_with_set_device_option(self):
         args = ['--set-device']

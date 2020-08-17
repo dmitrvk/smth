@@ -90,6 +90,20 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.db.save_notebook.assert_not_called()
         self.pdf.output.assert_not_called()
 
+    def test_execute_no_types(self):
+        self.db.get_type_titles.return_value = []
+
+        with mock.patch(
+                'smth.commands.types.TypesCommand') as command_constructor:
+            command_ = mock.MagicMock()
+            command_constructor.return_value = command_
+
+            with self.assertRaises(SystemExit):
+                commands.CreateCommand(self.db, self.view).execute()
+
+        command_.execute.assert_called()
+        self.db.save_notebook.assert_not_called()
+
     def test_execute_db_error(self):
         self.db.get_type_titles.side_effect = db.Error('Fail')
 
