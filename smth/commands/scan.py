@@ -144,27 +144,48 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
             for i in range(0, notebook.total_pages):
                 page = notebook.first_page_number + i
+                page_path = notebook.get_page_path(page)
 
                 if notebook.type.pages_paired:
                     if notebook.first_page_number % 2 == page % 2:
                         # left page
                         pdf.add_page()
-                        pdf.image(
-                            str(notebook.get_page_path(page)),
-                            0, 0,
-                            int(pdf_page_size[0] / 2), pdf_page_size[1])
+
+                        try:
+                            pdf.image(
+                                str(page_path),
+                                0, 0,
+                                int(pdf_page_size[0] / 2), pdf_page_size[1])
+                        except RuntimeError as exception:
+                            self._view.show_error(
+                                f"Page {page} missing or incorrect at "
+                                f"'{page_path}'")
+                            log.exception(exception)
                     else:
                         # right page
-                        pdf.image(
-                            str(notebook.get_page_path(page)),
-                            int(pdf_page_size[0] / 2), 0,
-                            int(pdf_page_size[0] / 2), pdf_page_size[1])
+                        try:
+                            pdf.image(
+                                str(page_path),
+                                int(pdf_page_size[0] / 2), 0,
+                                int(pdf_page_size[0] / 2), pdf_page_size[1])
+                        except RuntimeError as exception:
+                            self._view.show_error(
+                                f"Page {page} missing or incorrect at "
+                                f"'{page_path}'")
+                            log.exception(exception)
                 else:
                     pdf.add_page()
-                    pdf.image(
-                        str(notebook.get_page_path(page)),
-                        0, 0,
-                        pdf_page_size[0], pdf_page_size[1])
+
+                    try:
+                        pdf.image(
+                            str(page_path),
+                            0, 0,
+                            pdf_page_size[0], pdf_page_size[1])
+                    except RuntimeError as exception:
+                        self._view.show_error(
+                            f"Page {page} missing or incorrect at "
+                            f"'{page_path}'")
+                        log.exception(exception)
 
             try:
                 pdf.output(notebook.path)
