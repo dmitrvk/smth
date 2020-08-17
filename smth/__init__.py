@@ -11,3 +11,5 @@ Features:
 
 The progran uses the SANE library to interact with scanner devices.
 """
+
+__version__ = '0.8.0'

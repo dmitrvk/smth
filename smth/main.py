@@ -6,7 +6,7 @@ import importlib.util
 import logging
 import sys
 
-from smth import commands, const, db, view
+from smth import commands, const, db, view, __version__
 
 
 def main():
@@ -43,6 +43,10 @@ def main():
     if len(sys.argv) == 1:
         execute_command('scan')  # Default command
     else:
+        if sys.argv[1] == '-v':
+            print(__version__)
+            return
+
         command: str = sys.argv[1]
 
         if command in ('share', 'upload'):
