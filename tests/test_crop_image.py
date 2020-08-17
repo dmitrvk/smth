@@ -130,7 +130,7 @@ class CropImageTestCase(unittest.TestCase):
     def _type_height_pt(self) -> int:
         return self._mm_to_pt(self.type.page_height)
 
-    def _type_size_pt(self) -> Tuple[int]:
+    def _type_size_pt(self) -> Tuple[int, int]:
         return self._type_width_pt(), self._type_height_pt()
 
     def _mm_to_pt(self, size_mm: int) -> int:

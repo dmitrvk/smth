@@ -5,7 +5,7 @@
 import collections
 import importlib.util
 import logging
-from typing import List
+from typing import Deque, List
 
 import fpdf
 import PIL.Image as pillow
@@ -235,7 +235,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
     def _get_pages_queue(self, notebook: models.Notebook) -> collections.deque:
         """Asks for pages which should be appended and/or replaced."""
-        pages_queue = collections.deque()
+        pages_queue: Deque = collections.deque()
 
         validator = validators.PagesToScanValidator(notebook)
         append = self._view.ask_for_pages_to_append(validator)
