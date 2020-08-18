@@ -1,6 +1,6 @@
 import setuptools
 
-with open('README.md', 'r') as readme:
+with open('README.rst', 'r') as readme:
     long_description = readme.read()
 
 setuptools.setup(
@@ -9,7 +9,7 @@ setuptools.setup(
     keywords='scan sane cli',
     description='Scan books and handwriting in batch mode from console',
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type='text/x-rst',
     url='https://github.com/dmitrvk/smth',
     packages=(
         'smth', 'smth.commands', 'smth.models',
