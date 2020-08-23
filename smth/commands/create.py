@@ -2,10 +2,10 @@
 
 """The module provides `create` command for creating notebooks."""
 
+import argparse
 import logging
 import os
 import pathlib
-from typing import List
 
 import fpdf
 
@@ -19,7 +19,7 @@ log = logging.getLogger(__name__)
 class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Creates a new notebook."""
 
-    def execute(self, args: List[str] = None) -> None:
+    def execute(self, args: argparse.Namespace) -> None:
         """Asks user for new notebook info, saves notebook in the database.
 
         If path to PDF ends with '.pdf', it is treated as a file.  That allows

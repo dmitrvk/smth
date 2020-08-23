@@ -34,6 +34,8 @@ class UpdateCommandTestCase(fake_filesystem_unittest.TestCase):
             'ask_for_notebook.return_value': self.notebook.title,
         })
 
+        self.args = mock.MagicMock()
+
     def test_execute(self):
         old_title = self.notebook.title
 
@@ -47,7 +49,7 @@ class UpdateCommandTestCase(fake_filesystem_unittest.TestCase):
 
         self.view.ask_for_updated_notebook_properties.return_value = answers
 
-        commands.UpdateCommand(self.db, self.view).execute()
+        commands.UpdateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_called_once()
 
@@ -69,18 +71,18 @@ class UpdateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.view.ask_for_updated_notebook_properties.return_value = answers
 
         with self.assertRaises(SystemExit):
-            commands.UpdateCommand(self.db, self.view).execute()
+            commands.UpdateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_not_called()
 
     def test_execute_no_notebook_chosen(self):
         self.view.ask_for_notebook.return_value = None
-        commands.UpdateCommand(self.db, self.view).execute()
+        commands.UpdateCommand(self.db, self.view).execute(self.args)
         self.db.save_notebook.assert_not_called()
 
     def test_execute_no_new_notebook_properties(self):
         self.view.ask_for_updated_notebook_properties.return_value = None
-        commands.UpdateCommand(self.db, self.view).execute()
+        commands.UpdateCommand(self.db, self.view).execute(self.args)
         self.db.save_notebook.assert_not_called()
 
     def test_execute_notebook_with_title_already_exists(self):
@@ -94,7 +96,7 @@ class UpdateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.view.ask_for_updated_notebook_properties.return_value = answers
 
         with self.assertRaises(SystemExit):
-            commands.UpdateCommand(self.db, self.view).execute()
+            commands.UpdateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_not_called()
 
@@ -112,14 +114,14 @@ class UpdateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.view.ask_for_updated_notebook_properties.return_value = answers
 
         with self.assertRaises(SystemExit):
-            commands.UpdateCommand(self.db, self.view).execute()
+            commands.UpdateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_not_called()
 
     def test_execute_no_notebook(self):
         self.db.get_notebook_titles.return_value = []
 
-        commands.UpdateCommand(self.db, self.view).execute()
+        commands.UpdateCommand(self.db, self.view).execute(self.args)
 
         self.view.ask_for_notebook.assert_not_called()
         self.db.save_notebook.assert_not_called()

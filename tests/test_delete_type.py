@@ -17,22 +17,27 @@ class DeleteTypeTestCase(fake_filesystem_unittest.TestCase):
         self.view = mock.MagicMock()
         self.view.ask_for_type.return_value = 'type'
 
+        self.args = mock.MagicMock(**{
+            'create': False,
+            'delete': True,
+        })
+
     def test_delete_type(self):
-        commands.TypesCommand(self.db, self.view).execute(['--delete'])
+        commands.TypesCommand(self.db, self.view).execute(self.args)
         self.db.delete_type_by_title.assert_called_once()
 
     def test_delete_type_no_answers(self):
         self.view.ask_for_type.return_value = ''
-        commands.TypesCommand(self.db, self.view).execute(['--delete'])
+        commands.TypesCommand(self.db, self.view).execute(self.args)
         self.db.delete_type_by_title.assert_not_called()
 
     def test_delete_type_notebooks_of_type_exist(self):
         self.db.notebooks_of_type_exist.return_value = True
-        commands.TypesCommand(self.db, self.view).execute(['--delete'])
+        commands.TypesCommand(self.db, self.view).execute(self.args)
         self.db.delete_type_by_title.assert_not_called()
 
     def test_delete_type_db_error(self):
         self.db.delete_type_by_title.side_effect = db.Error()
         command = commands.TypesCommand(self.db, self.view)
-        self.assertRaises(SystemExit, command.execute, ['--delete'])
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.view.show_error.assert_called()

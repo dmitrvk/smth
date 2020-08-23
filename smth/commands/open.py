@@ -2,9 +2,9 @@
 
 """The module provides `open` command for openning notebook in PDF viewer."""
 
+import argparse
 import logging
 import subprocess
-from typing import List
 
 from . import command
 
@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class OpenCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Opens a notebook's PDF file in the default viewer."""
 
-    def execute(self, args: List[str] = None):
+    def execute(self, args: argparse.Namespace):
         """See the base class."""
         notebook_titles = self.get_notebook_titles_from_db()
 

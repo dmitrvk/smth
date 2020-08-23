@@ -27,21 +27,23 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
         cloud_patcher.start().return_value = self.cloud
         self.addCleanup(cloud_patcher.stop)
 
+        self.args = mock.MagicMock()
+
     def test_execute_upload_notebook_chosen_by_user(self):
-        commands.UploadCommand(self.db, self.view).execute()
+        commands.UploadCommand(self.db, self.view).execute(self.args)
         self.view.ask_for_notebook.assert_called_once()
         self.cloud.upload_file.assert_called_once_with(self.notebook.path)
 
     def test_execute_upload_notebook_provided_with_arg(self):
-        args = [self.notebook.title]
-        commands.UploadCommand(self.db, self.view).execute(args)
+        self.args.notebook_title = self.notebook.title
+        commands.UploadCommand(self.db, self.view).execute(self.args)
         self.view.ask_for_notebook.assert_not_called()
         self.cloud.upload_file.assert_called_once_with(self.notebook.path)
 
     def test_execute_db_error(self):
         self.db.get_notebook_titles.side_effect = db.Error('Failed')
         command = commands.UploadCommand(self.db, self.view)
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.cloud.upload_file.assert_not_called()
         self.view.show_error.assert_called_once_with('Failed')
 
@@ -50,12 +52,13 @@ class UploadCommandTestCase(fake_filesystem_unittest.TestCase):
 
         command = commands.UploadCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute, [self.notebook.title])
+        self.args.notebook_title = self.notebook.title
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.cloud.upload_file.assert_not_called()
         self.view.show_error.assert_called_once_with('Failed')
 
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []
-        commands.UploadCommand(self.db, self.view).execute()
+        commands.UploadCommand(self.db, self.view).execute(self.args)
         self.view.ask_for_notebook.assert_not_called()
         self.cloud.upload_file.assert_not_called()

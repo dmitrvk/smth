@@ -2,11 +2,11 @@
 
 """The module provides `update` command for changing notebook's properties."""
 
+import argparse
 import logging
 import os
 import pathlib
 import shutil
-from typing import List
 
 from smth import db, validators
 
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Update a notebook."""
 
-    def execute(self, args: List[str] = None) -> None:  # pylint: disable=too-many-branches  # noqa: E501
+    def execute(self, args: argparse.Namespace) -> None:  # pylint: disable=too-many-branches  # noqa: E501
         """Asks user for notebook properties, saves notebook in the database.
 
         Works similar to `create` command but changes the existing notebook.

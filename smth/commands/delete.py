@@ -2,10 +2,10 @@
 
 """The module provides `delete` command for deleting notebooks."""
 
+import argparse
 import logging
 import pathlib
 import shutil
-from typing import List
 
 from smth import db
 
@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Deletes a notebook."""
 
-    def execute(self, args: List[str] = None) -> None:
+    def execute(self, args: argparse.Namespace) -> None:
         """Asks for notebook, removes it from db, but leaves PDF untouched."""
         try:
             notebook_titles = self.get_notebook_titles_from_db()

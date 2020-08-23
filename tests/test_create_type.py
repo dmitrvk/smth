@@ -23,17 +23,22 @@ class CreateTypeTestCase(fake_filesystem_unittest.TestCase):
 
         self.view.ask_for_new_type_info.return_value = self.answers
 
+        self.args = mock.MagicMock(**{
+            'create': True,
+            'delete': False,
+        })
+
     def test_create_type(self):
-        commands.TypesCommand(self.db, self.view).execute(['--create'])
+        commands.TypesCommand(self.db, self.view).execute(self.args)
         self.db.save_type.assert_called_once()
 
     def test_create_type_no_answers(self):
         self.view.ask_for_new_type_info.return_value = None
-        commands.TypesCommand(self.db, self.view).execute(['--create'])
+        commands.TypesCommand(self.db, self.view).execute(self.args)
         self.db.save_type.assert_not_called()
 
     def test_create_type_db_error(self):
         self.db.save_type.side_effect = db.Error('Fail')
         command = commands.TypesCommand(self.db, self.view)
-        self.assertRaises(SystemExit, command.execute, ['--create'])
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.view.show_error.assert_called_once_with('Fail')

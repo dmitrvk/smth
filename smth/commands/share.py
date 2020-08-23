@@ -2,8 +2,8 @@
 
 """The module provides `share` command to share notebooks uploaded to cloud."""
 
+import argparse
 import logging
-from typing import List
 
 from smth import cloud, db, view
 
@@ -19,7 +19,7 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
         super().__init__(db_, view_)
         self._cloud = cloud.Cloud(ShareCommand.CloudCallback(self, view_))
 
-    def execute(self, args: List[str] = None):
+    def execute(self, args: argparse.Namespace):
         """Shares a notebook and shows a link."""
         notebook_titles = self.get_notebook_titles_from_db()
 

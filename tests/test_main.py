@@ -61,9 +61,8 @@ class MainTestCase(fake_filesystem_unittest.TestCase):
 
     def test_unknown_command(self):
         with mock.patch.object(sys, 'argv', ['__main__.py', 'test']):
-            output = testutils.capture_stdout(main.main)
-            for command in self.commands:
-                self.assertIn(command, output)
+            with self.assertRaises(SystemExit):
+                testutils.capture_stderr(main.main)
 
     def test_db_error(self):
         with mock.patch('smth.db.DB') as db_class_constructor:

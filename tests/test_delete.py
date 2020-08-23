@@ -31,8 +31,10 @@ class DeleteCommandTestCase(fake_filesystem_unittest.TestCase):
         self.pages_dir_path = pages_root / self.notebook.title
         self.fs.create_dir(self.pages_dir_path)
 
+        self.args = mock.MagicMock()
+
     def test_execute(self):
-        commands.DeleteCommand(self.db, self.view).execute()
+        commands.DeleteCommand(self.db, self.view).execute(self.args)
 
         self.db.delete_notebook_by_id.assert_called_once()
         self.assertTrue(self.notebook.path.exists())
@@ -40,7 +42,7 @@ class DeleteCommandTestCase(fake_filesystem_unittest.TestCase):
 
     def test_execute_no_notebook_chosen(self):
         self.view.ask_for_notebook.return_value = ''
-        commands.DeleteCommand(self.db, self.view).execute()
+        commands.DeleteCommand(self.db, self.view).execute(self.args)
 
         self.db.delete_notebook_by_id.assert_not_called()
         self.assertTrue(self.notebook.path.exists())
@@ -48,7 +50,7 @@ class DeleteCommandTestCase(fake_filesystem_unittest.TestCase):
 
     def test_execute_no_confirmation(self):
         self.view.confirm.return_value = False
-        commands.DeleteCommand(self.db, self.view).execute()
+        commands.DeleteCommand(self.db, self.view).execute(self.args)
 
         self.db.delete_notebook_by_id.assert_not_called()
         self.assertTrue(self.notebook.path.exists())
@@ -59,7 +61,7 @@ class DeleteCommandTestCase(fake_filesystem_unittest.TestCase):
 
         command = commands.DeleteCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.delete_notebook_by_id.assert_not_called()
         self.assertTrue(self.notebook.path.exists())
         self.assertTrue(self.pages_dir_path.exists())

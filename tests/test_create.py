@@ -1,3 +1,4 @@
+import argparse
 import logging
 import pathlib
 from unittest import mock
@@ -27,6 +28,8 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         fpdf_patcher.start().return_value = self.pdf
         self.addCleanup(fpdf_patcher.stop)
 
+        self.args = argparse.ArgumentParser().parse_args([])
+
     def test_execute(self):
         path = pathlib.Path('/test/path.pdf')
 
@@ -39,7 +42,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
 
         self.view.ask_for_new_notebook_info.return_value = answers
 
-        commands.CreateCommand(self.db, self.view).execute()
+        commands.CreateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_called_once()
         self.assertTrue(path.exists())
@@ -56,7 +59,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
 
         self.view.ask_for_new_notebook_info.return_value = answers
 
-        commands.CreateCommand(self.db, self.view).execute()
+        commands.CreateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_called_once()
         pdf_path = dir_path / 'notebook.pdf'
@@ -77,7 +80,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.view.ask_for_new_notebook_info.return_value = answers
 
         command = commands.CreateCommand(self.db, self.view)
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called()
 
@@ -85,7 +88,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
         self.view.ask_for_new_notebook_info.return_value = None
         self.pdf.output = mock.MagicMock()
 
-        commands.CreateCommand(self.db, self.view).execute()
+        commands.CreateCommand(self.db, self.view).execute(self.args)
 
         self.db.save_notebook.assert_not_called()
         self.pdf.output.assert_not_called()
@@ -99,7 +102,7 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
             command_constructor.return_value = command_
 
             with self.assertRaises(SystemExit):
-                commands.CreateCommand(self.db, self.view).execute()
+                commands.CreateCommand(self.db, self.view).execute(self.args)
 
         command_.execute.assert_called()
         self.db.save_notebook.assert_not_called()
@@ -109,6 +112,6 @@ class CreateCommandTestCase(fake_filesystem_unittest.TestCase):
 
         command = commands.CreateCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called_once_with('Fail')

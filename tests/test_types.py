@@ -5,17 +5,22 @@ from unittest import mock
 from smth import commands, db
 
 
-class TypesControllerTestCase(unittest.TestCase):
+class TypesCommandTestCase(unittest.TestCase):
     def setUp(self):
         logging.disable()
 
         self.db = mock.MagicMock()
         self.view = mock.MagicMock()
 
+        self.args = mock.MagicMock(**{
+            'create': False,
+            'delete': False,
+        })
+
     def test_execute(self):
         self.db.get_types.return_value = []
 
-        commands.TypesCommand(self.db, self.view).execute()
+        commands.TypesCommand(self.db, self.view).execute(self.args)
 
         self.db.get_types.assert_called_once()
         self.view.show_types.assert_called_once_with([])
@@ -25,7 +30,7 @@ class TypesControllerTestCase(unittest.TestCase):
 
         command = commands.TypesCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.get_types.assert_called_once()
         self.view.show_types.assert_not_called()
         self.view.show_error.assert_called_once_with('Fail')

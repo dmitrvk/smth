@@ -27,8 +27,10 @@ class ShareCommandTestCase(unittest.TestCase):
 
         self.command = commands.ShareCommand(self.db, self.view)
 
+        self.args = mock.MagicMock()
+
     def test_execute_share_file(self):
-        self.command.execute()
+        self.command.execute(self.args)
 
         self.view.ask_for_notebook.assert_called_once()
         self.cloud.share_file.assert_called_once()
@@ -36,7 +38,7 @@ class ShareCommandTestCase(unittest.TestCase):
     def test_execute_db_error_on_get_notebook_titles(self):
         self.db.get_notebook_titles.side_effect = db.Error('Failed')
 
-        self.assertRaises(SystemExit, self.command.execute)
+        self.assertRaises(SystemExit, self.command.execute, self.args)
 
         self.view.ask_for_notebook.assert_not_called()
         self.cloud.share_file.assert_not_called()
@@ -45,7 +47,7 @@ class ShareCommandTestCase(unittest.TestCase):
     def test_execute_db_error_on_get_notebook(self):
         self.db.get_notebook_by_title.side_effect = db.Error('Failed')
 
-        self.assertRaises(SystemExit, self.command.execute)
+        self.assertRaises(SystemExit, self.command.execute, self.args)
 
         self.view.ask_for_notebook.assert_called_once()
         self.cloud.share_file.assert_not_called()
@@ -54,7 +56,7 @@ class ShareCommandTestCase(unittest.TestCase):
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []
 
-        self.command.execute()
+        self.command.execute(self.args)
 
         self.view.ask_for_notebook.assert_not_called()
         self.cloud.share_file.assert_not_called()

@@ -2,6 +2,7 @@
 
 """smth main module."""
 
+import argparse
 import importlib.util
 import logging
 import sys
@@ -35,34 +36,79 @@ def main():
         log.exception(exception)
         sys.exit(1)
 
-    def execute_command(command_name: str) -> None:
-        command_class = f'{command_name.capitalize()}Command'
-        command = getattr(commands, command_class)(db_, view_)
-        command.execute(sys.argv[2:])
+    parser = argparse.ArgumentParser(prog='smth')
 
-    if len(sys.argv) == 1:
-        execute_command('scan')  # Default command
+    parser.add_argument(
+        '-v', '--version', action='store_true', help='print version and exit')
+
+    subparsers = parser.add_subparsers(title='commands', metavar='')
+
+    subparsers.add_parser(
+        'create', aliases=['c'], help='create new notebook'
+    ).set_defaults(func=create)
+
+    subparsers.add_parser(
+        'delete', aliases=['d'], help='delete notebook'
+    ).set_defaults(func=delete)
+
+    subparsers.add_parser(
+        'list', aliases=['l'], help='show available notebooks'
+    ).set_defaults(func=list_)
+
+    subparsers.add_parser(
+        'open', aliases=['o'], help='open notebook in default PDF viewer'
+    ).set_defaults(func=open_)
+
+    parser_scan = subparsers.add_parser(
+        'scan', aliases=['s'], help='scan notebook')
+    parser_scan.set_defaults(func=scan)
+
+    scan_args_group = parser_scan.add_mutually_exclusive_group()
+
+    scan_args_group.add_argument(
+        '--set-device',
+        help='choose scanning device',
+        action='store_true')
+
+    scan_args_group.add_argument(
+        '--pdf-only',
+        help='do not scan but only create PDF',
+        action='store_true')
+
+    subparsers.add_parser(
+        'share', aliases=['sh'],
+        help='share notebook uploaded to Google Drive (requires PyDrive)'
+    ).set_defaults(func=share)
+
+    parser_types = subparsers.add_parser(
+        'types', aliases=['sh'], help='manage notebook types')
+    parser_types.set_defaults(func=types)
+
+    types_args_group = parser_types.add_mutually_exclusive_group()
+    types_args_group.add_argument(
+        '-c', '--create', action='store_true', help='create new type')
+    types_args_group.add_argument(
+        '-d', '--delete', action='store_true', help='delete type')
+
+    subparsers.add_parser(
+        'update', aliases=['up'],
+        help="change notebook's title or path to PDF file"
+    ).set_defaults(func=update)
+
+    subparsers.add_parser(
+        'upload', aliases=['u'],
+        help='upload notebook to Google Drive (requires PyDrive)'
+    ).set_defaults(func=upload)
+
+    args = parser.parse_args()
+
+    if args.version:
+        print(__version__)
+    elif hasattr(args, 'func'):
+        args.func(args, db_, view_)
     else:
-        if sys.argv[1] == '-v':
-            print(__version__)
-            return
-
-        command: str = sys.argv[1]
-
-        if command in ('share', 'upload'):
-            if importlib.util.find_spec('pydrive'):
-                execute_command(command)
-            else:
-                view_.show_info('PyDrive not found.')
-
-        elif command in (
-                'create', 'delete', 'list', 'open', 'scan', 'types', 'update'):
-            execute_command(command)
-
-        else:
-            view_.show_info(f"Unknown command '{command}'.")
-            view_.show_info(const.HELP_MESSAGE)
-            log.info("Unknown command '%s'", command)
+        args = parser.parse_args(['scan'])
+        args.func(args, db_, view_)
 
 
 def setup_logging() -> None:
@@ -78,3 +124,54 @@ def setup_logging() -> None:
     handler.setFormatter(formatter)
 
     log.addHandler(handler)
+
+
+def create(args, db_: db.DB, view_: view.View) -> None:
+    """Runs `create` command."""
+    commands.CreateCommand(db_, view_).execute(args)
+
+
+def delete(args, db_: db.DB, view_: view.View) -> None:
+    """Runs `delete` command."""
+    commands.DeleteCommand(db_, view_).execute(args)
+
+
+def list_(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `list` command."""
+    commands.ListCommand(db_, view_).execute(args)
+
+
+def open_(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `open` command."""
+    commands.OpenCommand(db_, view_).execute(args)
+
+
+def scan(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `scan` command."""
+    commands.ScanCommand(db_, view_).execute(args)
+
+
+def share(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `share` command."""
+    if importlib.util.find_spec('pydrive'):
+        commands.ShareCommand(db_, view_).execute(args)
+    else:
+        view_.show_info('PyDrive not found.')
+
+
+def types(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `types` command."""
+    commands.TypesCommand(db_, view_).execute(args)
+
+
+def update(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `update` command."""
+    commands.UpdateCommand(db_, view_).execute(args)
+
+
+def upload(args, db_: db. DB, view_: view.View) -> None:
+    """Runs `upload` command."""
+    if importlib.util.find_spec('pydrive'):
+        commands.UploadCommand(db_, view_).execute(args)
+    else:
+        view_.show_info('PyDrive not found.')

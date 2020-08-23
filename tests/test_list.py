@@ -12,10 +12,12 @@ class ListCommandTestCase(unittest.TestCase):
         self.db = mock.MagicMock()
         self.view = mock.MagicMock()
 
+        self.args = mock.MagicMock()
+
     def test_execute(self):
         self.db.get_notebooks.return_value = []
 
-        commands.ListCommand(self.db, self.view).execute()
+        commands.ListCommand(self.db, self.view).execute(self.args)
 
         self.db.get_notebooks.assert_called_once()
         self.view.show_notebooks.assert_called_once_with([])
@@ -25,7 +27,7 @@ class ListCommandTestCase(unittest.TestCase):
 
         command = commands.ListCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.get_notebooks.assert_called_once()
         self.view.show_notebooks.assert_not_called()
         self.view.show_error.assert_called_once_with('Failed')

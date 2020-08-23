@@ -1,5 +1,6 @@
+import argparse
 import unittest
-from typing import List
+from unittest import mock
 
 from smth import commands
 
@@ -15,7 +16,8 @@ class CommandTestCase(unittest.TestCase):
 
     def test_execute(self):
         class ConcreteCommand(commands.Command):
-            def execute(self, args: List[str] = None):
-                super().execute()
+            def execute(self, args: argparse.Namespace):
+                super().execute(args)
 
-        ConcreteCommand(None, None).execute()
+        args = mock.MagicMock()
+        ConcreteCommand(None, None).execute(args)

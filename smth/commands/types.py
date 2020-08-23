@@ -2,8 +2,8 @@
 
 """The module provides `types` command for managing notebook types."""
 
+import argparse
 import logging
-from typing import List
 
 from smth import db, models, validators
 
@@ -15,15 +15,15 @@ log = logging.getLogger(__name__)
 class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Displays the list of all notebooks."""
 
-    def execute(self, args: List[str] = None) -> None:
+    def execute(self, args: argparse.Namespace) -> None:
         """Gets notebook types from database and shows them to user.
 
         If `--create` option is passed, asks user for new type info and
         saves new type in the database.
         """
-        if args and '--create' in args:
+        if args.create:
             self._create_type()
-        elif args and '--delete' in args:
+        elif args.delete:
             self._delete_type()
         else:
             try:

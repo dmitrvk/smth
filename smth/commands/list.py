@@ -2,8 +2,8 @@
 
 """The module provides `list` command for displaying available notebooks."""
 
+import argparse
 import logging
-from typing import List
 
 from smth import db
 
@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class ListCommand(command.Command):  # pylint: disable=too-few-public-methods
     """Displays list of existing notebooks."""
 
-    def execute(self, args: List[str] = None) -> None:
+    def execute(self, args: argparse.Namespace) -> None:
         """Gets the notebooks from database and shows them to user."""
         try:
             notebooks = self._db.get_notebooks()

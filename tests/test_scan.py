@@ -33,6 +33,11 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
             'ask_for_pages_to_replace.return_value': ['1', '2', '3-4'],
         })
 
+        self.args = mock.MagicMock(**{
+            'pdf_only': False,
+            'set_device': False,
+        })
+
         self.conf = mock.MagicMock(**{
             'scanner_device': None,
             'scanner_delay': 0,
@@ -63,7 +68,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
     def test_execute_no_devices(self):
         sane.get_devices.return_value = []
         command = commands.ScanCommand(self.db, self.view)
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.view.show_error.assert_called()
 
     def test_execute_wrong_device_set(self):
@@ -73,7 +78,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called_once()
 
@@ -82,7 +87,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         sane.open.assert_not_called()
         self.db.save_notebook.assert_not_called()
 
@@ -91,7 +96,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called()
 
@@ -100,7 +105,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.view.ask_for_notebook.assert_not_called()
         self.view.ask_for_pages_to_append.assert_not_called()
         self.view.ask_for_pages_to_replace.assert_not_called()
@@ -112,7 +117,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.view.ask_for_pages_to_append.assert_not_called()
         self.view.ask_for_pages_to_replace.assert_not_called()
         sane.open.assert_not_called()
@@ -123,7 +128,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.save_notebook.assert_not_called()
 
     def test_execute_sane_error(self):
@@ -131,7 +136,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
 
         command = commands.ScanCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.db.save_notebook.assert_not_called()
         self.view.show_error.assert_called()
 
@@ -144,7 +149,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
             command_constructor.return_value = command_
 
             with self.assertRaises(SystemExit):
-                commands.ScanCommand(self.db, self.view).execute()
+                commands.ScanCommand(self.db, self.view).execute(self.args)
 
             self.view.ask_for_notebook.assert_not_called()
             self.view.ask_for_pages_to_append.assert_not_called()
@@ -153,13 +158,15 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
             self.scanner.scan.assert_not_called()
 
     def test_execute_with_set_device_option(self):
-        args = ['--set-device']
+        self.args.set_device = True
+
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
-            commands.ScanCommand(self.db, self.view).execute(args)
+            commands.ScanCommand(self.db, self.view).execute(self.args)
         self.assertEqual(self.conf.scanner_device, '')
 
     def test_execute_with_pdf_only_option(self):
-        args = ['--pdf-only']
+        self.args.pdf_only = True
+
         scanner_ = mock.MagicMock()
         callback = mock.MagicMock()
 
@@ -167,7 +174,7 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
             with mock.patch(
                     'smth.commands.ScanCommand.ScannerCallback',
                     return_value=callback):
-                commands.ScanCommand(self.db, self.view).execute(args)
+                commands.ScanCommand(self.db, self.view).execute(self.args)
 
         scanner_.scan.assert_not_called()
         callback.on_finish.assert_called_once()
@@ -176,4 +183,4 @@ class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instan
         self.view.ask_for_notebook.return_value = ''
         with mock.patch('smth.scanner.Scanner', return_value=mock.MagicMock()):
             command = commands.ScanCommand(self.db, self.view)
-            self.assertRaises(SystemExit, command.execute)
+            self.assertRaises(SystemExit, command.execute, self.args)

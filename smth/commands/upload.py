@@ -2,9 +2,9 @@
 
 """The module provides `upload` command for uploading notebooks to cloud."""
 
+import argparse
 import logging
 import pathlib
-from typing import List
 
 from smth import cloud, db, view
 
@@ -20,18 +20,16 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
         super().__init__(db_, view_)
         self._cloud = cloud.Cloud(UploadCommand.CloudCallback(self, view_))
 
-    def execute(self, args: List[str] = None):
+    def execute(self, args: argparse.Namespace):
         """Uploads a notebook's PDF file to Google Drive."""
         notebook_titles = self.get_notebook_titles_from_db()
 
         if notebook_titles:
             path = None
 
-            if args:
-                notebook_title = args[0]
-
+            if args and hasattr(args, 'notebook_title'):
                 for title in notebook_titles:
-                    if title == notebook_title:
+                    if title == args.notebook_title:
                         try:
                             path = self._db.get_notebook_by_title(title).path
                             self._cloud.upload_file(path)

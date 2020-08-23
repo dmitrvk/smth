@@ -12,6 +12,8 @@ class OpenCommandTestCase(unittest.TestCase):
         self.db = mock.MagicMock()
         self.view = mock.MagicMock()
 
+        self.args = mock.MagicMock()
+
     def test_execute(self):
         self.db.get_notebook_titles.return_value = ['notebook']
 
@@ -21,7 +23,7 @@ class OpenCommandTestCase(unittest.TestCase):
         self.view.ask_for_notebook.return_value = 'notebook'
 
         with mock.patch('subprocess.Popen') as popen_class:
-            commands.OpenCommand(self.db, self.view).execute()
+            commands.OpenCommand(self.db, self.view).execute(self.args)
             popen_class.assert_called_once_with(['xdg-open', '/test/path.pdf'])
 
     def test_execute_db_error(self):
@@ -29,14 +31,14 @@ class OpenCommandTestCase(unittest.TestCase):
 
         command = commands.OpenCommand(self.db, self.view)
 
-        self.assertRaises(SystemExit, command.execute)
+        self.assertRaises(SystemExit, command.execute, self.args)
         self.view.show_error.assert_called_once_with('Failed')
 
     def test_execute_no_notebooks(self):
         self.db.get_notebook_titles.return_value = []
 
         with mock.patch('subprocess.Popen') as popen_class:
-            commands.OpenCommand(self.db, self.view).execute()
+            commands.OpenCommand(self.db, self.view).execute(self.args)
 
             self.view.ask_for_notebook.assert_not_called()
             popen_class.assert_not_called()

@@ -2,6 +2,7 @@
 
 """The module provides `scan` command to perform scanning operations."""
 
+import argparse
 import collections
 import importlib.util
 import logging
@@ -28,7 +29,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         except config.Error as exception:
             self.exit_with_error(exception)
 
-    def execute(self, args: List[str] = None) -> None:
+    def execute(self, args: argparse.Namespace) -> None:
         """Asks user for scanning preferences, scans notebook and makes PDF."""
         notebook_titles = self.get_notebook_titles_from_db()
 
@@ -52,28 +53,27 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
             self, self._db, self._view, self.conf)
         callback.on_error = self.exit_with_error
 
-        if args:
-            if '--set-device' in args:
+        if args.set_device:
+            try:
+                self.conf.scanner_device = ''
+            except config.Error as exception:
+                self.exit_with_error(exception)
+
+        if args.pdf_only:
+            self._view.show_info(
+                'Nothing will be scanned. '
+                'Only a PDF file will be created.')
+            title = self._view.ask_for_notebook(notebook_titles)
+
+            if title:
                 try:
-                    self.conf.scanner_device = ''
-                except config.Error as exception:
-                    self.exit_with_error(exception)
-
-            if '--pdf-only' in args:
-                self._view.show_info(
-                    'Nothing will be scanned. '
-                    'Only a PDF file will be created.')
-                title = self._view.ask_for_notebook(notebook_titles)
-
-                if title:
-                    try:
-                        notebook = self._db.get_notebook_by_title(title)
-                        callback.on_finish(notebook)
-                        return
-                    except db.Error as exception:
-                        self.exit_with_error(exception)
-                else:
+                    notebook = self._db.get_notebook_by_title(title)
+                    callback.on_finish(notebook)
                     return
+                except db.Error as exception:
+                    self.exit_with_error(exception)
+            else:
+                return
 
         scanner_ = scanner.Scanner(self.conf, callback)
         notebook = self._get_notebook_to_scan(notebook_titles)

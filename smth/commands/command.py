@@ -3,6 +3,7 @@
 """The module provides the abstract Command class."""
 
 import abc
+import argparse
 import logging
 import sys
 from typing import List, NoReturn, Union
@@ -20,12 +21,12 @@ class Command(abc.ABC):  # pylint: disable=too-few-public-methods
         self._view = view_
 
     @abc.abstractmethod
-    def execute(self, args: List[str] = None):
+    def execute(self, args: argparse.Namespace):
         """Runs command with the given arguments.
 
         Args:
             args:
-                A list of arguments passed to the command.
+                Arguments passed to the command.
         """
 
     def exit_with_error(self, error: Union[Exception, str]) -> NoReturn:
