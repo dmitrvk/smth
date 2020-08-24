@@ -8,6 +8,8 @@ setuptools.setup(
     version='0.8.0',
     keywords='scan sane cli',
     description='Scan books and handwriting in batch mode from console',
+    author='Dmitry Kalyukov',
+    author_email='dmitrykalyukov@gmail.com',
     long_description=long_description,
     long_description_content_type='text/x-rst',
     url='https://github.com/dmitrvk/smth',
