@@ -5,7 +5,7 @@ from unittest import mock
 import _sane
 import sane
 
-from smth import db, commands, models
+from smth import commands, db, models
 
 
 class ScanCommandTestCase(unittest.TestCase):  # pylint: disable=too-many-instance-attributes  # noqa: E501

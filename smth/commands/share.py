@@ -33,6 +33,7 @@ class ShareCommand(command.Command):  # pylint: disable=too-few-public-methods
 
                 try:
                     path = self._db.get_notebook_by_title(notebook).path
+
                 except db.Error as exception:
                     self.exit_with_error(exception)
 

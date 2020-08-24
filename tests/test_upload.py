@@ -4,7 +4,7 @@ from unittest import mock
 
 from pyfakefs import fake_filesystem_unittest
 
-from smth import db, commands, const, models
+from smth import commands, const, db, models
 
 
 class UploadCommandTestCase(fake_filesystem_unittest.TestCase):

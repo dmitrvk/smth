@@ -54,5 +54,6 @@ class Command(abc.ABC):  # pylint: disable=too-few-public-methods
         """
         try:
             return self._db.get_notebook_titles()
+
         except db.Error as exception:
             self.exit_with_error(exception)

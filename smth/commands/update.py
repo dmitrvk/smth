@@ -36,6 +36,7 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         try:
             notebook = self._db.get_notebook_by_title(notebook_title)
+
         except db.Error as exception:
             self.exit_with_error(exception)
 
@@ -69,6 +70,7 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
             try:
                 existing_notebook = self._db.get_notebook_by_path(str(path))
+
             except db.Error as exception:
                 self.exit_with_error(exception)
 
@@ -83,6 +85,7 @@ class UpdateCommand(command.Command):  # pylint: disable=too-few-public-methods
             if notebook.path.exists():
                 try:
                     shutil.move(str(notebook.path), str(path))
+
                 except OSError as exception:
                     self.exit_with_error(exception)
 

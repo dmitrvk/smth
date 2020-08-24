@@ -32,6 +32,10 @@ from smth import const
 log = logging.getLogger(__name__)
 
 
+class Error(Exception):
+    """An error which may occur when reading or writing configuration."""
+
+
 class Config:
     """App configuration."""
 
@@ -50,6 +54,7 @@ class Config:
         if const.CONFIG_PATH.exists():
             try:
                 self._config.read(str(const.CONFIG_PATH))
+
             except configparser.Error as exception:
                 log.exception(exception)
                 raise Error(f'Cannot load config: {exception}')
@@ -102,6 +107,7 @@ class Config:
         """Scanner resolution (PPI). Use 150 by default."""
         try:
             return self._config.getint('scanner', 'resolution', fallback=150)
+
         except ValueError as exception:
             raise Error(str(exception))
 
@@ -116,6 +122,7 @@ class Config:
         try:
             return self._config.getboolean(
                 'scanner', 'ask_upload', fallback=True)
+
         except ValueError as exception:
             raise Error(str(exception))
 
@@ -128,9 +135,6 @@ class Config:
         try:
             with open(str(const.CONFIG_PATH), 'w') as config_file:
                 self._config.write(config_file)
+
         except (OSError, configparser.Error) as exception:
             raise Error(f'Cannot write config: {exception}')
-
-
-class Error(Exception):
-    """An error which may occur when reading or writing configuration."""

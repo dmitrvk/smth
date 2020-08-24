@@ -9,7 +9,7 @@ Features:
     * Replace pages by scanning them again
     * Upload PDF files to Google Drive (requires PyDrive)
 
-The progran uses the SANE library to interact with scanner devices.
+The program uses SANE library to interact with scanner devices.
 """
 
 __version__ = '0.8.0'

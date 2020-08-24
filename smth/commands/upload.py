@@ -34,6 +34,7 @@ class UploadCommand(command.Command):  # pylint: disable=too-few-public-methods 
                             path = self._db.get_notebook_by_title(title).path
                             self._cloud.upload_file(path)
                             return
+
                         except db.Error as exception:
                             self.exit_with_error(exception)
 

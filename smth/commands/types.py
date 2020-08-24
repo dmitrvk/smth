@@ -29,6 +29,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
             try:
                 types = self._db.get_types()
                 self._view.show_types(types)
+
             except db.Error as exception:
                 self.exit_with_error(exception)
 
@@ -50,6 +51,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         try:
             self._db.save_type(type_)
+
         except db.Error as exception:
             self.exit_with_error(exception)
 
@@ -66,6 +68,7 @@ class TypesCommand(command.Command):  # pylint: disable=too-few-public-methods
         """Asks for type and deletes it from the database."""
         try:
             type_titles = self._db.get_type_titles()
+
         except db.Error as exception:
             self.exit_with_error(exception)
 

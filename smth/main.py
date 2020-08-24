@@ -7,14 +7,11 @@ import importlib.util
 import logging
 import sys
 
-from smth import commands, const, db, view, __version__
+from smth import __version__, commands, const, db, view
 
 
 def main():
-    """Creates needed files and initializes logs, database and view.
-
-    Parses arguments and runs a command.
-    Shows help message if no command provided or command is invalid."""
+    """Creates needed files and initializes logs, database and view."""
     if not const.DATA_ROOT_PATH.exists():
         const.DATA_ROOT_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -31,11 +28,32 @@ def main():
 
     try:
         db_ = db.DB(const.DB_PATH)
+
     except db.Error as exception:
         view_.show_error(f'{exception}.')
         log.exception(exception)
         sys.exit(1)
 
+    parse_args(db_, view_)
+
+
+def setup_logging() -> None:
+    """Set logging file, level, format."""
+    log = logging.getLogger()
+    log.setLevel(logging.DEBUG)
+
+    format_ = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
+    formatter = logging.Formatter(format_)
+
+    handler = logging.FileHandler(str(const.LOG_PATH))
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+
+    log.addHandler(handler)
+
+
+def parse_args(db_: db.DB, view_: view.View) -> None:
+    """Parses arguments and runs a command."""
     parser = argparse.ArgumentParser(prog='smth')
 
     parser.add_argument(
@@ -66,13 +84,10 @@ def main():
     scan_args_group = parser_scan.add_mutually_exclusive_group()
 
     scan_args_group.add_argument(
-        '--set-device',
-        help='choose scanning device',
-        action='store_true')
+        '--set-device', help='choose scanning device', action='store_true')
 
     scan_args_group.add_argument(
-        '--pdf-only',
-        help='do not scan but only create PDF',
+        '--pdf-only', help='do not scan but only create PDF',
         action='store_true')
 
     subparsers.add_parser(
@@ -109,21 +124,6 @@ def main():
     else:
         args = parser.parse_args(['scan'])
         args.func(args, db_, view_)
-
-
-def setup_logging() -> None:
-    """Set logging file, level, format."""
-    log = logging.getLogger()
-    log.setLevel(logging.DEBUG)
-
-    format_ = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
-    formatter = logging.Formatter(format_)
-
-    handler = logging.FileHandler(str(const.LOG_PATH))
-    handler.setLevel(logging.DEBUG)
-    handler.setFormatter(formatter)
-
-    log.addHandler(handler)
 
 
 def create(args, db_: db.DB, view_: view.View) -> None:

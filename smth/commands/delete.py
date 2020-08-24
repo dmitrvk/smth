@@ -51,5 +51,6 @@ class DeleteCommand(command.Command):  # pylint: disable=too-few-public-methods
                 message = (f"Notebook '{notebook.title}' deleted.")
                 log.info(message)
                 self._view.show_info(message)
+
         except db.Error as exception:
             self.exit_with_error(exception)

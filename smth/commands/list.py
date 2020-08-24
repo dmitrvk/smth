@@ -20,5 +20,6 @@ class ListCommand(command.Command):  # pylint: disable=too-few-public-methods
         try:
             notebooks = self._db.get_notebooks()
             self._view.show_notebooks(notebooks)
+
         except db.Error as exception:
             self.exit_with_error(exception)

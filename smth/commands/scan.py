@@ -26,6 +26,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         try:
             self.conf = config.Config()
+
         except config.Error as exception:
             self.exit_with_error(exception)
 
@@ -56,6 +57,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
         if args.set_device:
             try:
                 self.conf.scanner_device = ''
+
             except config.Error as exception:
                 self.exit_with_error(exception)
 
@@ -70,6 +72,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                     notebook = self._db.get_notebook_by_title(title)
                     callback.on_finish(notebook)
                     return
+
                 except db.Error as exception:
                     self.exit_with_error(exception)
             else:
@@ -170,6 +173,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                                 str(page_path),
                                 0, 0,
                                 int(pdf_page_size[0] / 2), pdf_page_size[1])
+
                         except RuntimeError as exception:
                             self._view.show_error(
                                 f"Page {page} missing or incorrect at "
@@ -182,6 +186,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                                 str(page_path),
                                 int(pdf_page_size[0] / 2), 0,
                                 int(pdf_page_size[0] / 2), pdf_page_size[1])
+
                         except RuntimeError as exception:
                             self._view.show_error(
                                 f"Page {page} missing or incorrect at "
@@ -195,6 +200,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                             str(page_path),
                             0, 0,
                             pdf_page_size[0], pdf_page_size[1])
+
                     except RuntimeError as exception:
                         self._view.show_error(
                             f"Page {page} missing or incorrect at "
@@ -208,6 +214,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                 pdf.output(notebook.path)
                 self._view.show_info(f"PDF saved at '{notebook.path}'.")
                 self._view.show_separator()
+
             except OSError as exception:
                 self.on_error(f'Failed to save PDF: {exception}.')
 
@@ -218,6 +225,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                         command_ = upload.UploadCommand(self._db, self._view)
                         args = [notebook.title]
                         command_.execute(args)
+
             except config.Error as exception:
                 self._view.show_error(f'Config file error: {str(exception)}')
 
@@ -241,6 +249,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         try:
             return self._db.get_notebook_by_title(notebook_title)
+
         except db.Error as exception:
             self.exit_with_error(exception)
 

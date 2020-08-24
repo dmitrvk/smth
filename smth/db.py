@@ -1,15 +1,13 @@
 # License: GNU GPL Version 3
 
-"""This module provides an interface to sqlite database.
-
-The module contains raw SQL queries which are executed
-in the corresponding public methods of the DB class.
+"""This module provides an interface to the sqlite database.
 
     Typical usage example:
 
     try:
         db_ = db.DB('/path/to/sqlite.db')
         notebooks = db_.get_notebooks()
+
     except db.Error:
         pass
 """
@@ -19,109 +17,46 @@ import pathlib
 import sqlite3
 from typing import List
 
-from smth import models
-
-
-class Error(Exception):
-    """An error which occurs when working with a database."""
-
+from smth import const, models
 
 log = logging.getLogger(__name__)
 
-SQL_CREATE_TABLE_NOTEBOOK_TYPE = '''CREATE TABLE IF NOT EXISTS notebook_type(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT UNIQUE,
-    page_width INTEGER,
-    page_height INTEGER,
-    pages_paired INTEGER)'''
 
-SQL_CREATE_TABLE_NOTEBOOK = '''CREATE TABLE IF NOT EXISTS notebook(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT UNIQUE,
-    type_id INTEGER NOT NULL,
-    path TEXT,
-    total_pages INTEGER,
-    first_page_number INTEGER,
-    FOREIGN KEY(type_id) REFERENCES notebook_type(id))'''
-
-SQL_TABLE_EXISTS = '''SELECT COUNT(*) FROM sqlite_master
-    WHERE type='table' AND name=?'''
-
-SQL_GET_NOTEBOOKS = '''SELECT * FROM notebook ORDER BY title'''
-
-SQL_GET_NOTEBOOK_TITLES = '''SELECT title FROM notebook ORDER BY title'''
-
-SQL_NOTEBOOK_COUNT = '''SELECT COUNT(*) FROM notebook WHERE title=?'''
-
-SQL_NOTEBOOK_WITH_TYPE_COUNT = '''SELECT COUNT(*) FROM notebook, notebook_type
-    WHERE notebook.type_id=notebook_type.id AND notebook_type.title=?'''
-
-SQL_CREATE_NOTEBOOK = '''INSERT INTO
-    notebook(title, type_id, path, total_pages, first_page_number)
-    VALUES(?,
-    (SELECT id FROM notebook_type WHERE title=?),
-    ?, ?, ?)'''
-
-SQL_UPDATE_NOTEBOOK = '''UPDATE notebook
-    SET title=?,
-    type_id=(SELECT id FROM notebook_type WHERE title=?),
-    path=?, total_pages=?, first_page_number=?
-    WHERE id=?'''
-
-SQL_DELETE_NOTEBOOK = '''DELETE FROM notebook WHERE id=?'''
-
-SQL_DELETE_TYPE_BY_TITLE = '''DELETE FROM notebook_type WHERE title=?'''
-
-SQL_CREATE_TYPE = '''INSERT INTO
-    notebook_type(title, page_width, page_height, pages_paired)
-    VALUES(?, ?, ?, ?)'''
-
-SQL_UPDATE_TYPE = '''UPDATE notebook_type
-    SET title=?, page_width=?, page_height=?, pages_paired=?
-    WHERE id=?'''
-
-SQL_GET_NOTEBOOK_BY_TITLE = '''SELECT * FROM notebook WHERE title=?'''
-
-SQL_GET_NOTEBOOK_BY_PATH = '''SELECT * FROM notebook WHERE path=?'''
-
-SQL_GET_TYPES = '''SELECT * FROM notebook_type ORDER BY title'''
-
-SQL_GET_TYPE_TITLES = '''SELECT title FROM notebook_type ORDER BY title'''
-
-SQL_GET_TYPE_BY_ID = '''SELECT * FROM notebook_type WHERE id=?'''
-
-SQL_GET_TYPE_BY_TITLE = '''SELECT * FROM notebook_type WHERE title=?'''
-
-SQL_TYPE_COUNT = '''SELECT COUNT(*) FROM notebook_type WHERE title=?'''
+class Error(Exception):
+    """An error which occurs when working with the database."""
 
 
 class DB:
-    """Class used to perform operation with the database."""
+    """Class used to perform operations with the database."""
 
     def __init__(self, path='smth.db'):
-        """Create tables and default notebook type if necessary."""
+        """Create tables and the default notebook type if necessary.
+
+        The default notebook type is of A4 format in portrait orientation.
+        """
         self._path = path
         connection = None
 
         try:
             connection = self._connect()
 
-            cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook_type',))
+            cursor = connection.execute(
+                const.SQL_TABLE_EXISTS, ('notebook_type',))
             table_exists = cursor.fetchone()[0] > 0
 
             if not table_exists:
-                connection.execute(SQL_CREATE_TABLE_NOTEBOOK_TYPE)
+                connection.execute(const.SQL_CREATE_TABLE_NOTEBOOK_TYPE)
                 log.info("Table 'notebook_type' created")
 
                 type_a4 = models.NotebookType('A4', 210, 297)
                 self.save_type(type_a4)
                 log.info("Type 'A4' created")
 
-            cursor = connection.execute(SQL_TABLE_EXISTS, ('notebook',))
+            cursor = connection.execute(const.SQL_TABLE_EXISTS, ('notebook',))
             table_exists = cursor.fetchone()[0] > 0
 
             if not table_exists:
-                connection.execute(SQL_CREATE_TABLE_NOTEBOOK)
+                connection.execute(const.SQL_CREATE_TABLE_NOTEBOOK)
                 log.info("Table 'notebook' created")
 
             connection.commit()
@@ -146,7 +81,7 @@ class DB:
 
         try:
             connection = self._connect()
-            for row in connection.execute(SQL_GET_NOTEBOOKS):
+            for row in connection.execute(const.SQL_GET_NOTEBOOKS):
                 notebooks.append(self._make_notebook_from_row(row))
 
         except (sqlite3.Error, Error) as exception:
@@ -176,7 +111,8 @@ class DB:
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_GET_NOTEBOOK_BY_TITLE, (title,))
+            cursor = connection.execute(
+                const.SQL_GET_NOTEBOOK_BY_TITLE, (title,))
             row = cursor.fetchone()
             if row:
                 notebook = self._make_notebook_from_row(row)
@@ -208,7 +144,8 @@ class DB:
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_GET_NOTEBOOK_BY_PATH, (path,))
+            cursor = connection.execute(
+                const.SQL_GET_NOTEBOOK_BY_PATH, (path,))
             row = cursor.fetchone()
             if row:
                 notebook = self._make_notebook_from_row(row)
@@ -235,7 +172,7 @@ class DB:
 
         try:
             connection = self._connect()
-            for row in connection.execute(SQL_GET_NOTEBOOK_TITLES):
+            for row in connection.execute(const.SQL_GET_NOTEBOOK_TITLES):
                 titles.append(row['title'])
 
         except sqlite3.Error as exception:
@@ -264,7 +201,7 @@ class DB:
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_NOTEBOOK_COUNT, (title,))
+            cursor = connection.execute(const.SQL_NOTEBOOK_COUNT, (title,))
             exists = cursor.fetchone()[0] > 0
 
         except sqlite3.Error as exception:
@@ -295,7 +232,7 @@ class DB:
             connection = sqlite3.connect(self._path)
 
             cursor = connection.execute(
-                SQL_NOTEBOOK_WITH_TYPE_COUNT, (type_title,))
+                const.SQL_NOTEBOOK_WITH_TYPE_COUNT, (type_title,))
             exists = cursor.fetchone()[0] > 0
 
         except sqlite3.Error as exception:
@@ -328,13 +265,13 @@ class DB:
                 values = (
                     notebook.title, notebook.type.title, str(notebook.path),
                     notebook.total_pages, notebook.first_page_number)
-                connection.execute(SQL_CREATE_NOTEBOOK, values)
+                connection.execute(const.SQL_CREATE_NOTEBOOK, values)
             else:
                 values = (
                     notebook.title, notebook.type.title, str(notebook.path),
                     notebook.total_pages, notebook.first_page_number,
                     notebook.id)
-                connection.execute(SQL_UPDATE_NOTEBOOK, values)
+                connection.execute(const.SQL_UPDATE_NOTEBOOK, values)
 
             connection.commit()
 
@@ -361,7 +298,7 @@ class DB:
 
         try:
             connection = sqlite3.connect(self._path)
-            connection.execute(SQL_DELETE_NOTEBOOK, (id_,))
+            connection.execute(const.SQL_DELETE_NOTEBOOK, (id_,))
             connection.commit()
 
         except sqlite3.Error as exception:
@@ -383,7 +320,7 @@ class DB:
 
         try:
             connection = self._connect()
-            for row in connection.execute(SQL_GET_TYPES):
+            for row in connection.execute(const.SQL_GET_TYPES):
                 types.append(self._make_type_from_row(row))
 
         except sqlite3.Error as exception:
@@ -408,7 +345,7 @@ class DB:
 
         try:
             connection = self._connect()
-            for row in connection.execute(SQL_GET_TYPE_TITLES):
+            for row in connection.execute(const.SQL_GET_TYPE_TITLES):
                 titles.append(row['title'])
 
         except sqlite3.Error as exception:
@@ -437,7 +374,7 @@ class DB:
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_GET_TYPE_BY_ID, (id_,))
+            cursor = connection.execute(const.SQL_GET_TYPE_BY_ID, (id_,))
             row = cursor.fetchone()
             if row:
                 type_ = self._make_type_from_row(row)
@@ -468,7 +405,7 @@ class DB:
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_GET_TYPE_BY_TITLE, (title,))
+            cursor = connection.execute(const.SQL_GET_TYPE_BY_TITLE, (title,))
             row = cursor.fetchone()
             if row:
                 type_ = self._make_type_from_row(row)
@@ -500,7 +437,7 @@ class DB:
 
         try:
             connection = self._connect()
-            cursor = connection.execute(SQL_TYPE_COUNT, (title,))
+            cursor = connection.execute(const.SQL_TYPE_COUNT, (title,))
             exists = cursor.fetchone()[0] > 0
 
         except sqlite3.Error as exception:
@@ -533,17 +470,18 @@ class DB:
                 values = (
                     type_.title, type_.page_width, type_.page_height,
                     type_.pages_paired)
-                connection.execute(SQL_CREATE_TYPE, values)
+                connection.execute(const.SQL_CREATE_TYPE, values)
             else:
                 values = (
                     type_.title, type_.page_width, type_.page_height,
                     type_.pages_paired, type_.id)
-                connection.execute(SQL_UPDATE_TYPE, values)
+                connection.execute(const.SQL_UPDATE_TYPE, values)
 
             connection.commit()
 
         except sqlite3.Error as exception:
             self._handle_error('Failed to save notebook type', exception)
+
         finally:
             if connection:
                 connection.close()
@@ -563,7 +501,7 @@ class DB:
 
         try:
             connection = sqlite3.connect(self._path)
-            connection.execute(SQL_DELETE_TYPE_BY_TITLE, (title,))
+            connection.execute(const.SQL_DELETE_TYPE_BY_TITLE, (title,))
             connection.commit()
 
         except sqlite3.Error as exception:

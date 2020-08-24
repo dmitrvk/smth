@@ -29,6 +29,7 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
         """
         try:
             type_titles = self._db.get_type_titles()
+
         except db.Error as exception:
             self.exit_with_error(exception)
 
@@ -59,6 +60,7 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         try:
             type_ = self._db.get_type_by_title(answers['type'])
+
         except db.Error as exception:
             self.exit_with_error(exception)
 
@@ -90,6 +92,7 @@ class CreateCommand(command.Command):  # pylint: disable=too-few-public-methods
             log.info("Created empty PDF at '{path}'")
 
             self._db.save_notebook(notebook)
+
         except (OSError, db.Error) as exception:
             self.exit_with_error(exception)
 

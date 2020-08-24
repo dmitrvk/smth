@@ -26,10 +26,10 @@ import pathlib
 
 try:
     import httplib2
+    import oauth2client.file
     import pydrive.auth
     import pydrive.drive
     import pydrive.files
-    import oauth2client.file
 except ImportError:
     pass
 
@@ -173,6 +173,7 @@ class Cloud:
 
             try:
                 gauth.LoadCredentialsFile(str(Cloud.CREDENTIALS_PATH))
+
             except (OSError,
                     pydrive.auth.InvalidCredentialsError) as exception:
                 self._callback.on_error(str(exception))
@@ -183,10 +184,12 @@ class Cloud:
 
                 gauth.CommandLineAuth()
                 gauth.SaveCredentialsFile(str(Cloud.CREDENTIALS_PATH))
+
             except (OSError,
                     httplib2.ServerNotFoundError,
                     pydrive.auth.InvalidCredentialsError) as exception:
                 self._callback.on_error(str(exception))
+
             except KeyboardInterrupt:
                 self._callback.on_error('Keyboard interrupt during auth.')
 
@@ -197,8 +200,10 @@ class Cloud:
             try:
                 with open(str(Cloud.SECRETS_PATH), 'r') as secrets_file:
                     return json.loads(secrets_file.read())
+
             except json.JSONDecodeError:
                 return {}
+
             except OSError as exception:
                 self._callback.on_error(str(exception))
 
@@ -206,6 +211,7 @@ class Cloud:
             try:
                 with open(str(Cloud.SECRETS_PATH), 'w') as sec_file:
                     json.dump(Cloud.SECRETS, sec_file)
+
             except OSError as exception:
                 self._callback.on_error(str(exception))
 
@@ -244,10 +250,12 @@ class Cloud:
             file_on_drive.SetContentFile(str(path))
             file_on_drive.Upload()
             self._callback.on_finish_uploading_file(path)
+
         except (OSError,
                 httplib2.ServerNotFoundError,
                 pydrive.files.ApiRequestError) as exception:
             self._callback.on_error(str(exception))
+
         except KeyboardInterrupt:
             message = 'Keyboard interrupt while uploading file.'
             self._callback.on_error(message)
@@ -274,9 +282,11 @@ class Cloud:
                         filename, file['alternateLink'])
 
                     return
+
                 except (httplib2.ServerNotFoundError,
                         pydrive.files.ApiRequestError) as exception:
                     self._callback.on_error(str(exception))
+
                 except KeyboardInterrupt:
                     message = 'Keyboard interrupt while sharing file.'
                     self._callback.on_error(message)
@@ -299,8 +309,10 @@ class Cloud:
             folder = self._gdrive.CreateFile(folder_metadata)
             folder.Upload()
             self._callback.on_create_smth_folder()
+
         except httplib2.ServerNotFoundError as exception:
             self._callback.on_error(str(exception))
+
         except KeyboardInterrupt:
             message = ("Keyboard interrupt while creating 'smth' folder "
                        "on Google Drive.")
@@ -315,9 +327,11 @@ class Cloud:
 
         try:
             return self._gdrive.ListFile({'q': query}).GetList()
+
         except httplib2.ServerNotFoundError as exception:
             self._callback.on_error(str(exception))
             return []
+
         except KeyboardInterrupt:
             message = ('Keyboard interrupt while loading the list of '
                        'files in root folder on Google Drive.')
@@ -331,9 +345,11 @@ class Cloud:
 
         try:
             return self._gdrive.ListFile({'q': query}).GetList()
+
         except httplib2.ServerNotFoundError as exception:
             self._callback.on_error(str(exception))
             return []
+
         except KeyboardInterrupt:
             message = ("Keyboard interrupt while loading the list of "
                        "files in 'smth' folder on Google Drive.")
