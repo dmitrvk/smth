@@ -11,7 +11,7 @@ smth: command-line tool for scanning on Linux
     .. image:: https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif
         :alt: smth demo
         :align: center
-        :target: https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif        
+        :target: https://raw.githubusercontent.com/dmitrvk/smth/master/smth.gif
 
 .. contents::
 
@@ -290,6 +290,12 @@ you will be asked whether you want to upload a
 notebook to Google Drive when scanning is completed.
 
 Set the parameter to *False* to disable this behavior.
+
+
+Contributing
+============
+
+See `CONTRIBUTING.rst <https://github.com/dmitrvk/smth/blob/master/CONTRIBUTING.rst>`_.
 
 
 Licensing
