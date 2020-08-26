@@ -17,3 +17,8 @@ Setup and tests
 * Optionally, create a new Python virtual enviroment
 * Install dependencies with ``pip install -r requirements.txt``
 * Run tests with ``make test``.
+
+There is a
+`gist <https://gist.github.com/dmitrvk/0d262722c479c4db7f36bb901a8d9b00>`_
+which allows to mock SANE module in Python to imitate real image scanner
+when developing.
