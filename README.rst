@@ -240,7 +240,8 @@ Configuration file
 Configuration is stored in ``~/.config/smth/smth.conf``.  The file looks as the
 following:
 
-::
+.. code-block::
+
     [scanner]
     device = <device>
     delay = 0
