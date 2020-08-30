@@ -1,10 +1,9 @@
 smth: command-line tool for scanning on Linux
 #############################################
 
-
 .. class:: no-web no-pdf
 
-    |build| |coverage| |license| |pypi| |python|
+    |build| |coverage| |license| |pypi| |python| |pyup|
 
 .. class:: no-web no-pdf
 
@@ -328,3 +327,7 @@ This project is licensed under the `GNU General Public License v3.0`_.
 .. |python| image:: https://img.shields.io/pypi/pyversions/smth?color=1793d1&style=flat-square
     :target: https://pypi.org/project/smth
     :alt: Python version
+
+.. |pyup| image:: https://pyup.io/repos/github/dmitrvk/smth/shield.svg
+     :target: https://pyup.io/repos/github/dmitrvk/smth/
+     :alt: Updates
