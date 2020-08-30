@@ -309,22 +309,22 @@ This project is licensed under the `GNU General Public License v3.0`_.
 
 .. _PyDrive: https://github.com/gsuitedevs/PyDrive
 
-.. |build| image:: https://img.shields.io/github/workflow/status/dmitrvk/smth/build?color=0366d6&style=flat-square
+.. |build| image:: https://img.shields.io/github/workflow/status/dmitrvk/smth/build?color=1793d1&style=flat-square
     :target: https://github.com/dmitrvk/smth/actions
     :alt: Build status
 
-.. |coverage| image:: https://img.shields.io/codecov/c/github/dmitrvk/smth?color=0366d6&style=flat-square&token=NH8F6U8988
+.. |coverage| image:: https://img.shields.io/codecov/c/github/dmitrvk/smth?color=1793d1&style=flat-square&token=NH8F6U8988
     :target: https://codecov.io/gh/dmitrvk/smth
     :alt: Test coverage
 
-.. |license| image:: https://img.shields.io/pypi/l/smth?color=0366d6&style=flat-square
+.. |license| image:: https://img.shields.io/pypi/l/smth?color=1793d1&style=flat-square
     :target: https://github.com/dmitrvk/smth/blob/master/LICENSE
     :alt: GNU General Public License v3.0
 
-.. |pypi| image:: https://img.shields.io/pypi/v/smth?color=0366d6&style=flat-square
+.. |pypi| image:: https://img.shields.io/pypi/v/smth?color=1793d1&style=flat-square
     :target: https://pypi.org/project/smth
     :alt: Latest version released on PyPi
 
-.. |python| image:: https://img.shields.io/pypi/pyversions/smth?color=0366d6&style=flat-square
+.. |python| image:: https://img.shields.io/pypi/pyversions/smth?color=1793d1&style=flat-square
     :target: https://pypi.org/project/smth
     :alt: Python version
