@@ -40,7 +40,8 @@ Python version 3.8 or greater is required.
 Make sure you have *SANE* installed.
 In Debian-based distributions you may need to install *libsane-dev* package.
 
-If you want to upload scanned documents to Google Drive, install `PyDrive`_:
+If you want to upload scanned documents to Google Drive, install `PyDrive`_
+with a package manager for your Linux distribution or with a ``pip`` command:
 
 .. code-block:: bash
 
