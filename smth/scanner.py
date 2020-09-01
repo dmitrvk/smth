@@ -163,7 +163,10 @@ class Scanner:  # pylint: disable=too-few-public-methods
 
         except _sane.error as exception:
             log.exception(exception)
-            self._callback.on_error(str(exception))
+
+            message = str(exception)
+            message += '\nPlease check if scanner is connected.'
+            self._callback.on_error(message)
 
         except KeyboardInterrupt:
             log.error('Scan failed due to keyboard interrupt')

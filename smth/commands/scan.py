@@ -52,7 +52,6 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         callback = ScanCommand.ScannerCallback(
             self, self._db, self._view, self.conf)
-        callback.on_error = self.exit_with_error
 
         if args.set_device:
             try:
@@ -233,6 +232,7 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
 
         def on_error(self, message):
             """See the base class."""
+            self._command.exit_with_error(message)
 
     def _get_notebook_to_scan(
             self, notebook_titles: List[str]) -> models.Notebook:
