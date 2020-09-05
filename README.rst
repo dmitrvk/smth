@@ -72,7 +72,7 @@ whether the pages are paired.
 
     $ smth create
 
-You will be asked for a notebook's title, typy, path to PDF file and the 1st
+You will be asked for a notebook's title, type, path to PDF file and the 1st
 page number.  All scanned pages will be inserted in the PDF file, so you will
 have all pages in one file.
 
@@ -137,7 +137,7 @@ application and copy-and-paste the verification code.
 After that you can choose a notebook you want to upload.
 
 **'smth' folder will be created in the root folder on your Google Drive.
-All files will be uploaded in that folder.**
+All files will be uploaded to that folder.**
 
 After successful uploading you may want to share the file with others.
 You can do this with your web browser or a mobile app,
@@ -175,8 +175,9 @@ scan
 Scans notebook: adds new pages and/or replaces existing ones.
 
 Optional arguments:
+
 * ``--set-device`` - reset the device which is used to
-prefrorm scanning and choose another one.
+  prefrorm scanning and choose another one.
 
 If *smth* is run without arguments, this command will be run by default.
 
@@ -184,7 +185,7 @@ share
 ~~~~~
 
 Makes a notebook's PDF file on Google Drive available for anyone with a link and
-show the link.
+shows the link.
 
 types
 ~~~~~
@@ -215,6 +216,7 @@ images and inserts pages into a PDF file.
 Without arguments, the command shows a list of available notebook types.
 
 Optional arguments:
+
 * ``--create`` - create a new notebook type.
 * ``--delete`` - delete a notebook type.
 
