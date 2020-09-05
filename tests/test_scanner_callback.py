@@ -1,3 +1,4 @@
+import argparse
 import logging
 import pathlib
 from unittest import mock
@@ -130,4 +131,8 @@ class ScannerCallbackTestCase(fake_filesystem_unittest.TestCase):
                 self.callback.on_finish(notebook)
 
                 self.view.confirm.assert_called_once()
-                command.execute.assert_called_once_with([notebook.title])
+
+                args = argparse.Namespace()
+                args.notebook_title = notebook.title
+
+                command.execute.assert_called_once_with(args)

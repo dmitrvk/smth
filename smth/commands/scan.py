@@ -222,7 +222,8 @@ class ScanCommand(command.Command):  # pylint: disable=too-few-public-methods
                         self.conf.scanner_ask_upload):
                     if self._view.confirm('Upload notebook to Google Drive?'):
                         command_ = upload.UploadCommand(self._db, self._view)
-                        args = [notebook.title]
+                        args = argparse.Namespace()
+                        args.notebook_title = notebook.title
                         command_.execute(args)
 
             except config.Error as exception:
