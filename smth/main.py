@@ -96,7 +96,7 @@ def parse_args(db_: db.DB, view_: view.View) -> None:
     ).set_defaults(func=share)
 
     parser_types = subparsers.add_parser(
-        'types', aliases=['sh'], help='manage notebook types')
+        'types', aliases=['t'], help='manage notebook types')
     parser_types.set_defaults(func=types)
 
     types_args_group = parser_types.add_mutually_exclusive_group()
